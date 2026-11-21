@@ -1,3 +1,4 @@
+class_name Builder
 extends Node3D
 
 @export var structures: Array[Structure] = []
@@ -107,6 +108,8 @@ func action_rotate():
 # Toggle between structures to build
 
 func action_structure_toggle():
+	var previous_index := index
+
 	if Input.is_action_just_pressed("structure_next"):
 		index = wrap(index + 1, 0, structures.size())
 		Audio.play("sounds/toggle.ogg", -30)
@@ -115,7 +118,9 @@ func action_structure_toggle():
 		index = wrap(index - 1, 0, structures.size())
 		Audio.play("sounds/toggle.ogg", -30)
 
-	update_structure()
+	# Rebuild the preview only when the selection changed (not every frame)
+	if index != previous_index:
+		update_structure()
 
 # Update the structure visual in the 'cursor'
 

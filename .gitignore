@@ -16,3 +16,9 @@ mono_crash.*.json
 
 # Kenney ignores
 build/
+# Godot editor temp copies of scenes
+*.tmp
+# Python bytecode (tools/mcp)
+__pycache__/
+# Claude Code per-user settings
+.claude/settings.local.json

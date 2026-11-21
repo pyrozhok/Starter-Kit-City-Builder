@@ -44,11 +44,13 @@ Apply every item to the diff; done when each one is marked pass, fail (with `pat
 Terms follow `GLOSSARY.md`.
 
 Commits
+
 - Each commit's diff matches its message: a `fix:` touches only the fix and its test, a `chore:`
   changes no behavior. Model: upstream `3a6e666` — "fixes memory leak" is exactly one added
   `n.queue_free()` in `update_structure()`.
 
 GDScript
+
 - Declarations are typed wherever the type is known.
 - A node removed from the tree is also `queue_free()`d (pattern: `update_structure()`).
 - `_process` only reads input and moves the selector; instancing and allocation happen on events —
@@ -65,6 +67,7 @@ GDScript
   `action_demolish` (see `generate-ui`) — otherwise clicking the Control also builds.
 
 Scenes and resources (`.tscn`, `.tres`, `.import`, `project.godot`)
+
 - Every `ext_resource path=` exists; ids are unique; existing `uid=` values are unchanged.
 - Every new script/resource has its `.uid` file committed.
 - Only source files are committed: `*.tmp`, `export_presets.cfg`, `.godot/`, `build/` stay out.
@@ -74,8 +77,15 @@ Scenes and resources (`.tscn`, `.tres`, `.import`, `project.godot`)
 
 ## 5. Report
 
-Two lists, most severe first, one line each: `path:line — problem — concrete fix`.
-**Blocking**: bugs, broken resources, failing gates. **Nits**: the rest. Then gate results, the
+Before writing the report:
+- Every finding is verified before it's reported: read the code path or reproduce it.
+  Unverified → put it under **Unverified** instead of Blocking/Nits.
+- Every proposed fix is checked to work: for GDScript, the fixed code must still compile
+  against the members it uses (`godot.build`); for refactors, show that behavior is unchanged.
+
+Three lists, most severe first, one line each: `path:line — problem — concrete fix`.
+**Blocking**: bugs, broken resources, failing gates. **Nits**: the rest. **Unverified**: findings
+you couldn't confirm, with what would confirm them. Then gate results, the
 `mattpocock-skills:code-review` findings worth acting on, and what headless runs can't verify (visuals, feel, audio).
 If nothing blocks, say so plainly.
 

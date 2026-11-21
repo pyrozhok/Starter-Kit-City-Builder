@@ -1,3 +1,4 @@
+class_name Builder
 extends Node3D
 
 @export var structures: Array[Structure] = []

@@ -112,8 +112,7 @@ def _git_snapshot() -> dict[str, str]:
     rewrote that were clean, and files that were already dirty but changed again.
     Empty if not a git repo.
     """
-    if _git_lines("rev-parse", "--git-dir") is None:
-        return {}
+    # Outside a repo every listing fails, so the snapshot is empty.
     # Before the first commit there is no HEAD to diff against: every tracked file counts.
     tracked = _git_lines("diff", "--name-only", "HEAD")
     if tracked is None:

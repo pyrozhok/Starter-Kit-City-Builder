@@ -84,7 +84,8 @@ Before writing the report:
 - Every proposed fix is checked to work: for GDScript, the fixed code must still compile
   against the members it uses (`godot.build`); for refactors, show that behavior is unchanged;
   for types: the narrowest existing type, adding a class_name if needed;
-  for Python in `tools/mcp`: run its pytest suite; until one exists, a stub probe on old and new code.
+  for Python in `tools/`: the pytest suite (command in `AGENTS.md`); a finding about old behavior is
+  shown red on the old code with `GODOT_MCP_PATH` (see `write-pytest`).
 - GUT asserts don't abort the test: the lines after a failed assert still run. Don't suggest moving
   cleanup out of a test body on that ground.
 - Decisions already explained — in a code comment at that spot, `docs/adr/`, or a graded finding

@@ -35,6 +35,12 @@ func test_build_charges_price_and_places_tile() -> void:
 	assert_eq(builder.map.cash, cash_before - builder.structures[0].price)
 	assert_eq(builder.cash_display.text, "$" + str(builder.map.cash))
 
+func test_demolish_empties_tile() -> void:
+	builder.gridmap.set_cell_item(Vector3i(2, 0, 3), 1)
+	Input.action_press("demolish")
+	builder.action_demolish(Vector3(2, 0, 3))
+	assert_eq(builder.gridmap.get_cell_item(Vector3i(2, 0, 3)), -1)
+
 func test_preview_is_not_rebuilt_without_toggle() -> void:
 	var preview: Node = builder.selector_container.get_child(0)
 	builder.action_structure_toggle()  # nothing pressed, like an idle _process frame

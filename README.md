@@ -1,5 +1,7 @@
 <p align="center"><img src="icon.png"/></p>
 
+# Starter Kit City Builder
+
 ## Agent workflow for game development
 
 This fork adds skills, MCP tools and evals so that coding agents can build UI from a mockup, write tests and review PRs in a Godot project.
@@ -49,8 +51,6 @@ Since 001, findings checked before reporting went from 1/9 to 8/9 and wrong fixe
 - Rules for agents: [`AGENTS.md`](AGENTS.md).
 
 ---
-
-# Starter Kit City Builder
 
 This package includes a basic template for a 3D city builder in Godot 4.7. Includes features like;
 

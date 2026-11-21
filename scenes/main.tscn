@@ -76,6 +76,7 @@ layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
+mouse_filter = 2
 
 [node name="CashIcon" type="TextureRect" parent="CanvasLayer/Top"]
 layout_mode = 0
@@ -85,6 +86,7 @@ offset_right = 161.0
 offset_bottom = 168.0
 scale = Vector2(0.5, 0.5)
 texture = ExtResource("17_cjamx")
+mouse_filter = 2
 
 [node name="Cash" type="Label" parent="CanvasLayer/Top"]
 layout_mode = 0
@@ -101,6 +103,7 @@ anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
 grow_vertical = 0
+mouse_filter = 2
 
 [node name="Instructions" type="TextureRect" parent="CanvasLayer/Bottom"]
 layout_mode = 0
@@ -110,6 +113,7 @@ offset_right = 360.0
 offset_bottom = 57.0
 scale = Vector2(0.833333, 0.833333)
 texture = ExtResource("22_pm3ni")
+mouse_filter = 2
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("24_y6deb")

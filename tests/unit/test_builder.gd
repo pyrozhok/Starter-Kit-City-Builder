@@ -3,6 +3,7 @@ extends GutTest
 const SAVE_PATH := "user://test_builder_map.res"
 
 var builder: Builder
+var viewport: SubViewport  # own viewport: GUT's panel can't be the hovered Control
 
 func before_each() -> void:
 	builder = Builder.new()
@@ -16,10 +17,12 @@ func before_each() -> void:
 	builder.selector.add_child(builder.selector_container)
 	builder.add_child(builder.cash_display)
 	builder.set_process(false)  # _process needs a camera; drive actions directly
-	add_child_autofree(builder)
+	viewport = SubViewport.new()
+	add_child_autofree(viewport)
+	viewport.add_child(builder)
 
 func after_each() -> void:
-	for action: String in ["build", "structure_next", "structure_previous"]:
+	for action: String in ["build", "demolish", "structure_next", "structure_previous"]:
 		Input.action_release(action)
 	if FileAccess.file_exists(SAVE_PATH):
 		DirAccess.remove_absolute(SAVE_PATH)
@@ -104,3 +107,32 @@ func test_set_active_false_stops_processing_and_hides_selector() -> void:
 	builder.set_active(true)
 	assert_true(builder.is_processing())
 	assert_true(builder.selector.visible)
+
+
+func _hover_new_button() -> Button:
+	var button := Button.new()
+	button.size = Vector2(200, 200)
+	viewport.add_child(button)
+	var motion := InputEventMouseMotion.new()
+	motion.position = Vector2(50, 50)
+	motion.global_position = motion.position
+	viewport.push_input(motion)
+	return button
+
+
+func test_build_is_ignored_while_pointer_is_over_ui() -> void:
+	var button := _hover_new_button()
+	assert_eq(viewport.gui_get_hovered_control(), button, "precondition: button hovered")
+	var cash_before: int = builder.map.cash
+	Input.action_press("build")
+	builder.action_build(Vector3(2, 0, 3))
+	assert_eq(builder.gridmap.get_cell_item(Vector3i(2, 0, 3)), GridMap.INVALID_CELL_ITEM)
+	assert_eq(builder.map.cash, cash_before)
+
+
+func test_demolish_is_ignored_while_pointer_is_over_ui() -> void:
+	builder.gridmap.set_cell_item(Vector3i(2, 0, 3), 0)
+	_hover_new_button()
+	Input.action_press("demolish")
+	builder.action_demolish(Vector3(2, 0, 3))
+	assert_eq(builder.gridmap.get_cell_item(Vector3i(2, 0, 3)), 0)

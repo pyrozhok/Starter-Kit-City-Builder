@@ -80,10 +80,15 @@ func get_mesh(packed_scene):
 					
 					return prop_value.duplicate()
 
+# The build/demolish actions fire even when a Control took the click; skip them over UI.
+
+func pointer_over_ui() -> bool:
+	return get_viewport().gui_get_hovered_control() != null
+
 # Build (place) a structure
 
 func action_build(gridmap_position):
-	if Input.is_action_just_pressed("build"):
+	if Input.is_action_just_pressed("build") and not pointer_over_ui():
 		
 		var previous_tile = gridmap.get_cell_item(gridmap_position)
 		gridmap.set_cell_item(gridmap_position, index, gridmap.get_orthogonal_index_from_basis(selector.basis))
@@ -97,7 +102,7 @@ func action_build(gridmap_position):
 # Demolish (remove) a structure
 
 func action_demolish(gridmap_position):
-	if Input.is_action_just_pressed("demolish"):
+	if Input.is_action_just_pressed("demolish") and not pointer_over_ui():
 		if gridmap.get_cell_item(gridmap_position) != -1:
 			gridmap.set_cell_item(gridmap_position, -1)
 			

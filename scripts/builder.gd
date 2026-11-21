@@ -1,6 +1,12 @@
 class_name Builder
 extends Node3D
 
+signal map_saved ## The player's map was written to disk.
+signal map_loaded ## A map was loaded for the player (not a quiet background load).
+
+const SAVE_PATH := "user://map.res"
+const SAMPLE_PATH := "res://sample map/map.res"
+
 @export var structures: Array[Structure] = []
 
 var map:DataMap
@@ -142,45 +148,52 @@ func update_cash():
 
 func action_save():
 	if Input.is_action_just_pressed("save"):
-		print("Saving map...")
-		
-		map.structures.clear()
-		for cell in gridmap.get_used_cells():
-			
-			var data_structure:DataStructure = DataStructure.new()
-			
-			data_structure.position = Vector2i(cell.x, cell.z)
-			data_structure.orientation = gridmap.get_cell_item_orientation(cell)
-			data_structure.structure = gridmap.get_cell_item(cell)
-			
-			map.structures.append(data_structure)
-			
-		ResourceSaver.save(map, "user://map.res")
-	
+		save_map(SAVE_PATH)
+
 func action_load():
 	if Input.is_action_just_pressed("load"):
-		print("Loading map...")
-		
-		gridmap.clear()
-		
-		map = ResourceLoader.load("user://map.res")
-		if not map:
-			map = DataMap.new()
-		for cell in map.structures:
-			gridmap.set_cell_item(Vector3i(cell.position.x, 0, cell.position.y), cell.structure, cell.orientation)
-			
-		update_cash()
+		load_map(SAVE_PATH)
 
 func action_load_resources():
 	if Input.is_action_just_pressed("load_resources"):
-		print("Loading map...")
-		
-		gridmap.clear()
-		
-		map = ResourceLoader.load("res://sample map/map.res")
-		if not map:
-			map = DataMap.new()
-		for cell in map.structures:
-			gridmap.set_cell_item(Vector3i(cell.position.x, 0, cell.position.y), cell.structure, cell.orientation)
-			
-		update_cash()
+		load_map(SAMPLE_PATH)
+
+## Writes every placed tile to [param path]; emits [signal map_saved] on success.
+func save_map(path: String) -> bool:
+	print("Saving map...")
+	map.structures.clear()
+	for cell in gridmap.get_used_cells():
+		var data_structure:DataStructure = DataStructure.new()
+		data_structure.position = Vector2i(cell.x, cell.z)
+		data_structure.orientation = gridmap.get_cell_item_orientation(cell)
+		data_structure.structure = gridmap.get_cell_item(cell)
+		map.structures.append(data_structure)
+	if ResourceSaver.save(map, path) != OK:
+		return false
+	map_saved.emit()
+	return true
+
+## Replaces the map with the one at [param path]. A missing file leaves an empty map and returns false.
+## [param announce] false loads without [signal map_loaded] (e.g. a menu background).
+func load_map(path: String, announce: bool = true) -> bool:
+	print("Loading map...")
+	gridmap.clear()
+	var loaded := ResourceLoader.load(path) as DataMap if ResourceLoader.exists(path) else null
+	map = loaded if loaded else DataMap.new()
+	for cell in map.structures:
+		gridmap.set_cell_item(Vector3i(cell.position.x, 0, cell.position.y), cell.structure, cell.orientation)
+	update_cash()
+	if loaded and announce:
+		map_loaded.emit()
+	return loaded != null
+
+## Empty map with starting cash.
+func new_map() -> void:
+	gridmap.clear()
+	map = DataMap.new()
+	update_cash()
+
+## Inactive: no input handling, no cursor (e.g. while a menu is open).
+func set_active(active: bool) -> void:
+	set_process(active)
+	selector.visible = active

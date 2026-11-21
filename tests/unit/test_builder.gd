@@ -1,5 +1,7 @@
 extends GutTest
 
+const SAVE_PATH := "user://test_builder_map.res"
+
 var builder: Builder
 
 func before_each() -> void:
@@ -19,6 +21,8 @@ func before_each() -> void:
 func after_each() -> void:
 	for action: String in ["build", "structure_next", "structure_previous"]:
 		Input.action_release(action)
+	if FileAccess.file_exists(SAVE_PATH):
+		DirAccess.remove_absolute(SAVE_PATH)
 
 func test_build_charges_price_and_places_tile() -> void:
 	var cash_before: int = builder.map.cash
@@ -42,3 +46,61 @@ func test_structure_next_switches_preview() -> void:
 	assert_eq(builder.selector_container.get_child_count(), 1)
 	assert_ne(builder.selector_container.get_child(0), preview)
 	await get_tree().process_frame  # let the replaced preview's queue_free() run before GUT counts orphans
+
+func test_save_map_writes_tiles_and_emits_map_saved() -> void:
+	watch_signals(builder)
+	builder.gridmap.set_cell_item(Vector3i(1, 0, 2), 1)
+	assert_true(builder.save_map(SAVE_PATH))
+	assert_signal_emitted(builder, "map_saved")
+	var saved: DataMap = ResourceLoader.load(SAVE_PATH, "", ResourceLoader.CACHE_MODE_IGNORE)
+	assert_eq(saved.structures.size(), 1)
+	assert_eq(saved.structures[0].position, Vector2i(1, 2))
+	assert_eq(saved.structures[0].structure, 1)
+
+
+func test_load_map_restores_tiles_cash_and_emits_map_loaded() -> void:
+	var map := DataMap.new()
+	map.cash = 1234
+	var cell := DataStructure.new()
+	cell.position = Vector2i(4, -1)
+	cell.structure = 1
+	map.structures.append(cell)
+	ResourceSaver.save(map, SAVE_PATH)
+	watch_signals(builder)
+	assert_true(builder.load_map(SAVE_PATH))
+	assert_eq(builder.gridmap.get_cell_item(Vector3i(4, 0, -1)), 1)
+	assert_eq(builder.cash_display.text, "$1234")
+	assert_signal_emitted(builder, "map_loaded")
+
+
+func test_load_map_quietly_does_not_emit_map_loaded() -> void:
+	ResourceSaver.save(DataMap.new(), SAVE_PATH)
+	watch_signals(builder)
+	assert_true(builder.load_map(SAVE_PATH, false))
+	assert_signal_not_emitted(builder, "map_loaded")
+
+
+func test_load_map_without_file_clears_map_and_returns_false() -> void:
+	builder.gridmap.set_cell_item(Vector3i(0, 0, 0), 1)
+	watch_signals(builder)
+	assert_false(builder.load_map("user://no_such_map.res"))
+	assert_eq(builder.gridmap.get_used_cells().size(), 0)
+	assert_eq(builder.map.cash, DataMap.new().cash)
+	assert_signal_not_emitted(builder, "map_loaded")
+
+
+func test_new_map_clears_tiles_and_resets_cash() -> void:
+	builder.gridmap.set_cell_item(Vector3i(0, 0, 0), 1)
+	builder.map.cash = 5
+	builder.new_map()
+	assert_eq(builder.gridmap.get_used_cells().size(), 0)
+	assert_eq(builder.cash_display.text, "$" + str(DataMap.new().cash))
+
+
+func test_set_active_false_stops_processing_and_hides_selector() -> void:
+	builder.set_active(false)
+	assert_false(builder.is_processing())
+	assert_false(builder.selector.visible)
+	builder.set_active(true)
+	assert_true(builder.is_processing())
+	assert_true(builder.selector.visible)

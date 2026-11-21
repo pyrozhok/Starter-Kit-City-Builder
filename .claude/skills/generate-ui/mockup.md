@@ -19,9 +19,16 @@ state), `<name>_components.png`. Exported icons are under `sprites/ui/`.
   component → its own `scenes/ui/<component>.tscn`, component state → StyleBox/colour per Control state
   (`normal`/`hover`/`disabled`/`focus`), stroke on one side → `border_width_<side>`, gradient →
   `GradientTexture2D`. Name each value that Godot cannot express exactly (letter-spacing below 1px,
-  shadow blur, backdrop blur): these are **expected mismatches**.
+  shadow blur, backdrop blur, line height: Godot sizes a line as ascent + descent, 1–3px taller than
+  the mockup's "auto"): these are **expected mismatches**.
+- A text layer that hugs its text maps to a Control that hugs too (centre anchors, `grow_horizontal`
+  both), not a full-width Label with centred text: only then can its rect be checked.
+- Instances in state frames can drift from their component (an override lost or added). Compare each
+  state frame's instance values with the component state; the component wins, and each drift goes in the
+  report under **needs a human**.
 - Write `design/<name>.map.json`: `{"<layer id>": "<node path from the scene root>"}` for every layer
-  with geometry worth checking.
+  with geometry worth checking. Nodes created at runtime (list items) get names from the code, in mockup
+  order (`Item1` on top), so the path is stable.
 
 Done when the table covers every non-annotation layer of every state frame, and the user has seen it.
 **Stop and wait** for their answer before step 2.

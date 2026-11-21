@@ -39,13 +39,19 @@ flowchart LR
   E -- done --> G["eval"]
 ```
 
-- 28/31 layers fall within ±2px, and 32/33 theme values match exactly. It took 1 of 3 fix iterations.
+- 32/33 theme values match exactly. The 33rd is the shade gradient, which was made darker on purpose so the title stays readable over the live city.
 - Of the 3 layers off by more than 2px, the eval lists all 3 as expected. One is 3px taller because Godot's line height is ascent + descent, and the skill now lists that mismatch as expected. The other two are a notification's text and time: the build shows "just now" where the mockup has "12 min ago", because relative times were cut from the run ([#3](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/3)).
 - **The agent asked instead of guessing.** In the mockup's "no save" frame the disabled button icons had opacity 1.0, but the component's `State=Disabled` variant says 0.35. The agent built 0.35 and asked me which one was right. The answer was the component.
 - You can check the geometry without figcraft or Godot. The repo has the mockups, every screenshot and the iteration-1 `.layout.json` files. With uv alone, `uv run --script tools/design/figcraft.py diff design/main_menu.figcraft MainMenu evals/generate-ui/001/iter1_main_save.layout.json design/main_menu.map.json` gives 28/31.
 - Figma isn't supported yet. Step 1 of generate-ui needs an adapter that writes the same `design/<name>.map.json`, for example through the Figma MCP ([#8](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/8)).
 
 Details: [`evals/generate-ui/001-main-menu.md`](evals/generate-ui/001-main-menu.md).
+
+### Limits
+
+- One run on one screen.
+- An agent made the mockup too, in another session: I gave it a reference screenshot, and it drew the layers through the FigCraft MCP. Its layers are probably cleaner and better named than in a designer's file. A designer's Figma file would be the real test ([#8](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/8)).
+- I wrote the skill and graded the run.
 
 ## review-pr evals, graded by the PR author
 

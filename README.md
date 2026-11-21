@@ -53,7 +53,7 @@ Details: [`evals/generate-ui/001-main-menu.md`](evals/generate-ui/001-main-menu.
 - An agent made the mockup too, in another session: I gave it a reference screenshot, and it drew the layers through the FigCraft MCP. Its layers are probably cleaner and better named than in a designer's file. A designer's Figma file would be the real test ([#8](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/8)).
 - I wrote the skill and graded the run.
 
-## review-pr evals, graded by the PR author
+## review-pr: 4 graded runs
 
 | Run | PR | Findings | Correct | False | Wrong fixes | Verified before reporting |
 |---|---|---|---|---|---|---|
@@ -66,7 +66,7 @@ Findings: reported by the agent; Correct / False: as graded; Wrong fixes: correc
 
 ⚠ 002 reviewed only 6 new commits, not the full PR, so it isn't directly comparable with the other runs.
 
-Since 001, findings checked before reporting went from 1/9 to 8/9 and wrong fixes from 1 to 0. False findings stayed at one per run: 001, 003 and 004 each had one, and each one became a rule in the skill.
+001, 003 and 004 each had one false finding, and each one became a rule in the skill (`f32e83f`, `7e4f65b`, `5297b37`).
 
 ### From a false finding to a rule
 
@@ -78,6 +78,7 @@ In run 004, finding #6 said a cleanup line would leak if the assert before it fa
 
 - Runs 001–003 all reviewed PR #1, and the rules added after them came from that PR. Only 004 tests the skill on a PR it wasn't tuned on.
 - Precision is graded, recall isn't: nobody counted the bugs the agent missed.
+- I graded every run, and I'm also the author of the skill and of both PRs.
 - Next: a set of PRs with planted bugs, rerun after every rule change, to measure both.
 
 ## How it's built

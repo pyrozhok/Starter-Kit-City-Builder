@@ -50,7 +50,7 @@ Since 001, findings checked before reporting went from 1/9 to 8/9 and wrong fixe
   2. Install the plugin: `/plugin install mattpocock-skills@claude-plugins-official`.
   3. Check that `/mcp` lists `godot` as connected. Then try `/review-pr <n>`, or ask for UI from a mockup (generate-ui) or for a test (write-test).
 - Evals were run with mattpocock-skills as of 2026-11-21. The plugin auto-updates, so later runs may differ.
-- You don't need figcraft to check the evals. The mockups, the layer tree reader ([`tools/design/figcraft.py`](tools/design/figcraft.py), uv only) and every screenshot are in the repo.
+- You don't need figcraft or Godot to check the generate-ui geometry. The repo has the mockups, every screenshot, and the iteration-1 `.layout.json` files. With uv alone you can rerun `uv run --script tools/design/figcraft.py diff design/main_menu.figcraft MainMenu evals/generate-ui/001/iter1_main_save.layout.json design/main_menu.map.json`, which gives 28/31.
 - Figma isn't supported yet. Step 1 of generate-ui needs an adapter that writes the same `design/<name>.map.json`, for example through the Figma MCP ([#8](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/8)).
 - Rules for agents: [`AGENTS.md`](AGENTS.md).
 

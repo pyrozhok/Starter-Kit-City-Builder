@@ -1,0 +1,468 @@
+{
+	"blank": false,
+	"controls": [
+		{
+			"h": 1080.0,
+			"path": "MainMenu/Root",
+			"type": "Control",
+			"variation": "",
+			"w": 1920.0,
+			"x": 0.0,
+			"y": 0.0
+		},
+		{
+			"h": 1080.0,
+			"path": "MainMenu/Root/Shade",
+			"type": "Panel",
+			"variation": "MenuShade",
+			"w": 1920.0,
+			"x": 0.0,
+			"y": 0.0
+		},
+		{
+			"h": 129.0,
+			"path": "MainMenu/Root/Title",
+			"text": "City Builder Starter Kit",
+			"type": "Label",
+			"variation": "TitleLabel",
+			"w": 1093.0,
+			"x": 413.5,
+			"y": 150.0
+		},
+		{
+			"h": 434.0,
+			"path": "MainMenu/Root/Content",
+			"type": "HBoxContainer",
+			"variation": "MenuContent",
+			"w": 1056.0,
+			"x": 432.0,
+			"y": 430.0
+		},
+		{
+			"h": 434.0,
+			"path": "MainMenu/Root/Content/Buttons",
+			"type": "VBoxContainer",
+			"variation": "MenuButtons",
+			"w": 520.0,
+			"x": 432.0,
+			"y": 430.0
+		},
+		{
+			"h": 64.0,
+			"path": "MainMenu/Root/Content/Buttons/Continue",
+			"text": "CONTINUE",
+			"type": "Button",
+			"variation": "MainMenuButton",
+			"w": 520.0,
+			"x": 432.0,
+			"y": 430.0
+		},
+		{
+			"h": 64.0,
+			"path": "MainMenu/Root/Content/Buttons/Continue/Blur",
+			"type": "Panel",
+			"variation": "BackdropBlur",
+			"w": 520.0,
+			"x": 432.0,
+			"y": 430.0
+		},
+		{
+			"h": 64.0,
+			"path": "MainMenu/Root/Content/Buttons/NewGame",
+			"text": "NEW GAME",
+			"type": "Button",
+			"variation": "MainMenuButton",
+			"w": 520.0,
+			"x": 432.0,
+			"y": 504.0
+		},
+		{
+			"h": 64.0,
+			"path": "MainMenu/Root/Content/Buttons/NewGame/Blur",
+			"type": "Panel",
+			"variation": "BackdropBlur",
+			"w": 520.0,
+			"x": 432.0,
+			"y": 504.0
+		},
+		{
+			"h": 64.0,
+			"path": "MainMenu/Root/Content/Buttons/Load",
+			"text": "LOAD GAME",
+			"type": "Button",
+			"variation": "MainMenuButton",
+			"w": 520.0,
+			"x": 432.0,
+			"y": 578.0
+		},
+		{
+			"h": 64.0,
+			"path": "MainMenu/Root/Content/Buttons/Load/Blur",
+			"type": "Panel",
+			"variation": "BackdropBlur",
+			"w": 520.0,
+			"x": 432.0,
+			"y": 578.0
+		},
+		{
+			"h": 64.0,
+			"path": "MainMenu/Root/Content/Buttons/Options",
+			"text": "OPTIONS",
+			"type": "Button",
+			"variation": "MainMenuButton",
+			"w": 520.0,
+			"x": 432.0,
+			"y": 652.0
+		},
+		{
+			"h": 64.0,
+			"path": "MainMenu/Root/Content/Buttons/Options/Blur",
+			"type": "Panel",
+			"variation": "BackdropBlur",
+			"w": 520.0,
+			"x": 432.0,
+			"y": 652.0
+		},
+		{
+			"h": 64.0,
+			"path": "MainMenu/Root/Content/Buttons/Credits",
+			"text": "CREDITS",
+			"type": "Button",
+			"variation": "MainMenuButton",
+			"w": 520.0,
+			"x": 432.0,
+			"y": 726.0
+		},
+		{
+			"h": 64.0,
+			"path": "MainMenu/Root/Content/Buttons/Credits/Blur",
+			"type": "Panel",
+			"variation": "BackdropBlur",
+			"w": 520.0,
+			"x": 432.0,
+			"y": 726.0
+		},
+		{
+			"h": 64.0,
+			"path": "MainMenu/Root/Content/Buttons/Exit",
+			"text": "EXIT",
+			"type": "Button",
+			"variation": "MainMenuButton",
+			"w": 520.0,
+			"x": 432.0,
+			"y": 800.0
+		},
+		{
+			"h": 64.0,
+			"path": "MainMenu/Root/Content/Buttons/Exit/Blur",
+			"type": "Panel",
+			"variation": "BackdropBlur",
+			"w": 520.0,
+			"x": 432.0,
+			"y": 800.0
+		},
+		{
+			"h": 199.0,
+			"path": "MainMenu/Root/Content/Sidebar",
+			"type": "VBoxContainer",
+			"variation": "MenuSidebar",
+			"w": 520.0,
+			"x": 968.0,
+			"y": 430.0
+		},
+		{
+			"h": 199.0,
+			"path": "MainMenu/Root/Content/Sidebar/Tips",
+			"type": "PanelContainer",
+			"variation": "MenuPanel",
+			"w": 520.0,
+			"x": 968.0,
+			"y": 430.0
+		},
+		{
+			"h": 159.0,
+			"path": "MainMenu/Root/Content/Sidebar/Tips/Blur",
+			"type": "Panel",
+			"variation": "BackdropBlurPanel",
+			"w": 476.0,
+			"x": 990.0,
+			"y": 448.0
+		},
+		{
+			"h": 159.0,
+			"path": "MainMenu/Root/Content/Sidebar/Tips/Box",
+			"type": "VBoxContainer",
+			"variation": "MenuPanelBox",
+			"w": 476.0,
+			"x": 990.0,
+			"y": 448.0
+		},
+		{
+			"h": 29.0,
+			"path": "MainMenu/Root/Content/Sidebar/Tips/Box/Header",
+			"text": "TIPS",
+			"type": "Label",
+			"variation": "PanelHeader",
+			"w": 476.0,
+			"x": 990.0,
+			"y": 448.0
+		},
+		{
+			"h": 2.0,
+			"path": "MainMenu/Root/Content/Sidebar/Tips/Box/Divider",
+			"type": "HSeparator",
+			"variation": "PanelDivider",
+			"w": 476.0,
+			"x": 990.0,
+			"y": 491.0
+		},
+		{
+			"h": 100.0,
+			"path": "MainMenu/Root/Content/Sidebar/Tips/Box/Content",
+			"type": "VBoxContainer",
+			"variation": "",
+			"w": 476.0,
+			"x": 990.0,
+			"y": 507.0
+		},
+		{
+			"h": 100.0,
+			"path": "MainMenu/Root/Content/Sidebar/Tips/Box/Content/Body",
+			"type": "HBoxContainer",
+			"variation": "TipRow",
+			"w": 476.0,
+			"x": 990.0,
+			"y": 507.0
+		},
+		{
+			"h": 100.0,
+			"path": "MainMenu/Root/Content/Sidebar/Tips/Box/Content/Body/ImageFrame",
+			"type": "Panel",
+			"variation": "TipImageFrame",
+			"w": 160.0,
+			"x": 990.0,
+			"y": 507.0
+		},
+		{
+			"h": 100.0,
+			"path": "MainMenu/Root/Content/Sidebar/Tips/Box/Content/Body/ImageFrame/Image",
+			"type": "TextureRect",
+			"variation": "",
+			"w": 160.0,
+			"x": 990.0,
+			"y": 507.0
+		},
+		{
+			"h": 59.0,
+			"path": "MainMenu/Root/Content/Sidebar/Tips/Box/Content/Body/Text",
+			"type": "VBoxContainer",
+			"variation": "TipText",
+			"w": 298.0,
+			"x": 1168.0,
+			"y": 527.0
+		},
+		{
+			"h": 29.0,
+			"path": "MainMenu/Root/Content/Sidebar/Tips/Box/Content/Body/Text/TipTitle",
+			"text": "Q / E — switch building",
+			"type": "Label",
+			"variation": "TipTitle",
+			"w": 298.0,
+			"x": 1168.0,
+			"y": 527.0
+		},
+		{
+			"h": 24.0,
+			"path": "MainMenu/Root/Content/Sidebar/Tips/Box/Content/Body/Text/TipBody",
+			"text": "RMB rotate · Delete demolish",
+			"type": "Label",
+			"variation": "TipBody",
+			"w": 298.0,
+			"x": 1168.0,
+			"y": 562.0
+		},
+		{
+			"h": 120.0,
+			"path": "Overlay/Notifications",
+			"type": "PanelContainer",
+			"variation": "MenuPanelSmall",
+			"w": 380.0,
+			"x": 1500.0,
+			"y": 920.0
+		},
+		{
+			"h": 94.0,
+			"path": "Overlay/Notifications/Blur",
+			"type": "Panel",
+			"variation": "BackdropBlurPanel",
+			"w": 348.0,
+			"x": 1516.0,
+			"y": 932.0
+		},
+		{
+			"h": 94.0,
+			"path": "Overlay/Notifications/Box",
+			"type": "VBoxContainer",
+			"variation": "MenuPanelBoxSmall",
+			"w": 348.0,
+			"x": 1516.0,
+			"y": 932.0
+		},
+		{
+			"h": 20.0,
+			"path": "Overlay/Notifications/Box/Header",
+			"text": "NOTIFICATIONS",
+			"type": "Label",
+			"variation": "PanelHeaderSmall",
+			"w": 348.0,
+			"x": 1516.0,
+			"y": 932.0
+		},
+		{
+			"h": 2.0,
+			"path": "Overlay/Notifications/Box/Divider",
+			"type": "HSeparator",
+			"variation": "PanelDivider",
+			"w": 348.0,
+			"x": 1516.0,
+			"y": 960.0
+		},
+		{
+			"h": 56.0,
+			"path": "Overlay/Notifications/Box/Content",
+			"type": "VBoxContainer",
+			"variation": "",
+			"w": 348.0,
+			"x": 1516.0,
+			"y": 970.0
+		},
+		{
+			"h": 56.0,
+			"path": "Overlay/Notifications/Box/Content/List",
+			"type": "VBoxContainer",
+			"variation": "NotificationList",
+			"w": 348.0,
+			"x": 1516.0,
+			"y": 970.0
+		},
+		{
+			"h": 27.0,
+			"path": "Overlay/Notifications/Box/Content/List/Item1",
+			"type": "MarginContainer",
+			"variation": "NotificationItem",
+			"w": 348.0,
+			"x": 1516.0,
+			"y": 970.0
+		},
+		{
+			"h": 21.0,
+			"path": "Overlay/Notifications/Box/Content/List/Item1/Row",
+			"type": "HBoxContainer",
+			"variation": "NotificationRow",
+			"w": 340.0,
+			"x": 1520.0,
+			"y": 973.0
+		},
+		{
+			"h": 21.0,
+			"path": "Overlay/Notifications/Box/Content/List/Item1/Row/DotSlot",
+			"type": "CenterContainer",
+			"variation": "",
+			"w": 8.0,
+			"x": 1520.0,
+			"y": 973.0
+		},
+		{
+			"h": 8.0,
+			"path": "Overlay/Notifications/Box/Content/List/Item1/Row/DotSlot/Dot",
+			"type": "Panel",
+			"variation": "NotificationDot",
+			"w": 8.0,
+			"x": 1520.0,
+			"y": 979.0
+		},
+		{
+			"h": 21.0,
+			"path": "Overlay/Notifications/Box/Content/List/Item1/Row/Text",
+			"text": "Map saved",
+			"type": "Label",
+			"variation": "NotifText",
+			"w": 257.0,
+			"x": 1538.0,
+			"y": 973.0
+		},
+		{
+			"h": 18.0,
+			"path": "Overlay/Notifications/Box/Content/List/Item1/Row/Time",
+			"text": "just now",
+			"type": "Label",
+			"variation": "NotifTime",
+			"w": 55.0,
+			"x": 1805.0,
+			"y": 974.0
+		},
+		{
+			"h": 27.0,
+			"path": "Overlay/Notifications/Box/Content/List/Item2",
+			"type": "MarginContainer",
+			"variation": "NotificationItem",
+			"w": 348.0,
+			"x": 1516.0,
+			"y": 999.0
+		},
+		{
+			"h": 21.0,
+			"path": "Overlay/Notifications/Box/Content/List/Item2/Row",
+			"type": "HBoxContainer",
+			"variation": "NotificationRow",
+			"w": 340.0,
+			"x": 1520.0,
+			"y": 1002.0
+		},
+		{
+			"h": 21.0,
+			"path": "Overlay/Notifications/Box/Content/List/Item2/Row/DotSlot",
+			"type": "CenterContainer",
+			"variation": "",
+			"w": 8.0,
+			"x": 1520.0,
+			"y": 1002.0
+		},
+		{
+			"h": 8.0,
+			"path": "Overlay/Notifications/Box/Content/List/Item2/Row/DotSlot/Dot",
+			"type": "Panel",
+			"variation": "NotificationDot",
+			"w": 8.0,
+			"x": 1520.0,
+			"y": 1008.0
+		},
+		{
+			"h": 21.0,
+			"path": "Overlay/Notifications/Box/Content/List/Item2/Row/Text",
+			"text": "Map loaded",
+			"type": "Label",
+			"variation": "NotifText",
+			"w": 257.0,
+			"x": 1538.0,
+			"y": 1002.0
+		},
+		{
+			"h": 18.0,
+			"path": "Overlay/Notifications/Box/Content/List/Item2/Row/Time",
+			"text": "just now",
+			"type": "Label",
+			"variation": "NotifTime",
+			"w": 55.0,
+			"x": 1805.0,
+			"y": 1003.0
+		}
+	],
+	"hover": "",
+	"scene": "res://scenes/main.tscn",
+	"size": [
+		1920,
+		1080
+	],
+	"state": "save"
+}

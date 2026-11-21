@@ -19,6 +19,14 @@ alt="Main menu built by the agent: live city behind, hover, New Game"/></p>
 |---|---|
 | <img src="design/main_menu.png" width="420"/> | <img src="evals/generate-ui/001/iter1_main_save.png" width="420"/> |
 
+## Requirements
+
+- Godot 4.7 and [uv](https://docs.astral.sh/uv/).
+- Claude Code with the plugin [mattpocock-skills](https://github.com/mattpocock/skills). The evals ran with version 1.3.1 (`49dd158`). The plugin updates itself, so later runs may use a newer version.
+  - Install: `/plugin install mattpocock-skills@claude-plugins-official`. `.claude/settings.json` enables it, so Claude Code also offers to install it when you trust the folder.
+  - `review-pr` calls its `code-review` and `write-test` calls its `tdd`. Without the plugin both skills stop and ask you to install it.
+  - The project skills add what the plugin can't know about Godot and this game: the build and test gates, a Godot checklist, the screenshot-and-compare loop, and the rules that came out of the evals.
+
 ## generate-ui: main menu from a figcraft mockup
 
 ```mermaid
@@ -72,10 +80,15 @@ Skills live in [`.claude/skills/`](.claude/skills), the MCP server in [`tools/mc
   - [#6 save slots and Load screen](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/6)
   - [#8 Figma input for generate-ui](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/8)
 - Run it in Claude Code:
-  1. Install Godot 4.7 and [uv](https://docs.astral.sh/uv/). [`.mcp.json`](.mcp.json) starts the server with `uv run --script tools/mcp/godot_mcp.py`. It runs `godot` by default; to run another binary, set `GODOT_BIN` in your environment before starting Claude Code.
-  2. Install the plugin: `/plugin install mattpocock-skills@claude-plugins-official`.
-  3. Check that `/mcp` lists `godot` as connected. Then try `/review-pr <n>`, or ask for UI from a mockup (generate-ui) or for a test (write-test).
-- Evals were run with mattpocock-skills as of 2026-11-21. The plugin auto-updates, so later runs may differ.
+  1. Install everything under [Requirements](#requirements). [`.mcp.json`](.mcp.json) starts the server with `uv run --script tools/mcp/godot_mcp.py`. It runs `godot` by default; to run another binary, set `GODOT_BIN` in your environment before starting Claude Code. The binary must be Godot 4.7: any other version rewrites `*.import` on every build.
+  2. Check that `/mcp` lists `godot` as connected. Then try `/review-pr <n>`, or ask for UI from a mockup (generate-ui) or for a test (write-test).
+- MCP tools of the `godot` server ([`tools/mcp/godot_mcp.py`](tools/mcp/godot_mcp.py)):
+  - `build`: reimport assets and compile all project scripts (optionally `export_preset`).
+  - `run_tests`: run the GUT suite in `tests/` (filter by `script` or `test_name`).
+  - `find_scenes` / `scene_tree`: search scenes by node name, type or script; dump a scene's node tree.
+  - `screenshot`: render a scene in windowed Godot at an exact size (optional `state`, `hover`) and save a PNG plus a `.layout.json` of every visible Control's rect.
+- Tests: [GUT](https://github.com/bitwes/Gut) 9.7.1 in `addons/gut`. From the CLI: `godot --headless -s res://addons/gut/gut_cmdln.gd -gconfig=res://.gutconfig.json -gexit`.
+- `docs/agents/` refers to the plugin's `/triage`, `/domain-modeling` and `/grill-with-docs`.
 - You don't need figcraft or Godot to check the generate-ui geometry. The repo has the mockups, every screenshot, and the iteration-1 `.layout.json` files. With uv alone you can rerun `uv run --script tools/design/figcraft.py diff design/main_menu.figcraft MainMenu evals/generate-ui/001/iter1_main_save.layout.json design/main_menu.map.json`, which gives 28/31.
 - Figma isn't supported yet. Step 1 of generate-ui needs an adapter that writes the same `design/<name>.map.json`, for example through the Figma MCP ([#8](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/8)).
 - Rules for agents: [`AGENTS.md`](AGENTS.md).
@@ -152,19 +165,3 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 Assets included in this package (2D sprites, 3D models and sound effects) are [CC0 licensed](https://creativecommons.org/publicdomain/zero/1.0/)
-
-### Claude Code tooling
-
-- **MCP server** `godot` (`tools/mcp/godot_mcp.py`, registered in `.mcp.json`, needs [uv](https://docs.astral.sh/uv/)):
-  - `build` — reimport assets and compile all project scripts (optionally `export_preset`)
-  - `run_tests` — run the GUT suite in `tests/` (filter by `script` or `test_name`)
-  - `find_scenes` / `scene_tree` — search scenes by node name, type or script; dump a scene's node tree
-  - `screenshot` — render a scene in windowed Godot at an exact size (optional `state`, `hover`) and save a PNG plus a `.layout.json` of every visible Control's rect
-  - `GODOT_BIN` in your environment picks the Godot binary (default `godot`); it must match the project version.
-- **Tests**: [GUT](https://github.com/bitwes/Gut) 9.7.1 in `addons/gut`; CLI:
-  `godot --headless -s res://addons/gut/gut_cmdln.gd -gconfig=res://.gutconfig.json -gexit`
-- **Skills** (`.claude/skills/`): `generate-ui`, `write-test`, `review-pr`.
-- **Plugin** [mattpocock-skills](https://github.com/mattpocock/skills) is required: `review-pr` runs its
-  `code-review`, `write-test` its `tdd`, and `docs/agents/` refer to `/triage`, `/domain-modeling`,
-  `/grill-with-docs`. `.claude/settings.json` enables it, so Claude Code offers to install it when you
-  trust the folder; or install by hand: `/plugin install mattpocock-skills@claude-plugins-official`.

@@ -21,8 +21,9 @@ SCRIPT = Path(__file__).resolve().parents[1] / "godot_mcp.py"
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
 
 # The fake binary. It does only what godot_mcp relies on Godot doing: find the project through
-# --path, write JUnit where -gjunit_xml_file points, print, change files, exit. A command line
-# godot_mcp gets wrong therefore loses its results here as it would with the real Godot.
+# --path, write JUnit where -gjunit_xml_file points, write the PNG and layout where screenshot.gd's
+# --out points, print, change files, exit. A command line godot_mcp gets wrong therefore loses its
+# results here as it would with the real Godot.
 _FAKE_GODOT = """
 import json, sys, time
 from pathlib import Path
@@ -49,6 +50,11 @@ if rule["junit"] is not None and junit:
     out = project / junit.removeprefix("res://")
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(rule["junit"])
+shot = next((a.split("=", 1)[1] for a in args if a.startswith("--out=")), None)
+if rule["layout"] is not None and shot:
+    png = Path(shot)
+    png.write_bytes(b"\\x89PNG\\r\\n\\x1a\\n")  # screenshot only checks that the file exists
+    png.with_suffix(".layout.json").write_text(rule["layout"])
 sys.stdout.write(rule["stdout"])
 sys.stdout.flush()
 sys.stderr.write(rule["stderr"])
@@ -77,14 +83,20 @@ class FakeGodot:
 
     def on(self, when: str | None = None, *, capture: str | None = None, stdout: str = "",
            stderr: str = "", code: int = 0, sleep: float = 0, junit: str | None = None,
-           write: dict[str, str] | None = None, delete: tuple[str, ...] = ()) -> FakeGodot:
-        """capture: replay fixtures/gut-9.7.1-<capture>.* (stdout, stderr, junit); `code` stays explicit."""
+           layout: str | None = None, write: dict[str, str] | None = None,
+           delete: tuple[str, ...] = ()) -> FakeGodot:
+        """capture: replay the files of fixtures/<capture>.* that exist (stdout, stderr, junit,
+        layout); `code` stays explicit. layout: screenshot.gd's output, written next to a PNG."""
         if capture:
-            stdout = self.fixture(f"gut-9.7.1-{capture}.stdout.txt")
-            stderr = self.fixture(f"gut-9.7.1-{capture}.stderr.txt")
-            junit = self.fixture(f"gut-9.7.1-{capture}.junit.xml")
+            files = {ext: FIXTURES / f"{capture}.{ext}"
+                     for ext in ("stdout.txt", "stderr.txt", "junit.xml", "layout.json")}
+            assert any(f.exists() for f in files.values()), f"no fixture {capture}.*"
+            read = {ext: f.read_text() if f.exists() else None for ext, f in files.items()}
+            stdout, stderr = read["stdout.txt"] or "", read["stderr.txt"] or ""
+            junit, layout = read["junit.xml"], read["layout.json"]
         self._rules.append({"when": when, "stdout": stdout, "stderr": stderr, "code": code,
-                            "sleep": sleep, "junit": junit, "write": write or {}, "delete": list(delete)})
+                            "sleep": sleep, "junit": junit, "layout": layout, "write": write or {},
+                            "delete": list(delete)})
         self._save()
         return self
 

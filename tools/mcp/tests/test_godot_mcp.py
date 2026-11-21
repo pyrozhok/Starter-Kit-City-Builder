@@ -74,7 +74,7 @@ def test_ansi_codes_are_stripped(mod: ModuleType, godot) -> None:
 
 
 def test_at_line_is_appended_to_its_error(mod: ModuleType, godot) -> None:
-    godot.on(capture="mixed", code=1)
+    godot.on(capture="gut-9.7.1-mixed", code=1)
 
     result = mod._godot([], timeout=5)
 
@@ -130,7 +130,7 @@ def test_output_tail_keeps_the_end_of_long_output(mod: ModuleType, godot) -> Non
 
 
 def test_orphans_are_summed_over_test_scripts(mod: ModuleType, godot) -> None:
-    godot.on(capture="orphans")  # test_leak_a.gd leaked 1 node, test_leak_b.gd leaked 2
+    godot.on(capture="gut-9.7.1-orphans")  # test_leak_a.gd leaked 1 node, test_leak_b.gd leaked 2
 
     assert mod._godot([], timeout=5)["orphans"] == 3
 
@@ -192,7 +192,7 @@ def gut_command(mod: ModuleType, *select: str) -> list[str]:
 
 
 def test_run_tests_runs_gut_on_the_test_directory(gut: ModuleType, godot) -> None:
-    godot.on(capture="orphans")
+    godot.on(capture="gut-9.7.1-orphans")
 
     gut.run_tests()
 
@@ -200,7 +200,7 @@ def test_run_tests_runs_gut_on_the_test_directory(gut: ModuleType, godot) -> Non
 
 
 def test_script_selects_its_directory_and_file(gut: ModuleType, godot) -> None:
-    godot.on(capture="orphans")
+    godot.on(capture="gut-9.7.1-orphans")
 
     gut.run_tests(script="res://tests/unit/test_builder.gd", test_name="cash")
 
@@ -209,7 +209,7 @@ def test_script_selects_its_directory_and_file(gut: ModuleType, godot) -> None:
 
 
 def test_passed_failed_and_pending_are_counted(gut: ModuleType, godot) -> None:
-    godot.on(capture="mixed", code=1)
+    godot.on(capture="gut-9.7.1-mixed", code=1)
 
     result = gut.run_tests()
 
@@ -272,7 +272,7 @@ def test_stale_junit_from_an_earlier_run_is_not_read(gut: ModuleType, godot) -> 
 
 
 def test_nothing_ran_is_not_ok(gut: ModuleType, godot) -> None:
-    godot.on(capture="nothing-ran", code=0)
+    godot.on(capture="gut-9.7.1-nothing-ran", code=0)
 
     result = gut.run_tests()
 
@@ -281,7 +281,7 @@ def test_nothing_ran_is_not_ok(gut: ModuleType, godot) -> None:
 
 
 def test_orphans_fail_a_green_run(gut: ModuleType, godot) -> None:
-    godot.on(capture="orphans", code=0)
+    godot.on(capture="gut-9.7.1-orphans", code=0)
 
     result = gut.run_tests()
 
@@ -291,7 +291,7 @@ def test_orphans_fail_a_green_run(gut: ModuleType, godot) -> None:
 
 def test_skipped_script_fails_a_run_that_exited_0(gut: ModuleType, godot) -> None:
     # GUT skips a test script that doesn't parse, runs the rest and exits 0.
-    godot.on(capture="skipped-script", code=0)
+    godot.on(capture="gut-9.7.1-skipped-script", code=0)
 
     result = gut.run_tests()
 
@@ -308,7 +308,7 @@ def test_skipped_script_fails_a_run_that_exited_0(gut: ModuleType, godot) -> Non
 def test_engine_error_in_a_test_counts_once(gut: ModuleType, godot) -> None:
     # Settled in review-pr eval 001 #7 and the comment in _godot: GUT turns an engine ERROR during
     # a test into that test's failure, so the ERROR line isn't counted again on top.
-    godot.on(capture="push-error", code=1)
+    godot.on(capture="gut-9.7.1-push-error", code=1)
 
     result = gut.run_tests()
 
@@ -321,7 +321,7 @@ def test_engine_error_in_a_test_counts_once(gut: ModuleType, godot) -> None:
 
 
 def test_gut_missing_returns_the_full_result_without_running_godot(mod: ModuleType, godot) -> None:
-    godot.on(capture="orphans")
+    godot.on(capture="gut-9.7.1-orphans")
 
     result = mod.run_tests()
 
@@ -548,7 +548,7 @@ def test_results_reach_the_client_as_json(scenes: ModuleType) -> None:
 
 def test_run_tests_over_mcp_reports_the_failing_test(gut: ModuleType, godot) -> None:
     # Agent → MCP session → run_tests → Godot process → JUnit file → result.
-    godot.on(capture="mixed", code=1)
+    godot.on(capture="gut-9.7.1-mixed", code=1)
 
     result = call(gut, "run_tests", {"script": "res://tests/mixed/test_mixed.gd"})
 
@@ -562,3 +562,106 @@ def test_refused_path_tells_the_agent_why(scenes: ModuleType) -> None:
 
     assert result.is_error is True
     assert "Path escapes project: res://../outside.tscn" in result.content[0].text
+
+
+# --- 10. screenshot ------------------------------------------------------------------------
+
+
+def shot_command(mod: ModuleType, *user_args: str) -> list[str]:
+    # The command the screenshot captures were taken with, against a windowed Godot 4.7.2.
+    return ["--path", str(mod.ROOT), "--audio-driver", "Dummy", "--resolution", "320x180",
+            "-s", "res://tools/mcp/screenshot.gd", "--", *user_args]
+
+
+def test_screenshot_runs_a_windowed_godot_with_its_arguments(scenes: ModuleType, godot) -> None:
+    godot.on(capture="screenshot-4.7.2-ok")
+
+    result = scenes.screenshot("res://scenes/main.tscn", state="save", hover="Root/New Game")
+
+    out = scenes.ROOT / ".godot/screenshots/main_save_hover-New-Game.png"
+    assert godot.calls == [shot_command(scenes, "--scene=res://scenes/main.tscn", f"--out={out}",
+                                        "--size=1920x1080", "--frames=30", "--state=save",
+                                        "--hover=Root/New Game")]
+    assert (result["path"], result["layout_path"]) == (str(out), str(out.with_suffix(".layout.json")))
+
+
+@pytest.mark.parametrize("scene", ["res://scenes/main.tscn", "res://scenes/main.scn"])
+def test_screenshot_without_state_or_hover(scenes: ModuleType, godot, scene: str) -> None:
+    (scenes.ROOT / "scenes/main.scn").write_bytes(b"RSCC")  # a binary scene: only its suffix matters here
+    godot.on(capture="screenshot-4.7.2-ok")
+
+    scenes.screenshot(scene, width=640, height=360, frames=5)
+
+    out = scenes.ROOT / ".godot/screenshots/main.png"
+    assert godot.calls == [shot_command(scenes, f"--scene={scene}", f"--out={out}", "--size=640x360",
+                                        "--frames=5")]
+
+
+def test_screenshot_keeps_machine_noise_apart(scenes: ModuleType, godot) -> None:
+    # A real successful run: the exit-time messages name no res:// path, so they are the machine's.
+    godot.on(capture="screenshot-4.7.2-ok")
+
+    result = scenes.screenshot("res://scenes/main.tscn", state="save")
+
+    assert (result["ok"], result["blank"], result["errors"]) == (True, False, [])
+    assert result["environment_errors"] == [
+        "WARNING: 4 ObjectDB instances were leaked at exit (run with `--verbose` for details).",
+        "ERROR: 2 resources still in use at exit (run with --verbose for details).",
+    ]
+    assert "output_tail" not in result
+
+
+def test_blank_frame_is_not_ok(scenes: ModuleType, godot) -> None:
+    godot.on(capture="screenshot-4.7.2-blank")
+
+    result = scenes.screenshot("res://scenes/main.tscn")
+
+    assert (result["ok"], result["blank"]) == (False, True)
+    assert "SCREENSHOT" in result["output_tail"]
+
+
+def test_script_error_in_the_scene_fails_the_screenshot(scenes: ModuleType, godot) -> None:
+    # Real run: _ready() calls a method on null; Godot still renders a frame and exits 0.
+    godot.on(capture="screenshot-4.7.2-script-error")
+
+    result = scenes.screenshot("res://scenes/main.tscn")
+
+    assert (result["ok"], result["blank"]) == (False, False)
+    assert result["errors"] == [
+        "SCRIPT ERROR: Cannot call method 'queue_free' on a null value. [res://scripts/broken_ready.gd:6]"]
+
+
+def test_project_warning_is_reported_without_failing(scenes: ModuleType, godot) -> None:
+    # Same line format as the captures; no capture has a project WARNING.
+    warning = "WARNING: The local variable 'x' is declared but never used.\n   at: GDScript::reload (res://scripts/main.gd:3)\n"
+    godot.on(stderr=warning + godot.fixture("screenshot-4.7.2-ok.stderr.txt"),
+             layout=godot.fixture("screenshot-4.7.2-ok.layout.json"))
+
+    result = scenes.screenshot("res://scenes/main.tscn")
+
+    assert result["ok"] is True
+    assert result["errors"] == ["WARNING: The local variable 'x' is declared but never used. [res://scripts/main.gd:3]"]
+
+
+
+
+def test_previous_screenshot_is_not_reported(scenes: ModuleType, godot) -> None:
+    out = scenes.ROOT / ".godot/screenshots/main.png"
+    out.parent.mkdir(parents=True)
+    out.write_bytes(b"old")
+    out.with_suffix(".layout.json").write_text('{"blank": false}')
+    godot.on(capture="screenshot-4.7.2-hover-missing", code=1)
+
+    assert scenes.screenshot("res://scenes/main.tscn")["path"] is None
+
+
+@pytest.mark.parametrize("scene", ["res://scripts/main.gd", "res://scenes/missing.tscn"])
+def test_screenshot_of_a_non_scene_runs_no_godot(scenes: ModuleType, godot, scene: str) -> None:
+    (scenes.ROOT / "scripts").mkdir()
+    (scenes.ROOT / "scripts/main.gd").write_text("extends Node3D\n")
+    godot.on(capture="screenshot-4.7.2-ok")
+
+    result = scenes.screenshot(scene)
+
+    assert (result["ok"], result["path"], result["errors"]) == (False, None, [f"Not a scene: {scene}"])
+    assert godot.calls == []

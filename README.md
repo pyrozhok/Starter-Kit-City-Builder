@@ -24,7 +24,7 @@ Skills live in [`.claude/skills/`](.claude/skills), the MCP server in [`tools/mc
 
 ⚠ 002 reviewed only 6 new commits, not the full PR, so it isn't directly comparable with the other runs.
 
-Since 001, findings checked before reporting went from 1/9 to 8/9 and wrong fixes from 1 to 0. Each run still had about one false finding, and each one became a rule in the skill.
+Since 001, findings checked before reporting went from 1/9 to 8/9 and wrong fixes from 1 to 0. 001, 003 and 004 each had one false finding, and each one became a rule in the skill.
 
 ### generate-ui 001: main menu from a figcraft mockup
 

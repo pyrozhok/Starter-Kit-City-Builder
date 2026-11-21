@@ -11,7 +11,7 @@ alt="Main menu built by the agent: live city behind, hover, New Game"/></p>
 
 ## TL;DR
 
-- **generate-ui** built the main menu from a mockup in 16 minutes, from the approved plan to the final screenshot, my review of the first draft included. It took 1 fix iteration of 3. 28/31 layers are within ±2px, and the other 3 come from Godot's line height. Where the mockup contradicted itself, the agent asked me instead of guessing.
+- **generate-ui** built the main menu from a mockup in 16 minutes, from the approved plan to the final screenshot, my review of the first draft included. It took 1 fix iteration of 3. 28/31 layers are within ±2px. The other 3 are expected: one comes from Godot's line height, and two from a text cut from the run. Where the mockup contradicted itself, the agent asked me instead of guessing.
 - **review-pr**: 4 runs on 2 PRs, graded by me as the PR author. False findings didn't go down: 3 of 4 runs had one. Two other numbers changed. Findings checked against the code before reporting went from 1/9 to 8/9, and wrong fixes went from 1 to 0. Recall isn't measured yet.
 - **Setup**: Claude Code with Opus 5.5 and mattpocock-skills 1.3.1. The skills, the MCP server, the menu and the evals were built in one day: 64 commits on 2026-11-21.
 
@@ -86,7 +86,7 @@ Skills live in [`.claude/skills/`](.claude/skills), the MCP server in [`tools/mc
 
 ### What carries over to another engine
 
-The skills reach the engine only through the MCP tools: `build`, `run_tests`, `screenshot` (a PNG plus a `.layout.json` with every visible Control's rect), and `scene_tree` / `find_scenes`. The layout diff compares mockup rects with `.layout.json` and knows nothing about Godot. To port the workflow, reimplement those tools for the new engine and rewrite the Godot-specific rules in the skills (scene text, mouse filters, GUT).
+The skills run the engine only through the MCP tools: `build`, `run_tests`, `screenshot` (a PNG plus a `.layout.json` with every visible Control's rect), and `scene_tree` / `find_scenes`. The layout diff compares mockup rects with `.layout.json` and knows nothing about Godot. To port the workflow, reimplement those tools for the new engine and rewrite the Godot-specific rules in the skills (scene text, mouse filters, GUT).
 
 <details>
 <summary>Links and setup</summary>

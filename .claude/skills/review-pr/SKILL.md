@@ -1,0 +1,81 @@
+---
+name: review-pr
+description: Review a PR, branch or local diff: Godot gates, code-review, then the Godot checklist.
+disable-model-invocation: true
+---
+
+# Review PR
+
+Argument: PR number/URL, branch name, or nothing (uncommitted changes).
+
+## 1. Get the change
+
+PRs live on the fork: pass the repo flag from `docs/agents/issue-tracker.md` to every `gh` command.
+
+- PR: `gh pr view <n>` (`--json title,body,baseRefName,headRefName,headRefOid,commits`) and `gh pr diff <n>`.
+  Gates need the PR's code locally: if the current branch's HEAD equals `headRefOid`, use it; otherwise
+  `gh pr checkout <n>` on a clean tree, and ask first when the tree is dirty.
+- Branch: base is `main`; `git log main..HEAD` and `git diff main...HEAD`.
+- Local: base is `HEAD`; `git diff HEAD`.
+
+Done when you know the base, the commit list, and the PR's stated intent (its description; empty
+description is itself a nit).
+
+## 2. Gates
+
+- `godot.build`: `ok: true` and `files_changed_by_build` empty. Each listed file is either PR churn
+  (its `.import`/`project.godot` disagree with the engine) or a `GODOT_BIN` that isn't the engine
+  version in `AGENTS.md` — check `godot --version` and say which. Restore those files
+  (`git checkout -- <files>`) so the review leaves the tree as it found it.
+- `godot.run_tests`: `ok: true`, `orphans: 0`. Note each behavior change in the diff that no test covers.
+
+Done when both results are recorded and `git status` matches step 1.
+
+## 3. General review
+
+Invoke the `code-review` skill with the base from step 1 as the fixed point. Keep its findings for the
+report; the checklist below covers only what it can't know about Godot and this project.
+Done when its Standards and Spec findings are in hand.
+
+## 4. Godot checklist
+
+Apply every item to the diff; done when each one is marked pass, fail (with `path:line`) or n/a.
+Terms follow `GLOSSARY.md`.
+
+Commits
+- Each commit's diff matches its message: a `fix:` touches only the fix and its test, a `chore:`
+  changes no behavior. Model: upstream `3a6e666` — "fixes memory leak" is exactly one added
+  `n.queue_free()` in `update_structure()`.
+
+GDScript
+- Declarations are typed wherever the type is known.
+- A node removed from the tree is also `queue_free()`d (pattern: `update_structure()`).
+- `_process` only reads input and moves the selector; instancing and allocation happen on events —
+  the preview is rebuilt only when `index` changes (`action_structure_toggle()`).
+- Every new input action is declared in `project.godot` `[input]`; one-shot actions use
+  `is_action_just_pressed`.
+- Build on a tile already holding the same structure costs nothing; demolish leaves `-1`;
+  save → load restores position, orientation and structure index.
+- `Builder.structures` keeps its order (append new structures at the end): the structure index is
+  positional, so reordering breaks saved maps and `sample map/map.res`.
+- UI talks to the game through `@export` references and signals; each signal is connected once and
+  dies with its owner.
+- New interactive Controls come with the `gui_get_hovered_control()` guard in `action_build` /
+  `action_demolish` (see `generate-ui`) — otherwise clicking the Control also builds.
+
+Scenes and resources (`.tscn`, `.tres`, `.import`, `project.godot`)
+- Every `ext_resource path=` exists; ids are unique; existing `uid=` values are unchanged.
+- Every new script/resource has its `.uid` file committed.
+- Only source files are committed: `*.tmp`, `export_presets.cfg`, `.godot/`, `build/` stay out.
+- `project.godot` changes are intentional: `config/features` matches the engine version in
+  `AGENTS.md`, settings hold no machine-local paths, every enabled plugin is wanted.
+- Binary assets (`.glb`, `.png`, `.ogg`) change only in a PR about assets.
+
+## 5. Report
+
+Two lists, most severe first, one line each: `path:line — problem — concrete fix`.
+**Blocking**: bugs, broken resources, failing gates. **Nits**: the rest. Then gate results, the
+`code-review` findings worth acting on, and what headless runs can't verify (visuals, feel, audio).
+If nothing blocks, say so plainly.
+
+Post to GitHub (`gh pr review <n> --comment|--request-changes`) when the user asks for it.

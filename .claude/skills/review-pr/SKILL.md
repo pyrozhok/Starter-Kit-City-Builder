@@ -85,6 +85,8 @@ Before writing the report:
   against the members it uses (`godot.build`); for refactors, show that behavior is unchanged;
   for types: the narrowest existing type, adding a class_name if needed;
   for Python in `tools/mcp`: run its pytest suite; until one exists, a stub probe on old and new code.
+- GUT asserts don't abort the test: the lines after a failed assert still run. Don't suggest moving
+  cleanup out of a test body on that ground.
 - Decisions already explained — in a code comment at that spot, `docs/adr/`, or a graded finding
   in `evals/review-pr/` — stay settled: cite the explanation and raise them again (in any list,
   judgement calls included) only with new evidence against it.

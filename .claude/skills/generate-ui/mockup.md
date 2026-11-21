@@ -77,3 +77,10 @@ left after the third goes into the report.
 
 Three lists: **matches**, **mismatches** (with Δ, and why each is left, e.g. expected), **needs a human**
 (animation, hover feel, blur, readability over the moving background). Give PNG paths for each iteration.
+
+## Commits
+
+- A display or resolution change (`project.godot` `[display]`, base size, stretch, HUD rescale) changes
+  what the player sees: it is `feat`, not `chore`.
+- A `fix:` iteration touches only the fix and its test. Extra files it needs — `map.json`, `.gdignore`,
+  eval PNGs — go in their own commit.

@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=3 uid="uid://vgwrcfy1qawf"]
+[gd_scene format=3 uid="uid://vgwrcfy1qawf"]
 
 [ext_resource type="Script" uid="uid://76g8ejmdibal" path="res://scripts/builder.gd" id="1_jybm7"]
 [ext_resource type="Environment" uid="uid://jbptgqvstei3" path="res://scenes/main-environment.tres" id="1_yndf3"]
@@ -25,12 +25,22 @@
 [ext_resource type="Texture2D" uid="uid://ciwbdik3tmxtp" path="res://sprites/instructions.png" id="22_pm3ni"]
 [ext_resource type="AudioStream" uid="uid://wvfsgkl8qob6" path="res://sounds/ambience.ogg" id="24_y6deb"]
 
+[ext_resource type="Script" path="res://scripts/main.gd" id="30_main"]
+[ext_resource type="PackedScene" path="res://scenes/ui/main_menu.tscn" id="31_menu"]
+[ext_resource type="PackedScene" path="res://scenes/ui/notifications.tscn" id="32_notifications"]
+
 [sub_resource type="LabelSettings" id="LabelSettings_q176i"]
 font = ExtResource("16_vlub6")
 font_size = 40
 shadow_color = Color(0, 0, 0, 0.392157)
 
-[node name="Main" type="Node3D"]
+[node name="Main" type="Node3D" node_paths=PackedStringArray("builder", "view", "menu", "hud", "notifications")]
+script = ExtResource("30_main")
+builder = NodePath("Builder")
+view = NodePath("View")
+menu = NodePath("MainMenu")
+hud = NodePath("CanvasLayer")
+notifications = NodePath("Overlay/Notifications")
 
 [node name="Builder" type="Node3D" parent="." node_paths=PackedStringArray("selector", "selector_container", "view_camera", "gridmap", "cash_display")]
 script = ExtResource("1_jybm7")
@@ -119,3 +129,10 @@ mouse_filter = 2
 stream = ExtResource("24_y6deb")
 volume_db = -30.0
 autoplay = true
+
+[node name="MainMenu" parent="." instance=ExtResource("31_menu")]
+
+[node name="Overlay" type="CanvasLayer" parent="."]
+layer = 20
+
+[node name="Notifications" parent="Overlay" instance=ExtResource("32_notifications")]

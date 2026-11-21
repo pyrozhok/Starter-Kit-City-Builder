@@ -10,6 +10,7 @@ const SAMPLE_PATH := "res://sample map/map.res"
 @export var structures: Array[Structure] = []
 
 var map:DataMap
+var save_path := SAVE_PATH # Where F1/F2 and the menu's Continue/Load save and load
 
 var index:int = 0 # Index of structure being built
 
@@ -153,11 +154,11 @@ func update_cash():
 
 func action_save():
 	if Input.is_action_just_pressed("save"):
-		save_map(SAVE_PATH)
+		save_map(save_path)
 
 func action_load():
 	if Input.is_action_just_pressed("load"):
-		load_map(SAVE_PATH)
+		load_map(save_path)
 
 func action_load_resources():
 	if Input.is_action_just_pressed("load_resources"):

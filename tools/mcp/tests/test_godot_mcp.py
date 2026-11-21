@@ -116,6 +116,16 @@ def test_nonzero_exit_is_not_ok(mod: ModuleType, godot) -> None:
     assert result["exit_code"] == 1
 
 
+def test_output_tail_keeps_the_end_of_long_output(mod: ModuleType, godot) -> None:
+    godot.on(stdout="".join(f"line {n}\n" for n in range(1000)), stderr="ERROR: the last word\n", code=1)
+
+    tail = mod._godot([], timeout=5)["output_tail"]
+
+    assert len(tail) <= 4000
+    assert tail.endswith("ERROR: the last word\n")
+    assert "line 0\n" not in tail
+
+
 # --- 2. Orphan parsing ---------------------------------------------------------------------
 
 
@@ -358,7 +368,7 @@ def test_export_without_presets_fails_with_a_full_step(mod: ModuleType, godot) -
     assert len(godot.calls) == 2  # import and check_scripts; no export attempted
 
 
-@pytest.mark.parametrize(("export_path", "out"), [(None, "build/Linux"), ("res://dist/game.x86_64", "dist/game.x86_64")])
+@pytest.mark.parametrize(("export_path", "out"), [(None, "build/Linux"), ("res://dist/linux/game.x86_64", "dist/linux/game.x86_64")])
 def test_export_writes_the_preset_to_its_path(mod: ModuleType, godot, export_path: str | None, out: str) -> None:
     (mod.ROOT / "export_presets.cfg").write_text("")
     godot.on()
@@ -370,6 +380,16 @@ def test_export_writes_the_preset_to_its_path(mod: ModuleType, godot, export_pat
     assert (mod.ROOT / out).parent.is_dir()
     assert result["ok"] is True
     assert "output_tail" not in result["steps"]["export"]
+
+
+def test_export_again_into_an_existing_directory(mod: ModuleType, godot) -> None:
+    (mod.ROOT / "export_presets.cfg").write_text("")
+    godot.on()
+
+    first = mod.build(export_preset="Linux")
+    second = mod.build(export_preset="Linux")
+
+    assert (first["ok"], second["ok"]) == (True, True)
 
 
 def test_export_path_outside_the_project_is_refused(mod: ModuleType, godot) -> None:
@@ -431,6 +451,15 @@ def scenes(mod: ModuleType) -> ModuleType:
 def test_scene_tree_parses_paths_types_scripts_and_instances(scenes: ModuleType) -> None:
     assert scenes.scene_tree("res://scenes/main.tscn") == {"scene": "res://scenes/main.tscn",
                                                             "nodes": MAIN_NODES}
+
+
+def test_built_in_script_is_reported_as_written(scenes: ModuleType) -> None:
+    # A script saved inside the scene is a SubResource, not a file.
+    (scenes.ROOT / "scenes/builtin.tscn").write_text(
+        '[gd_scene format=3]\n\n[sub_resource type="GDScript" id="GDScript_k2x"]\n'
+        'script/source = "extends Node"\n\n[node name="Root" type="Node"]\nscript = SubResource("GDScript_k2x")\n')
+
+    assert scenes.scene_tree("res://scenes/builtin.tscn")["nodes"][0]["script"] == 'SubResource("GDScript_k2x")'
 
 
 def test_find_scenes_without_query_lists_each_scene_with_its_root(scenes: ModuleType) -> None:

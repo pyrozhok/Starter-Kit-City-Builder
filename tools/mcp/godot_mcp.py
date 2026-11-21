@@ -2,7 +2,7 @@
 # requires-python = ">=3.10"
 # dependencies = ["mcp>=2.3,<3"]
 # ///
-"""MCP server for this Godot project: build (import + script check), GUT tests, scene search.
+"""MCP server for this Godot project: build (import + script check), GUT tests, scene search, screenshots.
 
 Run: uv run --script tools/mcp/godot_mcp.py   (registered in .mcp.json)
 Env: GODOT_BIN — Godot executable (default "godot"). Use the version the project targets.
@@ -11,6 +11,7 @@ Env: GODOT_BIN — Godot executable (default "godot"). Use the version the proje
 from __future__ import annotations
 
 import hashlib
+import json
 import os
 import re
 import subprocess
@@ -39,8 +40,8 @@ def _failure(error: str, tail: str = "") -> dict:
     return {"ok": False, "exit_code": None, "errors": [error], "output_tail": tail, "orphans": 0}
 
 
-def _godot(args: list[str], timeout: int) -> dict:
-    cmd = [GODOT, "--headless", "--path", str(ROOT), *args]
+def _godot(args: list[str], timeout: int, headless: bool = True) -> dict:
+    cmd = [GODOT, *(["--headless"] if headless else []), "--path", str(ROOT), *args]
     try:
         proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, cwd=ROOT)
     except FileNotFoundError:
@@ -212,7 +213,57 @@ def run_tests(path: str = "res://tests", test_name: str | None = None, script: s
     return result
 
 
-# --- .tscn parsing (text format) ---------------------------------------------------------
+SCREENSHOTS = ROOT / ".godot" / "screenshots"
+
+
+@mcp.tool()
+def screenshot(scene: str, width: int = 1920, height: int = 1080, state: str | None = None,
+               hover: str | None = None, frames: int = 30) -> dict:
+    """Render a scene in a real (windowed, not headless) Godot and save one frame as PNG.
+
+    The scene runs inside a SubViewport of exactly width×height, so the window size doesn't matter.
+    state: passed to the scene root's `_preview_state(state)` (e.g. "save" / "nosave" for the menu).
+    hover: Control path from the scene root to put the mouse over before the frame is taken.
+    frames: frames to wait before capturing (map loads, tweens).
+    Saves .godot/screenshots/<scene>[_<state>][_hover-<node>].png and, next to it, .layout.json with
+    the viewport rect, class and theme variation of every visible Control.
+    Returns path, layout_path, blank (true if the sampled pixels are all one colour), errors (project:
+    res:// paths, SCRIPT/USER ERROR) and environment_errors (driver/display messages; never fail the run).
+    Needs a display (Wayland/X11); a window opens for a few seconds.
+    """
+    path = _to_path(scene)
+    if path.suffix not in (".tscn", ".scn") or not path.exists():
+        return {**_failure(f"Not a scene: {scene}"), "path": None}
+    name = path.stem + (f"_{state}" if state else "") + (f"_hover-{hover.rsplit('/', 1)[-1]}" if hover else "")
+    out = SCREENSHOTS / f"{re.sub(r'[^A-Za-z0-9_.-]', '-', name)}.png"
+    layout = out.with_suffix(".layout.json")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.unlink(missing_ok=True)
+    layout.unlink(missing_ok=True)
+    user_args = [f"--scene={_res(path)}", f"--out={out}", f"--size={width}x{height}", f"--frames={frames}"]
+    if state:
+        user_args.append(f"--state={state}")
+    if hover:
+        user_args.append(f"--hover={hover}")
+    run = _godot(["--audio-driver", "Dummy", "--resolution", "320x180",
+                  "-s", "res://tools/mcp/screenshot.gd", "--", *user_args], timeout=180, headless=False)
+    if not out.exists() or not layout.exists():
+        return {"ok": False, "path": None, "errors": run["errors"] or ["No screenshot produced"],
+                "output_tail": run["output_tail"]}
+    blank = json.loads(layout.read_text())["blank"]
+    # A windowed run logs driver/display noise (Vulkan, Wayland, portals) as plain ERROR without a
+    # res:// path. That is the machine, not the project: report it apart and don't fail on it.
+    project = [e for e in run["errors"] if "res://" in e or e.startswith(("SCRIPT ERROR", "USER ERROR"))]
+    environment = [e for e in run["errors"] if e not in project]
+    project_fatal = [e for e in project if not e.startswith(("WARNING", "USER WARNING"))]
+    result = {"ok": not blank and not project_fatal, "path": str(out), "layout_path": str(layout), "blank": blank,
+              "errors": project, "environment_errors": environment}
+    if not result["ok"]:
+        result["output_tail"] = run["output_tail"]
+    return result
+
+
+# --- .tscn parsing (text format)---------------------------------------------------------
 
 _SECTION_RE = re.compile(r"^\[(\w+)\s*(.*?)\]\s*$")
 _ATTR_RE = re.compile(r'(\w+)=("(?:[^"\\]|\\.)*"|\w+\("[^"]*"\)|[^\s\]]+)')

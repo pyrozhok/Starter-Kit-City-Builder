@@ -1,6 +1,7 @@
 extends GutTest
 
 const SAVE_PATH := "user://test_main_map.res"
+const Main := preload("res://scripts/main.gd")
 
 var main: Node3D
 var builder: Builder
@@ -69,13 +70,13 @@ func test_continue_loads_save_and_announces_it() -> void:
 	menu.continue_game.emit()
 	assert_false(menu.visible)
 	assert_eq(builder.gridmap.get_used_cells(), [Vector3i(7, 0, 7)])
-	assert_eq(notifications.items()[0].text, "Map loaded")
+	assert_eq(notifications.items()[0].text, Main.MAP_LOADED)
 
 
 func test_save_notifies_and_enables_continue() -> void:
 	_start()
 	builder.map_saved.emit()
-	assert_eq(notifications.items()[0].text, "Map saved")
+	assert_eq(notifications.items()[0].text, Main.MAP_SAVED)
 	assert_true(notifications.items()[0].unread)
 	assert_true(menu.has_save)
 

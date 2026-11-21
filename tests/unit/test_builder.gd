@@ -16,10 +16,10 @@ func before_each() -> void:
 	builder.add_child(builder.selector)
 	builder.selector.add_child(builder.selector_container)
 	builder.add_child(builder.cash_display)
-	builder.set_process(false)  # _process needs a camera; drive actions directly
 	viewport = SubViewport.new()
 	add_child_autofree(viewport)
 	viewport.add_child(builder)
+	builder.set_process(false)  # after entering the tree (READY turns _process on); _process needs a camera, drive actions directly
 
 func after_each() -> void:
 	for action: String in ["build", "demolish", "structure_next", "structure_previous"]:

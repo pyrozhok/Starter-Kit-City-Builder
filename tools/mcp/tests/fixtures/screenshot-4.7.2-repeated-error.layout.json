@@ -1,0 +1,30 @@
+{
+	"blank": false,
+	"controls": [
+		{
+			"h": 360.0,
+			"path": ".",
+			"type": "Control",
+			"variation": "",
+			"w": 640.0,
+			"x": 0.0,
+			"y": 0.0
+		},
+		{
+			"h": 100.0,
+			"path": "Box",
+			"type": "ColorRect",
+			"variation": "",
+			"w": 100.0,
+			"x": 0.0,
+			"y": 0.0
+		}
+	],
+	"hover": "",
+	"scene": "res://scenes/re.tscn",
+	"size": [
+		640,
+		360
+	],
+	"state": ""
+}

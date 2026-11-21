@@ -19,6 +19,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 from mcp.server.mcpserver import MCPServer
+from mcp.server.mcpserver.exceptions import ToolError
 
 ROOT = Path(__file__).resolve().parents[2]
 GODOT = os.environ.get("GODOT_BIN", "godot")
@@ -28,8 +29,14 @@ RESULTS_XML = ROOT / ".godot" / "gut_results.xml"
 mcp = MCPServer("godot")
 
 # Godot prints e.g. "SCRIPT ERROR: Parse Error: ..." followed by "   at: GDScript::reload (res://x.gd:12)".
-_ERR_RE = re.compile(r"^(SCRIPT ERROR|ERROR|WARNING|USER ERROR|USER WARNING):\s*(.*)$")
+# SHADER ERROR: a shader that doesn't compile. Headless --import prints it too (dummy renderer).
+_ERR_RE = re.compile(r"^(SCRIPT ERROR|SHADER ERROR|ERROR|WARNING|USER ERROR|USER WARNING):\s*(.*)$")
 _AT_RE = re.compile(r"^\s+at:\s.*?\((res://[^)]+)\)")
+# A GDScript backtrace frame, e.g. "       [0] _ready (res://scripts/x.gd:5)". push_error(), push_warning()
+# and engine errors raised from a script name the engine on their `at:` line; the script is here.
+_FRAME_RE = re.compile(r"^\s+\[\d+\] .*?\((res://[^)]+)\)")
+# Frames of the harness that runs the project (this tool's scripts, GUT) locate nothing in it.
+_HARNESS = ("res://tools/mcp/", "res://addons/gut/")
 _ANSI_RE = re.compile(r"\x1b\[[0-9;]*m")
 # GUT prints "<n> orphans" after each test script that leaked nodes (never printed when 0).
 _ORPHANS_RE = re.compile(r"^(\d+) orphans$", re.MULTILINE)
@@ -43,7 +50,9 @@ def _failure(error: str, tail: str = "") -> dict:
 def _godot(args: list[str], timeout: int, headless: bool = True) -> dict:
     cmd = [GODOT, *(["--headless"] if headless else []), "--path", str(ROOT), *args]
     try:
-        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, cwd=ROOT)
+        # errors="replace": one byte that isn't UTF-8 (a file name, a printed string) must not
+        # turn the whole run into a UnicodeDecodeError.
+        proc = subprocess.run(cmd, capture_output=True, text=True, errors="replace", timeout=timeout, cwd=ROOT)
     except FileNotFoundError:
         return _failure(f"Godot binary not found: {GODOT} (set GODOT_BIN)")
     except subprocess.TimeoutExpired as e:
@@ -56,7 +65,7 @@ def _godot(args: list[str], timeout: int, headless: bool = True) -> dict:
         # narrower tuple on purpose: GUT turns an engine ERROR raised during a test into that
         # test's failure, already counted from the JUnit results, so there only SCRIPT/USER ERROR
         # (scripts GUT skipped as unloadable) count on top.
-        "ok": proc.returncode == 0 and not any(e.startswith(("SCRIPT ERROR", "ERROR", "USER ERROR")) for e in errors),
+        "ok": proc.returncode == 0 and not any(e.startswith(("SCRIPT ERROR", "SHADER ERROR", "ERROR", "USER ERROR")) for e in errors),
         "exit_code": proc.returncode,
         "errors": errors,
         "output_tail": output[-4000:],
@@ -70,15 +79,30 @@ def _text(stream: str | bytes | None) -> str:
 
 def _parse_errors(output: str) -> list[str]:
     errors: list[str] = []
+    located = True  # errors[-1] has its res:// location, or there is no error yet
     for line in output.splitlines():
         m = _ERR_RE.match(line)
         if m:
             errors.append(f"{m.group(1)}: {m.group(2)}")
+            located = False
+            continue
+        if located:
             continue
         at = _AT_RE.match(line)
-        if at and errors:
-            errors[-1] += f" [{at.group(1)}]"
+        frame = _FRAME_RE.match(line)
+        if at or (frame and not frame.group(1).startswith(_HARNESS)):
+            errors[-1] += f" [{(at or frame).group(1)}]"
+            located = True
     return list(dict.fromkeys(errors))
+
+
+def _git_lines(*args: str) -> list[str] | None:
+    """Output lines of a git command in ROOT, or None if it failed or git is missing."""
+    try:
+        out = subprocess.run(["git", *args], capture_output=True, text=True, cwd=ROOT, timeout=30)
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        return None
+    return out.stdout.splitlines() if out.returncode == 0 else None
 
 
 def _git_snapshot() -> dict[str, str]:
@@ -88,18 +112,16 @@ def _git_snapshot() -> dict[str, str]:
     rewrote that were clean, and files that were already dirty but changed again.
     Empty if not a git repo.
     """
-    cmds = (["git", "diff", "--name-only", "HEAD"], ["git", "ls-files", "--others", "--exclude-standard"])
-    names: set[str] = set()
-    for cmd in cmds:
-        try:
-            out = subprocess.run(cmd, capture_output=True, text=True, cwd=ROOT, timeout=30)
-        except (FileNotFoundError, subprocess.TimeoutExpired):
-            return {}
-        if out.returncode != 0:
-            return {}
-        names.update(out.stdout.splitlines())
+    # Outside a repo every listing fails, so the snapshot is empty.
+    # Before the first commit there is no HEAD to diff against: every tracked file counts.
+    tracked = _git_lines("diff", "--name-only", "HEAD")
+    if tracked is None:
+        tracked = _git_lines("ls-files")
+    untracked = _git_lines("ls-files", "--others", "--exclude-standard")
+    if tracked is None or untracked is None:
+        return {}
     snap: dict[str, str] = {}
-    for name in names:
+    for name in {*tracked, *untracked}:
         f = ROOT / name
         snap[name] = hashlib.sha1(f.read_bytes()).hexdigest() if f.is_file() else "<deleted>"
     return snap
@@ -119,7 +141,8 @@ def _res(path: Path) -> str:
 def _to_path(res_path: str) -> Path:
     p = ROOT / res_path.removeprefix("res://")
     if not p.resolve().is_relative_to(ROOT):
-        raise ValueError(f"Path escapes project: {res_path}")
+        # ToolError, not ValueError: the MCP server passes only a ToolError's message on to the agent.
+        raise ToolError(f"Path escapes project: {res_path}")
     return p
 
 
@@ -248,12 +271,14 @@ def screenshot(scene: str, width: int = 1920, height: int = 1080, state: str | N
     run = _godot(["--audio-driver", "Dummy", "--resolution", "320x180",
                   "-s", "res://tools/mcp/screenshot.gd", "--", *user_args], timeout=180, headless=False)
     if not out.exists() or not layout.exists():
-        return {"ok": False, "path": None, "errors": run["errors"] or ["No screenshot produced"],
+        # screenshot.gd prints its own reason ("SCREENSHOT FAILED: ...") without an error prefix.
+        reasons = re.findall(r"^SCREENSHOT FAILED: .*$", run["output_tail"], re.MULTILINE)
+        return {"ok": False, "path": None, "errors": reasons + run["errors"] or ["No screenshot produced"],
                 "output_tail": run["output_tail"]}
     blank = json.loads(layout.read_text())["blank"]
     # A windowed run logs driver/display noise (Vulkan, Wayland, portals) as plain ERROR without a
     # res:// path. That is the machine, not the project: report it apart and don't fail on it.
-    project = [e for e in run["errors"] if "res://" in e or e.startswith(("SCRIPT ERROR", "USER ERROR"))]
+    project = [e for e in run["errors"] if "res://" in e or e.startswith(("SCRIPT ERROR", "SHADER ERROR", "USER ERROR"))]
     environment = [e for e in run["errors"] if e not in project]
     project_fatal = [e for e in project if not e.startswith(("WARNING", "USER WARNING"))]
     result = {"ok": not blank and not project_fatal, "path": str(out), "layout_path": str(layout), "blank": blank,

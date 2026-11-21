@@ -1,0 +1,41 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[1m[INFO]:  [0musing [~/.local/share/godot/app_userdata/Starter Kit City Builder] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+[4m
+
+res://tests/pusherr/test_push_error.gd
+[0m* test_push_error_then_pass
+[31m    [Failed]:  [0mUnexpected Errors:
+    [1] <push_error>boom from the test
+      at line -1
+[1m0/1 passed.
+[0m
+
+
+
+[33m==============================================
+[0m[33m= Run Summary
+[0m[33m==============================================
+[0m[4m
+res://tests/pusherr/test_push_error.gd
+[0m- test_push_error_then_pass
+[31m    [Failed]:  [0mUnexpected Errors:
+    [1] <push_error>boom from the test
+          at line -1
+
+Totals
+------
+Scripts               1
+Tests                 1
+Passing Tests      none
+Failing Tests         1
+Asserts             1/2
+Time              0.453s
+
+
+[31m---- 1 failing tests ----
+[0m
+Results saved to res://.godot/gut_results.xml

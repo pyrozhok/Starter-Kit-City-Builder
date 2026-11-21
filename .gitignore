@@ -18,7 +18,8 @@ mono_crash.*.json
 build/
 # Godot editor temp copies of scenes
 *.tmp
-# Python bytecode (tools/mcp)
+# Python bytecode and pytest cache (tools/)
 __pycache__/
+.pytest_cache/
 # Claude Code per-user settings
 .claude/settings.local.json

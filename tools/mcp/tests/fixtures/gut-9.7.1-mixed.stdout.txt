@@ -1,0 +1,48 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[1m[INFO]:  [0musing [~/.local/share/godot/app_userdata/Starter Kit City Builder] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+[33m[GUT WARNING]:  [0mIgnoring script res://tests/mixed/test_broken.gd because it does not extend GutTest
+[4m
+
+res://tests/mixed/test_mixed.gd
+[0m* test_passes
+* test_fails
+[31m    [Failed]:  [0m[2] expected to equal [3]:  two is not three
+      at line 9
+* test_pending
+[33m    [Pending]:  [0mnot written yet
+[1m1/3 passed.
+[0m
+
+
+
+[33m==============================================
+[0m[33m= Run Summary
+[0m[33m==============================================
+[0m[4m
+res://tests/mixed/test_mixed.gd
+[0m- test_fails
+[31m    [Failed]:  [0m[2] expected to equal [3]:  two is not three
+          at line 9
+- test_pending
+[33m    [Pending]:  [0mnot written yet
+
+Totals
+------
+Warnings              1
+
+Scripts               1
+Tests                 3
+Passing Tests         1
+Failing Tests         1
+Risky/Pending         1
+Asserts             1/2
+Time              0.453s
+
+
+[31m---- 1 failing tests ----
+[0m
+Results saved to res://.godot/gut_results.xml

@@ -1,0 +1,5 @@
+SCRIPT ERROR: Cannot call method 'queue_free' on a null value.
+          at: _ready (res://scripts/broken_ready.gd:6)
+          GDScript backtrace (most recent call first):
+              [0] _ready (res://scripts/broken_ready.gd:6)
+              [1] _run (res://tools/mcp/screenshot.gd:38)

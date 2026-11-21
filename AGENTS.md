@@ -22,6 +22,12 @@ Default five labels: needs-triage, needs-info, ready-for-agent, ready-for-human,
 
 Single-context: root `GLOSSARY.md` + `docs/adr/`. See `docs/agents/domain.md`.
 
+## Python tools
+
+`tools/*.py` are uv scripts (dependencies in their PEP 723 header). Tests (no Godot needed; skill
+`write-pytest`): `uv run --with pytest --with 'mcp>=2.3,<3' pytest --import-mode=importlib tools`
+CI (`.github/workflows/tools.yml`) runs the same command on PRs that touch `tools/`.
+
 ## Git workflow
 
 - `main` on the fork changes only through a merged PR.

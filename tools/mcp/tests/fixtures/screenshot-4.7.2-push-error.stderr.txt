@@ -1,0 +1,5 @@
+ERROR: the scene says no
+   at: push_error (core/variant/variant_utility.cpp:1023)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://scripts/pe.gd:5)
+       [1] _run (res://tools/mcp/screenshot.gd:38)

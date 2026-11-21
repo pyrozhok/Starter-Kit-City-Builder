@@ -1,0 +1,5 @@
+WARNING: the scene warns
+     at: push_warning (core/variant/variant_utility.cpp:1033)
+     GDScript backtrace (most recent call first):
+         [0] _ready (res://scripts/pw.gd:5)
+         [1] _run (res://tools/mcp/screenshot.gd:38)

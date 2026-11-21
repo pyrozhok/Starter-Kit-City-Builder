@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="GutTests" failures="1" tests="1" >
+  <testsuite name="tests/pusherr/test_push_error.gd" tests="1" failures="1" skipped="0" time="0.000238" >
+      <testcase name="test_push_error_then_pass" assertions="2" status="fail" classname="tests/pusherr/test_push_error.gd" time="0.000238" >
+      <failure message="failed"><![CDATA[Unexpected Errors:
+      [1] <push_error>boom from the test
+            at line -1]]></failure></testcase>
+  </testsuite>
+</testsuites>

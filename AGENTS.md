@@ -5,6 +5,11 @@ Godot **4.7** — the single source for the engine version (`config/features` in
 
 ## Agent skills
 
+Requires the plugin `mattpocock-skills@claude-plugins-official` (enabled in `.claude/settings.json`;
+install: `/plugin install mattpocock-skills@claude-plugins-official`). Project skills call its skills
+by their prefixed name (`mattpocock-skills:code-review`, `mattpocock-skills:tdd`); if one is missing,
+stop and ask the user to install the plugin.
+
 ### Issue tracker
 
 GitHub Issues on the fork `pyrozhok/Starter-Kit-City-Builder` (always pass `--repo`; `origin` is upstream). See `docs/agents/issue-tracker.md`.

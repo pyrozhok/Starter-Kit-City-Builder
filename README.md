@@ -2,7 +2,7 @@
 
 # Starter Kit City Builder
 
-This package includes a basic template for a 3D city builder in Godot 4.6. Includes features like;
+This package includes a basic template for a 3D city builder in Godot 4.7. Includes features like;
 
 - Building and removing structures
 - Smooth camera controls
@@ -79,3 +79,7 @@ Assets included in this package (2D sprites, 3D models and sound effects) are [C
 - **Tests**: [GUT](https://github.com/bitwes/Gut) 9.7.1 in `addons/gut`; CLI:
   `godot --headless -s res://addons/gut/gut_cmdln.gd -gconfig=res://.gutconfig.json -gexit`
 - **Skills** (`.claude/skills/`): `generate-ui`, `write-test`, `review-pr`.
+- **Plugin** [mattpocock-skills](https://github.com/mattpocock/skills) is required: `review-pr` runs its
+  `code-review`, `write-test` its `tdd`, and `docs/agents/` refer to `/triage`, `/domain-modeling`,
+  `/grill-with-docs`. `.claude/settings.json` enables it, so Claude Code offers to install it when you
+  trust the folder; or install by hand: `/plugin install mattpocock-skills@claude-plugins-official`.

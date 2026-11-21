@@ -1,8 +1,50 @@
-<p align="center"><img src="icon.png"/></p>
+# Agent workflow for a Godot game
 
-# Starter Kit City Builder
+Fork of Kenney's Starter Kit City Builder.
 
-## Agent workflow for game development
+<p align="center"><img src="docs/media/main-menu.gif" width="720"
+alt="Main menu built by the agent: live city behind, hover, New Game"/></p>
+
+<p align="center">Main menu built by an agent from a figcraft mockup.</p>
+
+## TL;DR
+
+- **generate-ui**: 28/31 layers of the mockup within ±2px, after 1 fix iteration.
+- **review-pr**: 4 graded runs; findings verified before reporting went from 1/9 to 8/9, wrong fixes from 1 to 0.
+- Every agent mistake an eval finds becomes a rule in the skill.
+
+| Mockup ([`design/main_menu.png`](design/main_menu.png)) | Result, iteration 1 (`godot.screenshot`) |
+|---|---|
+| <img src="design/main_menu.png" width="420"/> | <img src="evals/generate-ui/001/iter1_main_save.png" width="420"/> |
+
+## generate-ui: main menu from a figcraft mockup
+
+```mermaid
+flowchart LR
+  A["mockup<br/>(figcraft)"] --> B["map.json"] --> C["build scenes"] --> D["godot.screenshot"] --> E["figcraft.py diff<br/>±2px"]
+  E -- mismatches --> F["fix<br/>(≤3 iterations)"] --> D
+  E -- done --> G["eval"]
+```
+
+28/31 layers fall within ±2px, and 32/33 theme values match exactly. It took 1 of 3 fix iterations. Details: [`evals/generate-ui/001-main-menu.md`](evals/generate-ui/001-main-menu.md).
+
+## review-pr evals, graded by the PR author
+
+| Run | PR | Findings | Correct | False | Wrong fixes | Verified before reporting |
+|---|---|---|---|---|---|---|
+| [001](evals/review-pr/001-pr1.md) | #1 | 9 | 7 | 1 | 1 | 1/9 |
+| [002](evals/review-pr/002-pr1.md) ⚠ | #1 | 7 | 6 | 0 | 0 | 7/7 |
+| [003](evals/review-pr/003-pr1.md) | #1 | 5 | 4 | 1 | 0 | 4/5 |
+| [004](evals/review-pr/004-pr4.md) | #4 | 9 | 8 | 1 | 0 | 8/9 |
+
+Findings: reported by the agent; Correct / False: as graded; Wrong fixes: correct findings with a wrong proposed fix; Verified: findings the agent checked against the code before reporting.
+
+⚠ 002 reviewed only 6 new commits, not the full PR, so it isn't directly comparable with the other runs.
+
+Since 001, findings checked before reporting went from 1/9 to 8/9 and wrong fixes from 1 to 0. 001, 003 and 004 each had one false finding, and each one became a rule in the skill.
+
+<details>
+<summary>How it's built: skills, MCP tools and evals</summary>
 
 This fork adds skills, MCP tools and evals so that coding agents can build UI from a mockup, write tests and review PRs in a Godot project.
 
@@ -15,28 +57,10 @@ flowchart LR
 
 Skills live in [`.claude/skills/`](.claude/skills), the MCP server in [`tools/mcp/godot_mcp.py`](tools/mcp/godot_mcp.py). No ADRs have been written yet.
 
-### review-pr evals, graded by the PR author
+</details>
 
-| Run | PR | Findings | Correct | False | Wrong fixes | Verified before reporting |
-|---|---|---|---|---|---|---|
-| [001](evals/review-pr/001-pr1.md) | #1 | 9 | 7 | 1 | 1 | 1/9 |
-| [002](evals/review-pr/002-pr1.md) ⚠ | #1 | 7 | 6 | 0 | 0 | 7/7 |
-| [003](evals/review-pr/003-pr1.md) | #1 | 5 | 4 | 1 | 0 | 4/5 |
-| [004](evals/review-pr/004-pr4.md) | #4 | 9 | 8 | 1 | 0 | 8/9 |
-
-⚠ 002 reviewed only 6 new commits, not the full PR, so it isn't directly comparable with the other runs.
-
-Since 001, findings checked before reporting went from 1/9 to 8/9 and wrong fixes from 1 to 0. 001, 003 and 004 each had one false finding, and each one became a rule in the skill.
-
-### generate-ui 001: main menu from a figcraft mockup
-
-| Mockup ([`design/main_menu.png`](design/main_menu.png)) | Result, iteration 1 (`godot.screenshot`) |
-|---|---|
-| <img src="design/main_menu.png" width="420"/> | <img src="evals/generate-ui/001/iter1_main_save.png" width="420"/> |
-
-28/31 layers fall within ±2px, and 32/33 theme values match exactly. It took 1 of 3 fix iterations. Details: [`evals/generate-ui/001-main-menu.md`](evals/generate-ui/001-main-menu.md).
-
-### Links and setup
+<details>
+<summary>Links and setup</summary>
 
 - PRs: [#1 Agent skills](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/1) and [#4 generate-ui + main menu](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/4).
 - Open issues:
@@ -54,7 +78,11 @@ Since 001, findings checked before reporting went from 1/9 to 8/9 and wrong fixe
 - Figma isn't supported yet. Step 1 of generate-ui needs an adapter that writes the same `design/<name>.map.json`, for example through the Figma MCP ([#8](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/8)).
 - Rules for agents: [`AGENTS.md`](AGENTS.md).
 
+</details>
+
 ---
+
+<p align="center"><img src="icon.png"/></p>
 
 This package includes a basic template for a 3D city builder in Godot 4.7. Includes features like;
 

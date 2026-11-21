@@ -1,6 +1,6 @@
 ---
 name: review-pr
-description: Review a PR, branch or local diff: Godot gates, code-review, then the Godot checklist.
+description: Review a PR, branch or local diff: Godot gates, mattpocock code-review, then the Godot checklist.
 disable-model-invocation: true
 ---
 
@@ -33,7 +33,8 @@ Done when both results are recorded and `git status` matches step 1.
 
 ## 3. General review
 
-Invoke the `code-review` skill with the base from step 1 as the fixed point. Keep its findings for the
+Invoke `mattpocock-skills:code-review` with the base from step 1 as the fixed point. If that skill
+isn't available, stop and tell the user to install the plugin (see `AGENTS.md`). Keep its findings for the
 report; the checklist below covers only what it can't know about Godot and this project.
 Done when its Standards and Spec findings are in hand.
 
@@ -75,7 +76,7 @@ Scenes and resources (`.tscn`, `.tres`, `.import`, `project.godot`)
 
 Two lists, most severe first, one line each: `path:line — problem — concrete fix`.
 **Blocking**: bugs, broken resources, failing gates. **Nits**: the rest. Then gate results, the
-`code-review` findings worth acting on, and what headless runs can't verify (visuals, feel, audio).
+`mattpocock-skills:code-review` findings worth acting on, and what headless runs can't verify (visuals, feel, audio).
 If nothing blocks, say so plainly.
 
 Post to GitHub (`gh pr review <n> --comment|--request-changes`) when the user asks for it.

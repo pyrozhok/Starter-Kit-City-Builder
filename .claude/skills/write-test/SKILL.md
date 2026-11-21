@@ -5,7 +5,8 @@ description: GUT tests for this project's GDScript. Use when adding or fixing a 
 
 # Write test (GUT)
 
-Follow the `tdd` skill for the loop: every new test is seen **red** (bug before the fix, or a
+Follow `mattpocock-skills:tdd` for the loop (if it isn't available, tell the user to install the
+plugin — see `AGENTS.md`): every new test is seen **red** (bug before the fix, or a
 temporarily broken expectation) before it goes green. This skill adds what is specific to GUT and
 this project. Terms follow `GLOSSARY.md`.
 

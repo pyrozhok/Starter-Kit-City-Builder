@@ -66,7 +66,7 @@ The real-Godot test also fails on a copy with `-gjunit_xml_file=` misspelled, as
 
 ## Deviations from the issue
 
-- **Run command**: `pytest --import-mode=importlib tools` instead of `pytest tools/mcp/tests`, so future suites under `tools/` run with it. The command is in `AGENTS.md` and CI; the issue body still has the old one (editing the issue was blocked by the session's permission classifier).
+- **Run command**: `pytest --import-mode=importlib tools` instead of `pytest tools/mcp/tests`, so future suites under `tools/` run with it. The command is in `AGENTS.md` and CI; the issue body was updated to match.
 - **No stubbed `_godot`**: the issue's "Stubbed `_godot`" seam was replaced by `FakeGodot` in the roast (mistake 7).
 - **Added**: section 8 (the tool contract the skills rely on), 9 (over MCP), 10 (`screenshot`), 11 (real Godot), CI.
 

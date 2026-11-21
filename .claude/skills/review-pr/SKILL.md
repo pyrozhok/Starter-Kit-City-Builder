@@ -45,7 +45,8 @@ Terms follow `GLOSSARY.md`.
 
 Commits
 
-- Each commit's diff matches its message: a `fix:` touches only the fix and its test, a `chore:`
+- Each commit's diff matches its message — subject **and body** (`git log -1 --format=%B <sha>`):
+  a change the body describes is covered. A `fix:` touches only the fix and its test, a `chore:`
   changes no behavior. Model: upstream `3a6e666` — "fixes memory leak" is exactly one added
   `n.queue_free()` in `update_structure()`.
 
@@ -83,6 +84,9 @@ Before writing the report:
 - Every proposed fix is checked to work: for GDScript, the fixed code must still compile
   against the members it uses (`godot.build`); for refactors, show that behavior is unchanged;
   for types: the narrowest existing type, adding a class_name if needed.
+- Decisions already explained — in a code comment at that spot, `docs/adr/`, or a graded finding
+  in `evals/review-pr/` — stay settled: cite the explanation and raise them again (in any list,
+  judgement calls included) only with new evidence against it.
 
 Three lists, most severe first, one line each: `path:line — problem — concrete fix`.
 **Blocking**: bugs, broken resources, failing gates. **Nits**: the rest. **Unverified**: findings

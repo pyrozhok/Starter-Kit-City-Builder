@@ -88,13 +88,15 @@ flowchart LR
   A["mattpocock-skills<br/>code-review, tdd, …"] --> B["project skills<br/>review-pr, generate-ui, write-test"]
   B --> C["godot MCP<br/>build, run_tests, screenshot, scene_tree"]
   B -. reads .-> D["AGENTS.md, GLOSSARY.md"]
+  B --> E["evals<br/>graded runs"]
+  E -- "each mistake → a rule" --> B
 ```
 
-Skills live in [`.claude/skills/`](.claude/skills), the MCP server in [`tools/mcp/godot_mcp.py`](tools/mcp/godot_mcp.py) and the evals in [`evals/`](evals).
+Skills live in [`.claude/skills/`](.claude/skills), the MCP server in [`tools/mcp/godot_mcp.py`](tools/mcp/godot_mcp.py) and the evals in [`evals/`](evals). write-test, the third skill, has no eval yet.
 
 ### What carries over to another engine
 
-The skills run the engine only through the MCP tools: `build`, `run_tests`, `screenshot` (a PNG plus a `.layout.json` with every visible Control's rect), and `scene_tree` / `find_scenes`. The layout diff compares mockup rects with `.layout.json` and knows nothing about Godot. To port the workflow, reimplement those tools for the new engine and rewrite the Godot-specific rules in the skills (scene text, mouse filters, GUT).
+The skills run the engine only through the MCP tools: `build`, `run_tests`, `screenshot` (a PNG plus a `.layout.json` with every visible Control's rect), and `scene_tree` / `find_scenes`. The layout diff compares mockup rects with `.layout.json` and knows nothing about Godot. To port the workflow, reimplement those tools for the new engine (`godot_mcp.py` is 331 lines) and rewrite the Godot-specific rules in the skills (scene text, mouse filters, GUT).
 
 <details>
 <summary>Links and setup</summary>

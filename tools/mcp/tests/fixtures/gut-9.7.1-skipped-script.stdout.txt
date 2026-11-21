@@ -1,0 +1,34 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[1m[INFO]:  [0musing [~/.local/share/godot/app_userdata/Starter Kit City Builder] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+[33m[GUT WARNING]:  [0mIgnoring script res://tests/skip/test_broken.gd because it does not extend GutTest
+[4m
+
+res://tests/skip/test_ok.gd
+[0m* test_passes
+[1m1/1 passed.
+[0m
+
+
+
+[33m==============================================
+[0m[33m= Run Summary
+[0m[33m==============================================
+[0m
+Totals
+------
+Warnings              1
+
+Scripts               1
+Tests                 1
+Passing Tests         1
+Asserts               1
+Time              0.445s
+
+
+[32m---- All tests passed! ----
+[0m
+Results saved to res://.godot/gut_results.xml

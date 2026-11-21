@@ -7,16 +7,95 @@ GODOT_MCP_PATH loads another copy of the script, e.g. one taken with
 from __future__ import annotations
 
 import importlib.util
+import json
 import os
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 from types import ModuleType
-from typing import Callable
 
 import pytest
 
 SCRIPT = Path(__file__).resolve().parents[1] / "godot_mcp.py"
+FIXTURES = Path(__file__).resolve().parent / "fixtures"
+
+# The fake binary. It does only what godot_mcp relies on Godot doing: find the project through
+# --path, write JUnit where -gjunit_xml_file points, print, change files, exit. A command line
+# godot_mcp gets wrong therefore loses its results here as it would with the real Godot.
+_FAKE_GODOT = """
+import json, sys, time
+from pathlib import Path
+
+here = Path(__file__).parent
+args = sys.argv[1:]
+with open(here / "calls.jsonl", "a") as f:
+    f.write(json.dumps(args) + "\\n")
+if "--path" not in args:
+    sys.stderr.write("ERROR: no project: --path missing\\n")
+    sys.exit(2)
+project = Path(args[args.index("--path") + 1])
+rules = json.loads((here / "rules.json").read_text())
+rule = next((r for r in rules if r["when"] is None or r["when"] in args), None)
+if rule is None:
+    sys.stderr.write("ERROR: fake Godot has no rule for " + " ".join(args) + "\\n")
+    sys.exit(2)
+for rel, text in rule["write"].items():
+    (project / rel).write_text(text)
+for rel in rule["delete"]:
+    (project / rel).unlink()
+junit = next((a.split("=", 1)[1] for a in args if a.startswith("-gjunit_xml_file=res://")), None)
+if rule["junit"] is not None and junit:
+    out = project / junit.removeprefix("res://")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(rule["junit"])
+sys.stdout.write(rule["stdout"])
+sys.stdout.flush()
+sys.stderr.write(rule["stderr"])
+sys.stderr.flush()
+time.sleep(rule["sleep"])
+sys.exit(rule["code"])
+"""
+
+
+class FakeGodot:
+    """An executable stand-in for Godot. `on(when, ...)` adds a rule: the first rule whose `when`
+    is one of the arguments (or is None) decides what a call prints, writes and returns."""
+
+    def __init__(self, directory: Path) -> None:
+        directory.mkdir()
+        self.dir = directory
+        self.path = directory / "godot"
+        self.path.write_text(f"#!{sys.executable} -I\n{_FAKE_GODOT}")
+        self.path.chmod(0o755)
+        self._rules: list[dict] = []
+        self._save()
+
+    @staticmethod
+    def fixture(name: str) -> str:
+        return (FIXTURES / name).read_text()
+
+    def on(self, when: str | None = None, *, capture: str | None = None, stdout: str = "",
+           stderr: str = "", code: int = 0, sleep: float = 0, junit: str | None = None,
+           write: dict[str, str] | None = None, delete: tuple[str, ...] = ()) -> FakeGodot:
+        """capture: replay fixtures/gut-9.7.1-<capture>.* (stdout, stderr, junit); `code` stays explicit."""
+        if capture:
+            stdout = self.fixture(f"gut-9.7.1-{capture}.stdout.txt")
+            stderr = self.fixture(f"gut-9.7.1-{capture}.stderr.txt")
+            junit = self.fixture(f"gut-9.7.1-{capture}.junit.xml")
+        self._rules.append({"when": when, "stdout": stdout, "stderr": stderr, "code": code,
+                            "sleep": sleep, "junit": junit, "write": write or {}, "delete": list(delete)})
+        self._save()
+        return self
+
+    @property
+    def calls(self) -> list[list[str]]:
+        """Arguments of each call, in order (the binary path itself left out)."""
+        log = self.dir / "calls.jsonl"
+        return [json.loads(line) for line in log.read_text().splitlines()] if log.exists() else []
+
+    def _save(self) -> None:
+        (self.dir / "rules.json").write_text(json.dumps(self._rules))
 
 
 @pytest.fixture
@@ -24,7 +103,7 @@ def mod(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> ModuleType:
     """A fresh godot_mcp module whose project root is tmp_path/project.
 
     Module constants are computed at import, so each one is patched, not just ROOT.
-    GODOT points at a missing binary until a test sets it: nothing reaches a real Godot.
+    GODOT points at a missing binary until a test asks for `godot`: nothing reaches a real Godot.
     """
     path = Path(os.environ.get("GODOT_MCP_PATH") or SCRIPT)
     spec = importlib.util.spec_from_file_location("godot_mcp_under_test", path)
@@ -46,26 +125,11 @@ def mod(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> ModuleType:
 
 
 @pytest.fixture
-def fake_godot(mod: ModuleType, tmp_path: Path) -> Callable[..., None]:
-    """Point GODOT at a shell script that prints stdout, then stderr, sleeps, and exits with code."""
-
-    def make(stdout: str = "", stderr: str = "", code: int = 0, sleep: int = 0) -> None:
-        bin_dir = tmp_path / "fake-godot"
-        bin_dir.mkdir(exist_ok=True)
-        (bin_dir / "stdout").write_text(stdout)
-        (bin_dir / "stderr").write_text(stderr)
-        script = bin_dir / "godot"
-        script.write_text(
-            "#!/bin/sh\n"
-            f'cat "{bin_dir}/stdout"\n'
-            f'cat "{bin_dir}/stderr" >&2\n'
-            + (f"exec sleep {sleep}\n" if sleep else "")
-            + f"exit {code}\n"
-        )
-        script.chmod(0o755)
-        mod.GODOT = str(script)
-
-    return make
+def godot(mod: ModuleType, tmp_path: Path) -> FakeGodot:
+    """GODOT pointed at a FakeGodot with no rules yet."""
+    fake = FakeGodot(tmp_path / "fake-godot")
+    mod.GODOT = str(fake.path)
+    return fake
 
 
 def _git(root: Path, *args: str) -> None:

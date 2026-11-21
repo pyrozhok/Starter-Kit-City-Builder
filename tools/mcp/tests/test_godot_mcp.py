@@ -493,3 +493,37 @@ def test_skills_can_still_call_the_tool(mod: ModuleType, tool: str) -> None:
     assert SKILL_CALLS[tool] <= set(tools[tool]["properties"])
     assert set(tools[tool].get("required", [])) <= SKILL_CALLS[tool]
 
+
+# --- 9. Over MCP: what the agent receives --------------------------------------------------
+
+
+def call(mod: ModuleType, tool: str, arguments: dict):
+    """Call a tool the way an agent does: an MCP client session to the server, in memory."""
+    from mcp.client import Client
+
+    async def run():
+        async with Client(mod.mcp) as client:
+            return await client.call_tool(tool, arguments)
+
+    return asyncio.run(run())
+
+
+def test_results_reach_the_client_as_json(scenes: ModuleType) -> None:
+    tree = call(scenes, "scene_tree", {"scene": "res://scenes/main.tscn"})
+    found = call(scenes, "find_scenes", {"query": "gridmap"})
+
+    assert tree.is_error is False
+    assert json.loads(tree.content[0].text) == {"scene": "res://scenes/main.tscn", "nodes": MAIN_NODES}
+    assert found.structured_content == {"result": [{"scene": "res://scenes/main.tscn", **MAIN_NODES[2]}]}
+
+
+def test_run_tests_over_mcp_reports_the_failing_test(gut: ModuleType, godot) -> None:
+    # Agent → MCP session → run_tests → Godot process → JUnit file → result.
+    godot.on(capture="mixed", code=1)
+
+    result = call(gut, "run_tests", {"script": "res://tests/mixed/test_mixed.gd"})
+
+    body = json.loads(result.content[0].text)
+    assert (body["ok"], body["failed"]) == (False, 1)
+    assert body["failures"][0]["test"] == "tests/mixed/test_mixed.gd::test_fails"
+

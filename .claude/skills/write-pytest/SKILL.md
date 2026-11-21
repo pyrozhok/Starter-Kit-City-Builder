@@ -35,14 +35,19 @@ import from `conftest.py`: fixtures go there, plain helpers in the test file.
 
 Godot is another process; the seam is that process boundary. Never stub `_godot` or another
 function of the module: a stub cooperates whatever arguments it gets, so the command line, the part
-Godot actually receives, goes untested.
+Godot actually receives, goes untested. What Godot needs to run (a display, a GPU, GUT) is the
+fake's to stand in for, never a reason to leave a tool untested: `screenshot` needs a window only
+inside Godot.
 
 - **Fake Godot** (`godot` fixture, `FakeGodot` in `conftest.py`): an executable that does only what
   `godot_mcp` relies on Godot doing — finds the project through `--path`, writes JUnit where
-  `-gjunit_xml_file` points, prints, changes files, exits, sleeps — and records each call's
-  arguments. `on(when, ...)` adds a rule; `capture=` replays a real run from `fixtures/`. Pin
-  `godot.calls` to command lines proven against real Godot (the one the captures were taken with,
-  a real `--import` / `check_scripts.gd` run), not to what the code happens to build.
+  `-gjunit_xml_file` points, writes the PNG and layout where `--out` points, prints, changes files,
+  exits, sleeps — and records each call's arguments. `on(when, ...)` adds a rule; `capture=` replays
+  a real run from `fixtures/`. Pin `godot.calls` to command lines proven against real Godot (the
+  ones the captures were taken with), not to what the code happens to build.
+- **Real Godot**, where one is installed: the last test re-runs `build` and `run_tests` on Godot 4.7
+  in a minimal project, so the pinned commands are checked against the engine, not only against
+  the captures. Skipped without a 4.7 binary.
 - **Temp git repo**, for `_git_snapshot` and `files_changed_by_build`: `git init` in `tmp_path`, one
   commit, `ROOT` patched to it. Set `GIT_CONFIG_GLOBAL=/dev/null`, `GIT_CONFIG_NOSYSTEM=1` and
   `GIT_CEILING_DIRECTORIES=<tmp_path>` with `monkeypatch.setenv`, so neither the fixture nor the code
@@ -63,11 +68,13 @@ adds nothing.
 ## Fixtures
 
 - Godot and GUT output is captured from a real run, never written by hand: throwaway test scripts
-  in a `git archive HEAD | tar -x -C <scratch>` copy, Godot run there with `run_tests`' arguments,
-  saving stdout, stderr and the JUnit file as one capture. Before writing data for a case, capture
+  or scenes in a `git archive HEAD | tar -x -C <scratch>` copy, Godot run there with the tool's
+  arguments, saving stdout, stderr and the files it wrote (JUnit, layout) as one capture. Before writing data for a case, capture
   it: Godot's behavior there is the expected value (`push-error` showed GUT already fails the
-  test). Name and version in the file name (`gut-9.7.1-<name>.*`); `fixtures/README.md` lists each
-  capture and its exit code. Home paths become `~/`; ANSI codes stay, so select lines by their text.
+  test; `shader-error` showed a prefix the parser didn't know). Name and version in the file name
+  (`gut-9.7.1-<name>.*`, `screenshot-4.7.2-<name>.*`); `fixtures/README.md` lists each capture and
+  its exit code. Home paths become `~/`, output dirs `<out>/`, the GPU `<GPU>`; ANSI codes stay, so
+  select lines by their text.
 - A case no real run produces (a defensive branch) says so in a comment in the test.
 - Files under `tools/*/tests/` are text Godot doesn't import (`.txt`, `.xml`, `.json`). A test
   writes the scenes, scripts and images it needs into `tmp_path`.
@@ -86,16 +93,19 @@ adds nothing.
 - **Behavior no commit broke**: generated mutants, `tools/mcp/tests/mutants.py` (fixed AST
   rules, each mutant loaded through `GODOT_MCP_PATH`). Mutations picked by hand measure what the
   author already expects the tests to catch. Each survivor is either equivalent (a timeout n+1, an
-  internal marker string: name it) or a missing test.
+  internal marker string: name it) or a missing test. "Dead" or "unreachable" is a claim about
+  Godot: check it on the engine before writing it down (`strings` on the binary for a message
+  prefix, loading the file in Godot for a scene layout).
 
 ## Done
 
 - Each new test was seen red (on the unfixed code, `<sha>^` or a mutant), then green.
-- The full suite passes with `GODOT_BIN=/nonexistent`: no test reaches a real Godot.
-- `mutants.py` run; every survivor outside an untested tool is equivalent, by name, or has a test.
+- The full suite passes with `GODOT_BIN=/nonexistent` (no test reaches a real Godot) and, where
+  Godot 4.7 is installed, without it (the real-Godot test runs).
+- `mutants.py` run; every survivor is equivalent, by name and reason, or has a test.
 - `git status` shows no new `.gd`, `.uid` or `.import` files; `godot.build` and `godot.run_tests`
   still pass.
-- Report the behaviors covered and the ones left untested (the windowed screenshot run, real GUT).
+- Report the behaviors covered and the ones left untested, each with the reason it can't be tested.
 
 Commits: `test(tools): …`. A bug a test finds gets its own `fix(tools): …` commit with that test.
 Production code changes only for the fix under test; ask before reshaping it for testability.

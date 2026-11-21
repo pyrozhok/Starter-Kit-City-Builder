@@ -145,9 +145,12 @@ def build(export_preset: str | None = None, export_path: str | None = None) -> d
     for step in steps.values():  # keep successful steps terse
         if step.get("ok"):
             step.pop("output_tail", None)
+    after = _git_snapshot()
     return {
         "ok": all(s["ok"] for s in steps.values()),
-        "files_changed_by_build": sorted(n for n, h in _git_snapshot().items() if before.get(n) != h),
+        # Union, not just the after snapshot: a dirty file the build restored to HEAD, or an
+        # untracked file it deleted, is gone from the after listing but still changed.
+        "files_changed_by_build": sorted(n for n in before.keys() | after.keys() if before.get(n) != after.get(n)),
         "steps": steps,
     }
 

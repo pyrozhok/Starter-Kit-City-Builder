@@ -10,7 +10,7 @@ This fork adds skills, MCP tools and evals so that coding agents can build UI fr
 flowchart LR
   A["mattpocock-skills<br/>code-review, tdd, …"] --> B["project skills<br/>review-pr, generate-ui, write-test"]
   B --> C["godot MCP<br/>build, run_tests, screenshot, scene_tree"]
-  C --> D["AGENTS.md, GLOSSARY.md, docs/adr/"]
+  B -. reads .-> D["AGENTS.md, GLOSSARY.md, docs/adr/"]
 ```
 
 Skills live in [`.claude/skills/`](.claude/skills), the MCP server in [`tools/mcp/godot_mcp.py`](tools/mcp/godot_mcp.py). No ADRs have been written yet.

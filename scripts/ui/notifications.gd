@@ -26,7 +26,16 @@ func push(text: String) -> void:
 		var oldest := _list.get_child(-1)
 		_list.remove_child(oldest)
 		oldest.queue_free()
+	_name_items()
 	show()
+
+
+# Item1 is the newest, as in the mockup; stable names for screenshot layout checks.
+func _name_items() -> void:
+	for item in items():
+		item.name = "_" + item.name  # clear the target names first: siblings can't share one
+	for i in _list.get_child_count():
+		_list.get_child(i).name = "Item%d" % (i + 1)
 
 
 func items() -> Array[NotificationItem]:

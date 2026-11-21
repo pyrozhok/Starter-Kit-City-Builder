@@ -22,6 +22,7 @@ func test_push_shows_unread_item_on_top() -> void:
 	assert_eq(items[0].time, "just now")
 	assert_true(items[0].unread)
 	assert_eq(items[1].text, "Map loaded")
+	assert_eq([items[0].name, items[1].name], [&"Item1", &"Item2"], "named top-down like the mockup")
 
 
 func test_keeps_only_three_newest() -> void:

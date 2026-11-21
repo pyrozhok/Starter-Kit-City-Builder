@@ -19,6 +19,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 from mcp.server.mcpserver import MCPServer
+from mcp.server.mcpserver.exceptions import ToolError
 
 ROOT = Path(__file__).resolve().parents[2]
 GODOT = os.environ.get("GODOT_BIN", "godot")
@@ -119,7 +120,8 @@ def _res(path: Path) -> str:
 def _to_path(res_path: str) -> Path:
     p = ROOT / res_path.removeprefix("res://")
     if not p.resolve().is_relative_to(ROOT):
-        raise ValueError(f"Path escapes project: {res_path}")
+        # ToolError, not ValueError: the MCP server passes only a ToolError's message on to the agent.
+        raise ToolError(f"Path escapes project: {res_path}")
     return p
 
 

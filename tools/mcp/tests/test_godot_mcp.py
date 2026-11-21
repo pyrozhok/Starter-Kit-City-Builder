@@ -527,3 +527,9 @@ def test_run_tests_over_mcp_reports_the_failing_test(gut: ModuleType, godot) -> 
     assert (body["ok"], body["failed"]) == (False, 1)
     assert body["failures"][0]["test"] == "tests/mixed/test_mixed.gd::test_fails"
 
+
+def test_refused_path_tells_the_agent_why(scenes: ModuleType) -> None:
+    result = call(scenes, "scene_tree", {"scene": "res://../outside.tscn"})
+
+    assert result.is_error is True
+    assert "Path escapes project: res://../outside.tscn" in result.content[0].text

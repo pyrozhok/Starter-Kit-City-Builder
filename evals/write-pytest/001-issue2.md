@@ -2,8 +2,8 @@
 
 - **Target**: issue #2, sections 1–7 of its test plan and its red phase.
 - **Date**: 2026-11-21
-- **Skill version**: `.claude/skills/write-pytest/SKILL.md` at `1cea235` for the run; `94ffe62` adds the run's lessons, `eea0993` the roast's, `e6cf424` the third pass's.
-- **Code under test**: `tools/mcp/godot_mcp.py` at `91052d8`; three fixes on the way (`81c1b65`, `89d486f`, `aeb1e0e`).
+- **Skill version**: `.claude/skills/write-pytest/SKILL.md` at `1cea235` for the run; `94ffe62` adds the run's lessons, `eea0993` the roast's, `e6cf424` the third pass's, `fd738d8` the grading's.
+- **Code under test**: `tools/mcp/godot_mcp.py` at `91052d8`; six fixes on the way (`81c1b65`, `89d486f`, `aeb1e0e`; after grading `189f3d0`, `e83c4dd`, `caec066`).
 - **Graded by**: a separate Claude session (Opus 5.5), 2026-11-21, not the agent that wrote the tests. Numbers reproduced: 432/458 with the same 26 survivors; 77 tests, all passing with Godot 4.7.2 and 76 + 1 skipped with `GODOT_BIN=/nonexistent`; every bug test red on `<sha>^`, green on `<sha>`.
 
 Three passes:
@@ -115,3 +115,59 @@ Two findings that sit in no row:
 
 - **`godot.build` does catch a broken shader.** "Left untested" says it can't. A headless `--import` of a `git archive` copy with `COLOR = undefined_thing;` in `backdrop_blur.gdshader` prints `SHADER ERROR` and then `ERROR: Shader compilation failed.`, and `_godot` returns `ok: false` for the step. An incremental import after editing the shader does the same. The headless `at:` line is `(null) (:12)`, with no `res://`.
 - **A scene's `push_error` is filed as machine noise.** Godot 4.7 prints `push_error` / `push_warning` as `ERROR:` / `WARNING:` with `at: push_error (core/...)`. The `res://` appears only in the backtrace, which `_parse_errors` skips, so `screenshot` puts the error in `environment_errors`. Checked on the `push-error` capture: `project` is empty. Probably a bug, and the one the dead `USER ERROR` prefix was meant to catch.
+
+## After grading
+
+Each ⚠ and ❌ above, and both grader's notes, with what was done. Grades above are left as given.
+
+| Graded item | Done |
+|---|---|
+| Note: a scene's `push_error` filed as machine noise | **Bug, fixed** `189f3d0`. An error with no `res://` on its `at:` line takes the first backtrace frame in project code (frames in `tools/mcp`, GUT locate nothing). Also locates `push_warning`, a shader built in code and engine errors raised from a script. Real windowed captures for each; four tests red before |
+| Survivor ❌ `errors="replace"` | Tests: a Latin-1 `.tscn` in `find_scenes`, a non-UTF-8 byte on the timeout path (`f222161`). Checking it found a **bug, fixed** `e83c4dd`: the finished-run path decoded strictly, so one such byte in Godot's output raised `UnicodeDecodeError` in every tool. Red before |
+| Survivor ❌ `_git_snapshot`, repo without commits | **Bug, fixed** `caec066`: before the first commit every tracked file now counts, untracked ones as before. Two tests red before. A corrupt `.git/index` (every listing exits 128) keeps `[]`, tested in `f16ea7c` |
+| Survivor ❌ `or` → `and` in `screenshot` | Test: a PNG without its layout (`f222161`); `FakeGodot.on(png=True)` |
+| Survivor ❌ `SHADER ERROR` prefix in `screenshot` | Test with the real code-built shader capture (`189f3d0`). After that fix the backtrace locates it (`[res://scripts/cs.gd:8]`), so the prefix's mutant survives again; see the table below |
+| Survivor ❌ `parents=True` | Test: `screenshot` in a checkout with no `.godot/` (`f222161`) |
+| Survivor ❌ timeout tail length | Test: long output cut off by the timeout (`f222161`) |
+| Survivor ⚠ `_godot` `SHADER ERROR`, wrong reason | Reason corrected in the table below; `build` on the real headless capture tested (`e56b4a9`) |
+| Survivor ⚠ `USER ERROR` dead, hiding a bug | The bug is the `push_error` note, fixed in `189f3d0` |
+| Bug ⚠ `89d486f`, false comment | Comment corrected (`71bbea8`). Its commit message stays: rewriting history would change every commit this file cites |
+| Note: `godot.build` catches a broken shader | "Left untested" corrected below; test on the real headless capture (`e56b4a9`) |
+| Mistake ⚠ #8, rule cell is a test commit | Rule in the skill (`fd738d8`): assert the exact result; a key set or `ok` passes on a deleted branch |
+| Mistake ⚠ #9, the suite broke capture-first | `f222161`: hand-written Godot lines replaced by captures (clean import, green GUT run, `check_scripts.gd` over a broken script, a repeated `push_error`); `USER ERROR` case removed. The rest carry `# synthetic: <why>`; rule in `fd738d8` |
+| Mistake ⚠ #14, rule named only "dead" / "unreachable" | Rule in `fd738d8`: every survivor's reason is an experiment, whatever the word. Applied below. It caught a dead check in this pass's own fix (`31e5063`) |
+| Mistake ⚠ #15, export and screenshot never re-run | `9db7e1c`: export on real Godot (without templates it tells a command it took from one it didn't; red with preset and path swapped), and a windowed screenshot behind `GODOT_MCP_WINDOWED=1` |
+
+### Numbers after grading (`fd738d8`)
+
+- Tests: 93. With Godot 4.7.2: 91 passed, 1 skipped (the windowed one; it passes with `GODOT_MCP_WINDOWED=1`). With `GODOT_BIN=/nonexistent`: 90 passed, 3 skipped.
+- Generated mutants: 450/477 killed (94%).
+
+### Surviving mutants after grading (27), each with its experiment
+
+| Mutants | Experiment |
+|---|---|
+| Timeouts n+1: `30` (git), `600`, `300`, `1200`, `900`, `180` (6) | none possible: a test can't tell n s from n+1 s |
+| `"<deleted>"` marker; prefix of "Path escapes project" (2) | any marker differs from every hash; tests match the reason after the prefix |
+| `_git_lines`: `return None` → `pass` (1) | the function then returns None anyway (Python) |
+| `_git_snapshot`: `"diff"`, `"--name-only"`, `"HEAD"` (3) | the broken command fails and the fallback lists every tracked file; the hashes find the same changes (all 12 `files_changed` tests pass on each): only the cost differs |
+| `_git_snapshot`: `or` → `and` (1) | a corrupt index fails all three listings together (checked with git) |
+| `_godot`: `text=True` → `False` (1) | with `errors=` given, `subprocess` opens text mode anyway (Python) |
+| `_godot` `"SHADER ERROR"` in the fatal prefixes (1) | the real headless capture prints `ERROR: Shader compilation failed.` right after, which fails the step on its own |
+| `"USER ERROR"` (`_godot`, `run_tests`, `screenshot`), `"USER WARNING"` (4) | `strings` on the Godot 4.7.2 binary finds neither; `push_error` prints `ERROR:` (captures) |
+| `screenshot`: `"SCRIPT ERROR"`, `"SHADER ERROR"` in the project prefixes (2) | every SCRIPT / SHADER ERROR in the 10 windowed captures is located by its `at:` line or backtrace, both script- and scene-built shaders |
+| `_parse_errors`: `located = True` → `False` at start (1) | no capture has an `at:` or frame line before its first error (the mutant would raise IndexError on one) |
+| `_parse_tscn`: `current = None` removed (1) | Godot 4.7.2 refuses a `[sub_resource]` after a node (loaded one) |
+| `_parse_tscn` `split("=", 1)`, `screenshot` `rsplit("/", 1)` (2) | only `[1]` / `[-1]` is used, the same for any maxsplit |
+| `screenshot`: either `unlink` removed (2) | the "both files exist" check needs both; graded ✅ |
+
+### Found on the way, not in a tool under test
+
+- `tools/mcp/check_scripts.gd` reports "0 failed" and exits 0 for a script that doesn't parse: Godot 4.7 still returns a `GDScript` from `load()`. `build` fails only through the `SCRIPT ERROR` lines (capture `godot-4.7.2-check-scripts-error`, test in `f222161`). Its own failure count doesn't work; not fixed here.
+
+### Left untested, after grading
+
+- `godot.build` *does* catch a broken shader (`e56b4a9`); the line above saying it can't is wrong.
+- The windowed `screenshot` re-run is opt-in (`GODOT_MCP_WINDOWED=1`): it opens a window.
+- An export that succeeds: no export templates on this machine; the real test checks the command, not the exported game.
+- `tools/design/figcraft.py`: no suite yet.

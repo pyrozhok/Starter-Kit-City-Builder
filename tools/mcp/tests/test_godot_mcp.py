@@ -643,6 +643,16 @@ def test_project_warning_is_reported_without_failing(scenes: ModuleType, godot) 
     assert result["errors"] == ["WARNING: The local variable 'x' is declared but never used. [res://scripts/main.gd:3]"]
 
 
+def test_shader_error_fails_the_screenshot(scenes: ModuleType, godot) -> None:
+    # Real run with an unknown identifier in scenes/ui/backdrop_blur.gdshader: the frame renders.
+    godot.on(capture="screenshot-4.7.2-shader-error")
+
+    result = scenes.screenshot("res://scenes/main.tscn")
+
+    assert result["ok"] is False
+    assert ("SHADER ERROR: Unknown identifier in expression: 'undefined_thing'. "
+            "[res://scenes/ui/backdrop_blur.gdshader:12]") in result["errors"]
+
 
 
 def test_previous_screenshot_is_not_reported(scenes: ModuleType, godot) -> None:

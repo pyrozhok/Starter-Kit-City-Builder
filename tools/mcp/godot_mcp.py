@@ -29,7 +29,8 @@ RESULTS_XML = ROOT / ".godot" / "gut_results.xml"
 mcp = MCPServer("godot")
 
 # Godot prints e.g. "SCRIPT ERROR: Parse Error: ..." followed by "   at: GDScript::reload (res://x.gd:12)".
-_ERR_RE = re.compile(r"^(SCRIPT ERROR|ERROR|WARNING|USER ERROR|USER WARNING):\s*(.*)$")
+# SHADER ERROR comes only from a renderer (screenshot); headless runs never compile shaders.
+_ERR_RE = re.compile(r"^(SCRIPT ERROR|SHADER ERROR|ERROR|WARNING|USER ERROR|USER WARNING):\s*(.*)$")
 _AT_RE = re.compile(r"^\s+at:\s.*?\((res://[^)]+)\)")
 _ANSI_RE = re.compile(r"\x1b\[[0-9;]*m")
 # GUT prints "<n> orphans" after each test script that leaked nodes (never printed when 0).
@@ -57,7 +58,7 @@ def _godot(args: list[str], timeout: int, headless: bool = True) -> dict:
         # narrower tuple on purpose: GUT turns an engine ERROR raised during a test into that
         # test's failure, already counted from the JUnit results, so there only SCRIPT/USER ERROR
         # (scripts GUT skipped as unloadable) count on top.
-        "ok": proc.returncode == 0 and not any(e.startswith(("SCRIPT ERROR", "ERROR", "USER ERROR")) for e in errors),
+        "ok": proc.returncode == 0 and not any(e.startswith(("SCRIPT ERROR", "SHADER ERROR", "ERROR", "USER ERROR")) for e in errors),
         "exit_code": proc.returncode,
         "errors": errors,
         "output_tail": output[-4000:],
@@ -255,7 +256,7 @@ def screenshot(scene: str, width: int = 1920, height: int = 1080, state: str | N
     blank = json.loads(layout.read_text())["blank"]
     # A windowed run logs driver/display noise (Vulkan, Wayland, portals) as plain ERROR without a
     # res:// path. That is the machine, not the project: report it apart and don't fail on it.
-    project = [e for e in run["errors"] if "res://" in e or e.startswith(("SCRIPT ERROR", "USER ERROR"))]
+    project = [e for e in run["errors"] if "res://" in e or e.startswith(("SCRIPT ERROR", "SHADER ERROR", "USER ERROR"))]
     environment = [e for e in run["errors"] if e not in project]
     project_fatal = [e for e in project if not e.startswith(("WARNING", "USER WARNING"))]
     result = {"ok": not blank and not project_fatal, "path": str(out), "layout_path": str(layout), "blank": blank,

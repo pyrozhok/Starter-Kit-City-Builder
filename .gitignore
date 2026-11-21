@@ -16,3 +16,5 @@ mono_crash.*.json
 
 # Kenney ignores
 build/
+# Godot editor temp copies of scenes
+*.tmp

@@ -26,10 +26,6 @@ config/icon="res://icon.png"
 
 Audio="*res://scripts/audio.gd"
 
-[editor]
-
-movie_writer/movie_file="D:/Godot/recording.avi"
-
 [input]
 
 build={

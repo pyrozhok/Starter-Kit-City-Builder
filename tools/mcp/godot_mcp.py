@@ -96,6 +96,15 @@ def _parse_errors(output: str) -> list[str]:
     return list(dict.fromkeys(errors))
 
 
+def _git_lines(*args: str) -> list[str] | None:
+    """Output lines of a git command in ROOT, or None if it failed or git is missing."""
+    try:
+        out = subprocess.run(["git", *args], capture_output=True, text=True, cwd=ROOT, timeout=30)
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        return None
+    return out.stdout.splitlines() if out.returncode == 0 else None
+
+
 def _git_snapshot() -> dict[str, str]:
     """Hash of every modified tracked file and every untracked (not ignored) file.
 
@@ -103,18 +112,17 @@ def _git_snapshot() -> dict[str, str]:
     rewrote that were clean, and files that were already dirty but changed again.
     Empty if not a git repo.
     """
-    cmds = (["git", "diff", "--name-only", "HEAD"], ["git", "ls-files", "--others", "--exclude-standard"])
-    names: set[str] = set()
-    for cmd in cmds:
-        try:
-            out = subprocess.run(cmd, capture_output=True, text=True, cwd=ROOT, timeout=30)
-        except (FileNotFoundError, subprocess.TimeoutExpired):
-            return {}
-        if out.returncode != 0:
-            return {}
-        names.update(out.stdout.splitlines())
+    if _git_lines("rev-parse", "--git-dir") is None:
+        return {}
+    # Before the first commit there is no HEAD to diff against: every tracked file counts.
+    tracked = _git_lines("diff", "--name-only", "HEAD")
+    if tracked is None:
+        tracked = _git_lines("ls-files")
+    untracked = _git_lines("ls-files", "--others", "--exclude-standard")
+    if tracked is None or untracked is None:
+        return {}
     snap: dict[str, str] = {}
-    for name in names:
+    for name in {*tracked, *untracked}:
         f = ROOT / name
         snap[name] = hashlib.sha1(f.read_bytes()).hexdigest() if f.is_file() else "<deleted>"
     return snap

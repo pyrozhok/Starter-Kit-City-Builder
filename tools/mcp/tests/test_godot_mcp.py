@@ -180,6 +180,22 @@ def test_files_changed_by_build(mod: ModuleType, repo: Path, godot, before: dict
     assert mod.build()["files_changed_by_build"] == expected
 
 
+@pytest.mark.parametrize(("write", "expected"), [
+    pytest.param({"new.gd.uid": "uid://x\n"}, ["new.gd.uid"], id="creates-untracked"),
+    pytest.param({"staged.txt": "b\n"}, ["staged.txt"], id="rewrites-staged"),
+])
+def test_files_changed_by_build_before_the_first_commit(mod: ModuleType, godot, write: dict[str, str],
+                                                        expected: list[str]) -> None:
+    # `git init` and `git add`, no commit yet: there is no HEAD for `git diff HEAD`.
+    root: Path = mod.ROOT
+    (root / "staged.txt").write_text("a\n")
+    subprocess.run(["git", "init", "-q"], cwd=root, check=True)
+    subprocess.run(["git", "add", "staged.txt"], cwd=root, check=True)
+    godot.on("--import", write=write).on()
+
+    assert mod.build()["files_changed_by_build"] == expected
+
+
 def test_files_changed_by_build_is_empty_outside_a_git_repo(mod: ModuleType, godot) -> None:
     godot.on("--import", write={"new.gd.uid": "uid://x\n"}).on()
 

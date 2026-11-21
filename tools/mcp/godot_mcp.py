@@ -29,7 +29,7 @@ RESULTS_XML = ROOT / ".godot" / "gut_results.xml"
 mcp = MCPServer("godot")
 
 # Godot prints e.g. "SCRIPT ERROR: Parse Error: ..." followed by "   at: GDScript::reload (res://x.gd:12)".
-# SHADER ERROR comes only from a renderer (screenshot); headless runs never compile shaders.
+# SHADER ERROR: a shader that doesn't compile. Headless --import prints it too (dummy renderer).
 _ERR_RE = re.compile(r"^(SCRIPT ERROR|SHADER ERROR|ERROR|WARNING|USER ERROR|USER WARNING):\s*(.*)$")
 _AT_RE = re.compile(r"^\s+at:\s.*?\((res://[^)]+)\)")
 # A GDScript backtrace frame, e.g. "       [0] _ready (res://scripts/x.gd:5)". push_error(), push_warning()

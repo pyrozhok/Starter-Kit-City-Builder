@@ -665,6 +665,13 @@ def test_failed_screenshot_says_why(scenes: ModuleType, godot) -> None:
 
     assert (result["ok"], result["path"]) == (False, None)
     assert result["errors"][0] == "SCREENSHOT FAILED: hover target not found or not a Control: Nope"
+    assert "SCREENSHOT FAILED" in result["output_tail"]
+
+
+def test_silent_failure_still_has_an_error(scenes: ModuleType, godot) -> None:
+    godot.on(code=1)  # no frame, nothing printed
+
+    assert scenes.screenshot("res://scenes/main.tscn")["errors"] == ["No screenshot produced"]
 
 
 def test_previous_screenshot_is_not_reported(scenes: ModuleType, godot) -> None:

@@ -47,33 +47,44 @@ def test_godot_runs_headless_in_the_project(mod: ModuleType, godot) -> None:
 
 
 def test_timeout_keeps_what_godot_printed(mod: ModuleType, godot) -> None:
-    godot.on(stderr="ERROR: still importing\n", sleep=30)
+    # A real import's output, then Godot hangs (no capture of a hang: this is the stuck import).
+    godot.on(capture="godot-4.7.2-import", sleep=30)
 
     result = mod._godot(["--import"], timeout=1)
 
     assert result["ok"] is False
     assert result["exit_code"] is None
     assert result["errors"][0] == f"Timed out after 1s: {mod.GODOT} {' '.join(headless(mod, '--import'))}"
-    assert "still importing" in result["output_tail"]
+    assert "first_scan_filesystem" in result["output_tail"]
     assert set(result) == RUN_KEYS
+
+
+def test_timeout_keeps_the_end_of_long_output(mod: ModuleType, godot) -> None:
+    # synthetic: numbered lines stand for a long run cut off by the timeout.
+    godot.on(stdout="".join(f"line {n}\n" for n in range(1000)), stderr="ERROR: the last word\n", sleep=30)
+
+    tail = mod._godot([], timeout=1)["output_tail"]
+
+    assert len(tail) <= 4000
+    assert tail.endswith("ERROR: the last word\n")
+    assert "line 0\n" not in tail
 
 
 def test_run_that_never_finished_has_the_keys_of_a_finished_run(mod: ModuleType, godot) -> None:
     missing = mod._godot(["--import"], timeout=5)
-    godot.on(stdout="done\n")
+    godot.on(capture="godot-4.7.2-import")
     finished = mod._godot(["--import"], timeout=5)
 
     assert set(finished) == RUN_KEYS
     assert set(missing) == RUN_KEYS
 
 
-def test_ansi_codes_are_stripped(mod: ModuleType, godot) -> None:
-    godot.on(stderr="\x1b[1;31mERROR: red text\x1b[0m\n")
+def test_gut_colours_are_stripped(mod: ModuleType, godot) -> None:
+    # GUT colours its output even into a pipe (the orphans capture); Godot's own lines aren't.
+    assert "\x1b[" in godot.fixture("gut-9.7.1-orphans.stdout.txt")
+    godot.on(capture="gut-9.7.1-orphans")
 
-    result = mod._godot([], timeout=5)
-
-    assert result["errors"] == ["ERROR: red text"]
-    assert "\x1b" not in result["output_tail"]
+    assert "\x1b" not in mod._godot([], timeout=5)["output_tail"]
 
 
 def test_at_line_is_appended_to_its_error(mod: ModuleType, godot) -> None:
@@ -81,8 +92,8 @@ def test_at_line_is_appended_to_its_error(mod: ModuleType, godot) -> None:
 
     result = mod._godot([], timeout=5)
 
-    # The engine's own `at:` line names a C++ file, not res://, so it adds nothing; the GDScript
-    # backtrace lines that follow aren't `at:` lines.
+    # The third error's `at:` line names a C++ file and its backtrace runs only through GUT, the
+    # harness, so it gets no location.
     assert result["errors"] == [
         'SCRIPT ERROR: Parse Error: Cannot assign a value of type "String" as "int". '
         "[res://tests/mixed/test_broken.gd:5]",
@@ -102,20 +113,29 @@ def test_output_that_is_not_utf8_does_not_break_the_run(mod: ModuleType, godot) 
     assert result["errors"] == ["ERROR: Cannot open file 'caf\ufffd.png'."]
 
 
-def test_duplicate_errors_are_collapsed(mod: ModuleType, godot) -> None:
-    godot.on(stderr="ERROR: same\nERROR: same\nWARNING: other\nERROR: same\n")
+def test_timeout_output_that_is_not_utf8_is_kept(mod: ModuleType, godot) -> None:
+    # synthetic: as above, on the timeout path, where the output arrives as bytes.
+    godot.on(stderr="loading caf\udce9.png\n", sleep=30)
 
-    assert mod._godot([], timeout=5)["errors"] == ["ERROR: same", "WARNING: other"]
+    assert "caf\ufffd.png" in mod._godot([], timeout=1)["output_tail"]
 
 
-@pytest.mark.parametrize(("stderr", "ok"), [
-    ("ERROR: Failed to load resource\n", False),
-    ("SCRIPT ERROR: Parse Error: x\n", False),
-    ("USER ERROR: boom\n", False),
-    ("WARNING: 3 ObjectDB instances were leaked at exit\n", True),  # from the orphans capture
+def test_error_repeated_every_frame_is_reported_once(mod: ModuleType, godot) -> None:
+    # Real windowed run: push_error() in _process() for three frames.
+    godot.on(capture="screenshot-4.7.2-repeated-error")
+
+    assert mod._godot([], timeout=5)["errors"] == ["ERROR: every frame [res://scripts/re.gd:9]"]
+
+
+@pytest.mark.parametrize(("capture", "ok"), [
+    ("godot-4.7.2-import", True),                   # nothing on stderr
+    ("gut-9.7.1-orphans", True),                    # WARNING only
+    ("screenshot-4.7.2-script-error", False),       # SCRIPT ERROR
+    ("godot-4.7.2-import-shader-error", False),     # SHADER ERROR, then ERROR
+    ("screenshot-4.7.2-push-error", False),         # a plain ERROR
 ])
-def test_ok_on_exit_0_depends_on_error_lines(mod: ModuleType, godot, stderr: str, ok: bool) -> None:
-    godot.on(stderr=stderr, code=0)
+def test_ok_on_exit_0_depends_on_error_lines(mod: ModuleType, godot, capture: str, ok: bool) -> None:
+    godot.on(capture=capture, code=0)
 
     assert mod._godot([], timeout=5)["ok"] is ok
 
@@ -130,6 +150,7 @@ def test_nonzero_exit_is_not_ok(mod: ModuleType, godot) -> None:
 
 
 def test_output_tail_keeps_the_end_of_long_output(mod: ModuleType, godot) -> None:
+    # synthetic: numbered lines stand for a long run.
     godot.on(stdout="".join(f"line {n}\n" for n in range(1000)), stderr="ERROR: the last word\n", code=1)
 
     tail = mod._godot([], timeout=5)["output_tail"]
@@ -252,8 +273,7 @@ def test_passed_failed_and_pending_are_counted(gut: ModuleType, godot) -> None:
 
 
 def test_green_run_is_ok_and_terse(gut: ModuleType, godot) -> None:
-    # The skipped-script run as it would be without test_broken.gd: same JUnit, nothing on stderr.
-    godot.on(junit=godot.fixture("gut-9.7.1-skipped-script.junit.xml"), stdout="1/1 passed.\n")
+    godot.on(capture="gut-9.7.1-green", code=0)
 
     result = gut.run_tests()
 
@@ -271,6 +291,7 @@ def test_failure_without_body_falls_back_to_message(gut: ModuleType, godot) -> N
 
 
 def test_truncated_junit_is_reported_as_missing(gut: ModuleType, godot) -> None:
+    # synthetic: half of a real JUnit file, as Godot killed mid-write leaves it.
     junit = godot.fixture("gut-9.7.1-mixed.junit.xml")
     godot.on(junit=junit[: len(junit) // 2], code=1)
 
@@ -281,6 +302,7 @@ def test_truncated_junit_is_reported_as_missing(gut: ModuleType, godot) -> None:
 
 
 def test_no_junit_reports_godot_errors_and_the_missing_file(gut: ModuleType, godot) -> None:
+    # synthetic: no capture of Godot stopping before GUT writes its JUnit file.
     godot.on(stderr="ERROR: boom\n", code=1)
 
     errors = gut.run_tests()["errors"]
@@ -389,14 +411,17 @@ def test_build_fails_on_a_shader_that_does_not_compile(mod: ModuleType, godot) -
 
 
 def test_only_failed_steps_keep_output_tail(mod: ModuleType, godot) -> None:
-    godot.on("res://tools/mcp/check_scripts.gd", code=1,
-             stderr="SCRIPT ERROR: Parse Error: x\n   at: GDScript::reload (res://scripts/x.gd:3)\n")
-    godot.on(stdout="imported\n")
+    # Real runs: a clean import, then check_scripts.gd over a script that doesn't parse. Godot 4.7
+    # still loads it, so check_scripts.gd says "0 failed" and exits 0; the SCRIPT ERROR lines are
+    # what fail the step.
+    godot.on("res://tools/mcp/check_scripts.gd", capture="godot-4.7.2-check-scripts-error", code=0)
+    godot.on(capture="godot-4.7.2-import")
 
     result = mod.build()
 
     assert "output_tail" not in result["steps"]["import"]
-    assert "Parse Error" in result["steps"]["check_scripts"]["output_tail"]
+    assert "CHECKED 22 scripts, 0 failed" in result["steps"]["check_scripts"]["output_tail"]
+    assert result["steps"]["check_scripts"]["errors"][0].endswith("[res://scripts/broken_script.gd:5]")
     assert result["ok"] is False
 
 
@@ -512,6 +537,16 @@ def test_find_scenes_without_query_lists_each_scene_with_its_root(scenes: Module
         {"scene": "res://scenes/main.tscn", "root_name": "Main", "root_type": "Node3D",
          "script": "res://scripts/main.gd", "node_count": 5},
     ]
+
+
+def test_scene_with_a_byte_that_is_not_utf8_is_still_listed(scenes: ModuleType) -> None:
+    # A .tscn saved by another tool in Latin-1: one bad byte must not fail find_scenes for the project.
+    (scenes.ROOT / "scenes/latin1.tscn").write_bytes(b'[gd_scene format=3]\n\n[node name="Caf\xe9" type="Node"]\n')
+
+    roots = {hit["scene"]: hit["root_name"] for hit in scenes.find_scenes("")}
+
+    assert roots["res://scenes/latin1.tscn"] == "Caf\ufffd"
+    assert "res://scenes/main.tscn" in roots
 
 
 @pytest.mark.parametrize(("query", "expected"), [
@@ -696,13 +731,6 @@ def test_scene_push_error_fails_the_screenshot(scenes: ModuleType, godot) -> Non
     assert result["errors"] == ["ERROR: the scene says no [res://scripts/pe.gd:5]"]
 
 
-def test_error_repeated_every_frame_is_reported_once(scenes: ModuleType, godot) -> None:
-    # Real run: push_error() in _process() for three frames.
-    godot.on(capture="screenshot-4.7.2-repeated-error")
-
-    assert scenes.screenshot("res://scenes/main.tscn")["errors"] == ["ERROR: every frame [res://scripts/re.gd:9]"]
-
-
 def test_shader_built_in_code_is_located_by_its_script(scenes: ModuleType, godot) -> None:
     # Real run: a script sets Shader.code with an unknown identifier. The `at:` line has no
     # res:// path (`(null) (:3)`); the backtrace names the script that set the code.
@@ -756,6 +784,28 @@ def test_silent_failure_still_has_an_error(scenes: ModuleType, godot) -> None:
     godot.on(code=1)  # no frame, nothing printed
 
     assert scenes.screenshot("res://scenes/main.tscn")["errors"] == ["No screenshot produced"]
+
+
+def test_png_without_layout_is_no_screenshot(scenes: ModuleType, godot) -> None:
+    # synthetic: screenshot.gd saves the PNG, then writes the layout; a run stopped between the two
+    # (the layout write failed, or the 180 s timeout) leaves the PNG alone.
+    godot.on(png=True, code=1)
+
+    result = scenes.screenshot("res://scenes/main.tscn")
+
+    assert (result["ok"], result["path"], result["errors"]) == (False, None, ["No screenshot produced"])
+
+
+def test_screenshot_in_a_fresh_checkout(mod: ModuleType, godot) -> None:
+    # .godot/ is gitignored: a fresh clone or worktree has none until the first import.
+    (mod.ROOT / "scenes").mkdir()
+    (mod.ROOT / "scenes/main.tscn").write_text(HUD_TSCN)
+    godot.on(capture="screenshot-4.7.2-ok")
+
+    result = mod.screenshot("res://scenes/main.tscn")
+
+    assert result["ok"] is True
+    assert Path(result["path"]).parent == mod.ROOT / ".godot/screenshots"
 
 
 def test_previous_screenshot_is_not_reported(scenes: ModuleType, godot) -> None:

@@ -14,6 +14,7 @@ are replaced by `~/`; ANSI colour codes are kept. `FakeGodot.on(capture=...)` re
 | `skipped-script` | `test_ok.gd` passes; `test_broken.gd` as above | 0 |
 | `nothing-ran` | an empty directory | 0 |
 | `push-error` | `push_error("boom from the test")`, then `assert_true(true)` | 1 |
+| `green` | `test_ok.gd`: one passing test | 0 |
 
 ## Screenshot runs
 
@@ -29,3 +30,21 @@ checks that it exists). The output directory is replaced by `<out>/`, the GPU na
 | `script-error` | a red `ColorRect` under a root whose `_ready()` calls `queue_free()` on null | 0 |
 | `shader-error` | `scenes/ui/main_menu.tscn` with `COLOR = undefined_thing;` added to `backdrop_blur.gdshader` | 0 |
 | `hover-missing` | `scenes/main.tscn`, `--hover=Nope` (no layout: nothing was written) | 1 |
+| `push-error` | a root whose `_ready()` calls `push_error("the scene says no")` | 0 |
+| `push-warning` | a root whose `_ready()` calls `push_warning("the scene warns")` | 0 |
+| `repeated-error` | a root whose `_process()` calls `push_error("every frame")` for three frames | 0 |
+| `code-shader-error` | a root whose `_ready()` builds a `Shader` in code with `COLOR = nope;` | 0 |
+| `builtin-shader-error` | a `Shader` sub-resource in the `.tscn` with `COLOR = nope;`, no script | 0 |
+
+The windowed runs after `hover-missing` use 640×360 and 5 frames; each scene has a red
+`ColorRect`, so the frame isn't blank.
+
+## Other Godot runs
+
+Each capture `godot-4.7.2-<name>` is one real headless run in a `git archive HEAD` copy.
+
+| Capture | Command | Exit |
+|---|---|---|
+| `import` | `--import` of the project | 0 |
+| `import-shader-error` | `--import` with `COLOR = undefined_thing;` added to `backdrop_blur.gdshader` | 0 |
+| `check-scripts-error` | `-s res://tools/mcp/check_scripts.gd` with a script that doesn't parse (`var x: int = "not an int"`); Godot 4.7 still loads it, so the tool reports "0 failed" | 0 |

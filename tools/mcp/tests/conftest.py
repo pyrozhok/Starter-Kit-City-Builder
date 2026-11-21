@@ -51,10 +51,11 @@ if rule["junit"] is not None and junit:
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(rule["junit"])
 shot = next((a.split("=", 1)[1] for a in args if a.startswith("--out=")), None)
-if rule["layout"] is not None and shot:
+if (rule["layout"] is not None or rule["png"]) and shot:
     png = Path(shot)
     png.write_bytes(b"\\x89PNG\\r\\n\\x1a\\n")  # screenshot only checks that the file exists
-    png.with_suffix(".layout.json").write_text(rule["layout"])
+    if rule["layout"] is not None:  # screenshot.gd saves the PNG first, then the layout
+        png.with_suffix(".layout.json").write_text(rule["layout"])
 # As bytes: a str holding surrogate escapes ("\\udcff") comes out as the raw byte it stands for.
 sys.stdout.buffer.write(rule["stdout"].encode("utf-8", "surrogateescape"))
 sys.stdout.flush()
@@ -84,10 +85,11 @@ class FakeGodot:
 
     def on(self, when: str | None = None, *, capture: str | None = None, stdout: str = "",
            stderr: str = "", code: int = 0, sleep: float = 0, junit: str | None = None,
-           layout: str | None = None, write: dict[str, str] | None = None,
+           layout: str | None = None, png: bool = False, write: dict[str, str] | None = None,
            delete: tuple[str, ...] = ()) -> FakeGodot:
         """capture: replay the files of fixtures/<capture>.* that exist (stdout, stderr, junit,
-        layout); `code` stays explicit. layout: screenshot.gd's output, written next to a PNG."""
+        layout); `code` stays explicit. layout: screenshot.gd's output, written next to a PNG;
+        png: the PNG alone, as a run stopped between the two writes leaves it."""
         if capture:
             files = {ext: FIXTURES / f"{capture}.{ext}"
                      for ext in ("stdout.txt", "stderr.txt", "junit.xml", "layout.json")}
@@ -96,7 +98,7 @@ class FakeGodot:
             stdout, stderr = read["stdout.txt"] or "", read["stderr.txt"] or ""
             junit, layout = read["junit.xml"], read["layout.json"]
         self._rules.append({"when": when, "stdout": stdout, "stderr": stderr, "code": code,
-                            "sleep": sleep, "junit": junit, "layout": layout, "write": write or {},
+                            "sleep": sleep, "junit": junit, "layout": layout, "png": png, "write": write or {},
                             "delete": list(delete)})
         self._save()
         return self

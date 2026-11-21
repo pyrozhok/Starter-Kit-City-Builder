@@ -217,6 +217,14 @@ def test_files_changed_by_build_before_the_first_commit(mod: ModuleType, godot, 
     assert mod.build()["files_changed_by_build"] == expected
 
 
+def test_files_changed_by_build_with_a_corrupt_git_index(mod: ModuleType, repo: Path, godot) -> None:
+    # A corrupt .git/index makes `git diff HEAD` and both `git ls-files` exit 128 (checked).
+    (repo / ".git/index").write_text("garbage\n")
+    godot.on("--import", write={"new.gd.uid": "uid://x\n"}).on()
+
+    assert mod.build()["files_changed_by_build"] == []
+
+
 def test_files_changed_by_build_is_empty_outside_a_git_repo(mod: ModuleType, godot) -> None:
     godot.on("--import", write={"new.gd.uid": "uid://x\n"}).on()
 

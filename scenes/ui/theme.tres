@@ -1,0 +1,224 @@
+[gd_resource type="Theme" format=3]
+
+[ext_resource type="FontFile" uid="uid://d0cxd77jybrcn" path="res://fonts/lilita_one_regular.ttf" id="1_font"]
+
+[sub_resource type="FontVariation" id="FontVariation_spaced"]
+base_font = ExtResource("1_font")
+spacing_glyph = 1
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_normal"]
+content_margin_left = 22.0
+content_margin_top = 0.0
+content_margin_right = 24.0
+content_margin_bottom = 0.0
+bg_color = Color(0.054902, 0.0745098, 0.101961, 0.72)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_hover"]
+content_margin_left = 28.0
+content_margin_top = 0.0
+content_margin_right = 24.0
+content_margin_bottom = 0.0
+bg_color = Color(0.109804, 0.14902, 0.2, 0.9)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+border_width_left = 6
+border_color = Color(0.960784, 0.721569, 0.254902, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_disabled"]
+content_margin_left = 22.0
+content_margin_top = 0.0
+content_margin_right = 24.0
+content_margin_bottom = 0.0
+bg_color = Color(0.054902, 0.0745098, 0.101961, 0.45)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_focus"]
+draw_center = false
+border_width_left = 6
+border_color = Color(0.960784, 0.721569, 0.254902, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+content_margin_left = 22.0
+content_margin_top = 18.0
+content_margin_right = 22.0
+content_margin_bottom = 22.0
+bg_color = Color(0.054902, 0.0745098, 0.101961, 0.72)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel_small"]
+content_margin_left = 16.0
+content_margin_top = 12.0
+content_margin_right = 16.0
+content_margin_bottom = 14.0
+bg_color = Color(0.054902, 0.0745098, 0.101961, 0.72)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_divider"]
+color = Color(1, 1, 1, 0.14)
+thickness = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_blur6"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(1, 1, 1, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_blur8"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(1, 1, 1, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tip_frame"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(1, 1, 1, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dot"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.960784, 0.721569, 0.254902, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="Gradient" id="Gradient_shade"]
+colors = PackedColorArray(0.0392157, 0.054902, 0.0784314, 0.45, 0.0392157, 0.054902, 0.0784314, 0.75)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_shade"]
+gradient = SubResource("Gradient_shade")
+fill_from = Vector2(0.5, 0.25)
+fill_to = Vector2(0.5, 1)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_shade"]
+texture = SubResource("GradientTexture2D_shade")
+
+[resource]
+default_font = ExtResource("1_font")
+TitleLabel/base_type = &"Label"
+TitleLabel/colors/font_color = Color(1, 1, 1, 1)
+TitleLabel/colors/font_shadow_color = Color(0, 0, 0, 0.55)
+TitleLabel/constants/shadow_offset_x = 0
+TitleLabel/constants/shadow_offset_y = 6
+TitleLabel/font_sizes/font_size = 112
+MenuShade/base_type = &"Panel"
+MenuShade/styles/panel = SubResource("StyleBoxTexture_shade")
+MenuContent/base_type = &"HBoxContainer"
+MenuContent/constants/separation = 16
+MenuButtons/base_type = &"VBoxContainer"
+MenuButtons/constants/separation = 10
+MenuSidebar/base_type = &"VBoxContainer"
+MenuSidebar/constants/separation = 16
+MainMenuButton/base_type = &"Button"
+MainMenuButton/colors/font_color = Color(0.94902, 0.956863, 0.968627, 1)
+MainMenuButton/colors/font_hover_color = Color(1, 0.843137, 0.537255, 1)
+MainMenuButton/colors/font_pressed_color = Color(1, 0.843137, 0.537255, 1)
+MainMenuButton/colors/font_hover_pressed_color = Color(1, 0.843137, 0.537255, 1)
+MainMenuButton/colors/font_focus_color = Color(1, 0.843137, 0.537255, 1)
+MainMenuButton/colors/font_disabled_color = Color(0.94902, 0.956863, 0.968627, 0.35)
+MainMenuButton/colors/icon_normal_color = Color(1, 1, 1, 1)
+MainMenuButton/colors/icon_hover_color = Color(1, 1, 1, 1)
+MainMenuButton/colors/icon_pressed_color = Color(1, 1, 1, 1)
+MainMenuButton/colors/icon_hover_pressed_color = Color(1, 1, 1, 1)
+MainMenuButton/colors/icon_focus_color = Color(1, 1, 1, 1)
+MainMenuButton/colors/icon_disabled_color = Color(1, 1, 1, 0.35)
+MainMenuButton/constants/h_separation = 20
+MainMenuButton/constants/icon_max_width = 24
+MainMenuButton/font_sizes/font_size = 30
+MainMenuButton/fonts/font = SubResource("FontVariation_spaced")
+MainMenuButton/styles/normal = SubResource("StyleBoxFlat_btn_normal")
+MainMenuButton/styles/hover = SubResource("StyleBoxFlat_btn_hover")
+MainMenuButton/styles/pressed = SubResource("StyleBoxFlat_btn_hover")
+MainMenuButton/styles/hover_pressed = SubResource("StyleBoxFlat_btn_hover")
+MainMenuButton/styles/disabled = SubResource("StyleBoxFlat_btn_disabled")
+MainMenuButton/styles/focus = SubResource("StyleBoxFlat_btn_focus")
+MenuPanel/base_type = &"PanelContainer"
+MenuPanel/styles/panel = SubResource("StyleBoxFlat_panel")
+MenuPanelSmall/base_type = &"PanelContainer"
+MenuPanelSmall/styles/panel = SubResource("StyleBoxFlat_panel_small")
+MenuPanelBox/base_type = &"VBoxContainer"
+MenuPanelBox/constants/separation = 14
+MenuPanelBoxSmall/base_type = &"VBoxContainer"
+MenuPanelBoxSmall/constants/separation = 8
+PanelHeader/base_type = &"Label"
+PanelHeader/colors/font_color = Color(0.788235, 0.827451, 0.870588, 1)
+PanelHeader/font_sizes/font_size = 24
+PanelHeader/fonts/font = SubResource("FontVariation_spaced")
+PanelHeaderSmall/base_type = &"Label"
+PanelHeaderSmall/colors/font_color = Color(0.788235, 0.827451, 0.870588, 1)
+PanelHeaderSmall/font_sizes/font_size = 17
+PanelHeaderSmall/fonts/font = SubResource("FontVariation_spaced")
+PanelDivider/base_type = &"HSeparator"
+PanelDivider/constants/separation = 2
+PanelDivider/styles/separator = SubResource("StyleBoxLine_divider")
+BackdropBlur/base_type = &"Panel"
+BackdropBlur/styles/panel = SubResource("StyleBoxFlat_blur6")
+BackdropBlurPanel/base_type = &"Panel"
+BackdropBlurPanel/styles/panel = SubResource("StyleBoxFlat_blur8")
+TipRow/base_type = &"HBoxContainer"
+TipRow/constants/separation = 18
+TipText/base_type = &"VBoxContainer"
+TipText/constants/separation = 6
+TipImageFrame/base_type = &"Panel"
+TipImageFrame/styles/panel = SubResource("StyleBoxFlat_tip_frame")
+TipTitle/base_type = &"Label"
+TipTitle/colors/font_color = Color(0.94902, 0.956863, 0.968627, 1)
+TipTitle/font_sizes/font_size = 24
+TipBody/base_type = &"Label"
+TipBody/colors/font_color = Color(0.717647, 0.760784, 0.811765, 1)
+TipBody/font_sizes/font_size = 20
+NotificationList/base_type = &"VBoxContainer"
+NotificationList/constants/separation = 2
+NotificationItem/base_type = &"MarginContainer"
+NotificationItem/constants/margin_left = 4
+NotificationItem/constants/margin_top = 3
+NotificationItem/constants/margin_right = 4
+NotificationItem/constants/margin_bottom = 3
+NotificationRow/base_type = &"HBoxContainer"
+NotificationRow/constants/separation = 10
+NotificationDot/base_type = &"Panel"
+NotificationDot/styles/panel = SubResource("StyleBoxFlat_dot")
+NotifText/base_type = &"Label"
+NotifText/colors/font_color = Color(0.94902, 0.956863, 0.968627, 1)
+NotifText/font_sizes/font_size = 18
+NotifTime/base_type = &"Label"
+NotifTime/colors/font_color = Color(0.541176, 0.588235, 0.65098, 1)
+NotifTime/font_sizes/font_size = 15

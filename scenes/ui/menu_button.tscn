@@ -1,0 +1,21 @@
+[gd_scene format=3]
+
+[ext_resource type="Material" path="res://scenes/ui/backdrop_blur.tres" id="1_blur"]
+
+[node name="MenuButton" type="Button"]
+custom_minimum_size = Vector2(0, 64)
+theme_type_variation = &"MainMenuButton"
+text = "BUTTON"
+alignment = 0
+
+[node name="Blur" type="Panel" parent="."]
+show_behind_parent = true
+material = ExtResource("1_blur")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"BackdropBlur"

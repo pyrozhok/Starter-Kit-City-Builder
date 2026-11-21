@@ -1,0 +1,152 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_script"]
+[ext_resource type="Theme" path="res://scenes/ui/theme.tres" id="2_theme"]
+[ext_resource type="Texture2D" path="res://sprites/ui/icon_arrow_right.svg" id="3_arrow"]
+[ext_resource type="Texture2D" path="res://sprites/ui/icon_plus.svg" id="4_plus"]
+[ext_resource type="Texture2D" path="res://sprites/ui/icon_folder.svg" id="5_folder"]
+[ext_resource type="Texture2D" path="res://sprites/ui/icon_gear.svg" id="6_gear"]
+[ext_resource type="Texture2D" path="res://sprites/ui/icon_star.svg" id="7_star"]
+[ext_resource type="Texture2D" path="res://sprites/ui/icon_close.svg" id="8_close"]
+[ext_resource type="PackedScene" path="res://scenes/ui/menu_button.tscn" id="9_button"]
+[ext_resource type="PackedScene" path="res://scenes/ui/menu_panel.tscn" id="10_panel"]
+[ext_resource type="Texture2D" path="res://sprites/ui/tips/switch_building.png" id="11_tip"]
+
+[node name="MainMenu" type="CanvasLayer"]
+layer = 10
+script = ExtResource("1_script")
+
+[node name="Root" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_theme")
+
+[node name="Shade" type="Panel" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"MenuShade"
+
+[node name="Title" type="Label" parent="Root"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_top = 150.0
+grow_horizontal = 2
+theme_type_variation = &"TitleLabel"
+text = "City Builder Starter Kit"
+horizontal_alignment = 1
+
+[node name="Content" type="HBoxContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_top = 430.0
+grow_horizontal = 2
+theme_type_variation = &"MenuContent"
+
+[node name="Buttons" type="VBoxContainer" parent="Root/Content"]
+custom_minimum_size = Vector2(520, 0)
+layout_mode = 2
+theme_type_variation = &"MenuButtons"
+
+[node name="Continue" parent="Root/Content/Buttons" instance=ExtResource("9_button")]
+unique_name_in_owner = true
+layout_mode = 2
+text = "CONTINUE"
+icon = ExtResource("3_arrow")
+
+[node name="NewGame" parent="Root/Content/Buttons" instance=ExtResource("9_button")]
+unique_name_in_owner = true
+layout_mode = 2
+text = "NEW GAME"
+icon = ExtResource("4_plus")
+
+[node name="Load" parent="Root/Content/Buttons" instance=ExtResource("9_button")]
+unique_name_in_owner = true
+layout_mode = 2
+text = "LOAD GAME"
+icon = ExtResource("5_folder")
+
+[node name="Options" parent="Root/Content/Buttons" instance=ExtResource("9_button")]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Coming soon"
+text = "OPTIONS"
+icon = ExtResource("6_gear")
+
+[node name="Credits" parent="Root/Content/Buttons" instance=ExtResource("9_button")]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Coming soon"
+text = "CREDITS"
+icon = ExtResource("7_star")
+
+[node name="Exit" parent="Root/Content/Buttons" instance=ExtResource("9_button")]
+unique_name_in_owner = true
+layout_mode = 2
+text = "EXIT"
+icon = ExtResource("8_close")
+
+[node name="Sidebar" type="VBoxContainer" parent="Root/Content"]
+custom_minimum_size = Vector2(520, 0)
+layout_mode = 2
+size_flags_vertical = 0
+theme_type_variation = &"MenuSidebar"
+
+[node name="Tips" parent="Root/Content/Sidebar" instance=ExtResource("10_panel")]
+layout_mode = 2
+title = "TIPS"
+
+[node name="Body" type="HBoxContainer" parent="Root/Content/Sidebar/Tips"]
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"TipRow"
+
+[node name="ImageFrame" type="Panel" parent="Root/Content/Sidebar/Tips/Body"]
+clip_children = 1
+custom_minimum_size = Vector2(160, 100)
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"TipImageFrame"
+
+[node name="Image" type="TextureRect" parent="Root/Content/Sidebar/Tips/Body/ImageFrame"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("11_tip")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Text" type="VBoxContainer" parent="Root/Content/Sidebar/Tips/Body"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+mouse_filter = 2
+theme_type_variation = &"TipText"
+
+[node name="TipTitle" type="Label" parent="Root/Content/Sidebar/Tips/Body/Text"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"TipTitle"
+text = "Q / E — switch building"
+
+[node name="TipBody" type="Label" parent="Root/Content/Sidebar/Tips/Body/Text"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"TipBody"
+text = "RMB rotate · Delete demolish"

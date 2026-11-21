@@ -1,11 +1,14 @@
 ---
 name: generate-ui
-description: In-game UI for this city builder: HUD, menu, panel, button, popup, label. Use when adding, restyling or wiring up UI in scenes/*.tscn.
+description: In-game UI for this city builder: HUD, menu, panel, button, popup, label. Use when adding, restyling or wiring up UI in scenes/*.tscn, or building UI from a mockup (design/*.figcraft, *.png).
 ---
 
 # Generate UI
 
 Terms follow `GLOSSARY.md`.
+
+Building from a mockup (`design/*.figcraft` or a PNG to match): follow [`mockup.md`](mockup.md); it
+replaces step 3 below with screenshot-and-compare.
 
 ## 1. Inspect
 
@@ -31,13 +34,12 @@ Done when the scene parses (`godot.build` ok) and the node sits where step 1 sai
 ## Clicks pass through UI
 
 `builder.gd` polls `Input.is_action_just_pressed("build" / "demolish")` in `_process`, which fires
-whether or not a Control consumed the click: pressing a button also builds on the tile under it.
-`mouse_filter` alone leaves this unsolved.
+whether or not a Control consumed the click. `Builder.pointer_over_ui()` guards both actions: any
+hovered Control blocks them.
 
-- Decorative Controls: `mouse_filter = MOUSE_FILTER_IGNORE`, so they never count as hovered.
-- Interactive Controls: `MOUSE_FILTER_STOP`, plus a guard at the top of `action_build` and
-  `action_demolish`: `if get_viewport().gui_get_hovered_control() != null: return`.
-  That guard is a gameplay change: ask the user first, and cover it with `write-test`.
+- Decorative Controls (labels, icons, panels, full-screen shades): `mouse_filter = MOUSE_FILTER_IGNORE`,
+  or they block building wherever they cover the map.
+- Interactive Controls: `MOUSE_FILTER_STOP`; the guard does the rest.
 
 ## Editing `.tscn` text
 
@@ -52,4 +54,6 @@ whether or not a Control consumed the click: pressing a button also builds on th
 - `godot.run_tests`: `ok: true`; UI with logic has a test (`write-test`).
 - `godot.scene_tree` again shows the node at the intended path.
 
-Then ask the user to check the layout in the editor or game — headless runs can't see it.
+- `godot.screenshot` of the scene shows the UI where you meant it (read the PNG).
+
+Then ask the user about what a still frame can't show: animation, hover feel.

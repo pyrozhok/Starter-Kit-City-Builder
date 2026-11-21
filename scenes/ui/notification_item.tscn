@@ -1,0 +1,34 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/notification_item.gd" id="1_script"]
+
+[node name="NotificationItem" type="MarginContainer"]
+mouse_filter = 2
+theme_type_variation = &"NotificationItem"
+script = ExtResource("1_script")
+
+[node name="Row" type="HBoxContainer" parent="."]
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"NotificationRow"
+
+[node name="DotSlot" type="CenterContainer" parent="Row"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Dot" type="Panel" parent="Row/DotSlot"]
+custom_minimum_size = Vector2(8, 8)
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"NotificationDot"
+
+[node name="Text" type="Label" parent="Row"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"NotifText"
+text = "Notification text"
+
+[node name="Time" type="Label" parent="Row"]
+layout_mode = 2
+theme_type_variation = &"NotifTime"
+text = "now"

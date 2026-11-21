@@ -1,8 +1,9 @@
 # Design-to-UI agent for a game engine
 
-Agents that build game UI from a mockup and check the result against it, write tests and review PRs.
-They work in a Godot 4.7 city builder, a fork of Kenney's Starter Kit City Builder.
+An agent that builds game UI from a mockup and checks the result against it, and a second agent that reviews PRs.
+Both work in a Godot 4.7 city builder, a fork of Kenney's Starter Kit City Builder.
 An eval grades every run, and every mistake it finds becomes a rule in the skill.
+Built in one day with Claude Code: 64 commits on 2026-11-21.
 
 <p align="center"><img src="docs/media/main-menu.gif" width="720"
 alt="Main menu built by the agent: live city behind, hover, New Game"/></p>
@@ -11,9 +12,8 @@ alt="Main menu built by the agent: live city behind, hover, New Game"/></p>
 
 ## Results
 
-- **generate-ui** built the main menu from a mockup in 16 minutes, from the approved plan to the final screenshot, my review of the first draft included. It took 1 fix iteration of 3. 28/31 layers are within ±2px. The other 3 are expected: one comes from Godot's line height, and two from a text cut from the run. Where the mockup contradicted itself, the agent asked me instead of guessing.
-- **review-pr**: 4 runs on 2 PRs, graded by me as the PR author. False findings didn't go down: 3 of 4 runs had one. Two other numbers changed. Findings checked against the code before reporting went from 1/9 to 8/9, and wrong fixes went from 1 to 0. Recall isn't measured yet.
-- **Setup**: Claude Code with Opus 5.5 and mattpocock-skills 1.3.1. The skills, the MCP server, the menu and the evals were built in one day: 64 commits on 2026-11-21.
+- **generate-ui**: 28/31 layers of the mockup within ±2px, after 1 fix iteration of 3. The run took 16 minutes from the approved plan to the final screenshot. When the mockup contradicted itself, the agent asked instead of guessing.
+- **review-pr**: in 4 runs on 2 PRs, findings checked against the code before reporting went from 1/9 to 8/9, and wrong fixes from 1 to 0. False findings didn't go down: 3 of the 4 runs had one.
 
 | Mockup ([`design/main_menu.png`](design/main_menu.png)) | Result, iteration 1 (`godot.screenshot`) |
 |---|---|
@@ -22,7 +22,8 @@ alt="Main menu built by the agent: live city behind, hover, New Game"/></p>
 ## Requirements
 
 - Godot 4.7 and [uv](https://docs.astral.sh/uv/).
-- Claude Code with the plugin [mattpocock-skills](https://github.com/mattpocock/skills). The evals ran with version 1.3.1 (`49dd158`). The plugin updates itself, so later runs may use a newer version.
+- Claude Code. The evals ran on Opus 5.5.
+- The plugin [mattpocock-skills](https://github.com/mattpocock/skills). The evals ran with version 1.3.1 (`49dd158`). The plugin updates itself, so later runs may use a newer version.
   - Install: `/plugin install mattpocock-skills@claude-plugins-official`. `.claude/settings.json` enables it, so Claude Code also offers to install it when you trust the folder.
   - `review-pr` calls its `code-review` and `write-test` calls its `tdd`. Without the plugin both skills stop and ask you to install it.
   - The project skills add what the plugin can't know about Godot and this game: the build and test gates, a Godot checklist, the screenshot-and-compare loop, and the rules that came out of the evals.

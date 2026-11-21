@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "godot": {
+      "command": "uv",
+      "args": ["run", "--script", "tools/mcp/godot_mcp.py"],
+      "env": { "GODOT_BIN": "godot" }
+    }
+  }
+}

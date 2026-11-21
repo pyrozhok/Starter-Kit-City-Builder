@@ -850,27 +850,77 @@ REAL_GODOT = _real_godot()
 REPO = Path(__file__).resolve().parents[3]
 
 
-@pytest.mark.skipif(REAL_GODOT is None, reason="needs Godot 4.7: GODOT_BIN or godot on PATH")
-def test_real_godot_builds_and_runs_gut(mod: ModuleType, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+needs_godot = pytest.mark.skipif(REAL_GODOT is None, reason="needs Godot 4.7: GODOT_BIN or godot on PATH")
+
+
+@pytest.fixture
+def real_project(mod: ModuleType, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> ModuleType:
+    """ROOT as a minimal Godot 4.7 project with the repo's GUT and tool scripts, run by the real Godot."""
     root: Path = mod.ROOT
     shutil.copytree(REPO / "addons/gut", root / "addons/gut")
     shutil.copy(REPO / ".gutconfig.json", root)
     (root / "tools/mcp").mkdir(parents=True)
-    shutil.copy(REPO / "tools/mcp/check_scripts.gd", root / "tools/mcp")
+    for script in ("check_scripts.gd", "screenshot.gd"):
+        shutil.copy(REPO / "tools/mcp" / script, root / "tools/mcp")
     (root / "project.godot").write_text(
         'config_version=5\n\n[application]\n\nconfig/name="pytest"\nconfig/features=PackedStringArray("4.7")\n')
+    for var in ("XDG_DATA_HOME", "XDG_CONFIG_HOME", "XDG_CACHE_HOME"):  # Godot's user:// and caches
+        monkeypatch.setenv(var, str(tmp_path / var.lower()))
+    mod.GODOT = REAL_GODOT
+    return mod
+
+
+@needs_godot
+def test_real_godot_builds_and_runs_gut(real_project: ModuleType) -> None:
+    root: Path = real_project.ROOT
     (root / "tests").mkdir()
     (root / "tests/test_real.gd").write_text(
         "extends GutTest\n\n\nfunc test_passes() -> void:\n\tassert_eq(1, 1)\n\n\n"
         "func test_fails() -> void:\n\tassert_eq(2, 3, \"a real failure\")\n")
-    for var in ("XDG_DATA_HOME", "XDG_CONFIG_HOME", "XDG_CACHE_HOME"):  # Godot's user:// and caches
-        monkeypatch.setenv(var, str(tmp_path / var.lower()))
-    mod.GODOT = REAL_GODOT
 
-    build = mod.build()
-    result = mod.run_tests()
+    build = real_project.build()
+    result = real_project.run_tests()
 
     assert build["ok"] is True, build
     assert (result["passed"], result["failed"], result["orphans"]) == (1, 1, 0), result
     assert result["failures"][0]["test"] == "tests/test_real.gd::test_fails"
     assert "a real failure" in result["failures"][0]["message"]
+
+
+@needs_godot
+def test_real_godot_takes_the_export_command(real_project: ModuleType) -> None:
+    # Without export templates Godot can't export, but it tells a preset and path it took apart
+    # from arguments it didn't: "Invalid export preset name" means the command is wrong.
+    (real_project.ROOT / "export_presets.cfg").write_text(
+        '[preset.0]\n\nname="Linux"\nplatform="Linux"\nrunnable=true\nexport_filter="all_resources"\n'
+        'include_filter=""\nexclude_filter=""\nexport_path=""\n\n[preset.0.options]\n\n'
+        'binary_format/embed_pck=true\n')
+
+    export = real_project.build(export_preset="Linux")["steps"]["export"]
+
+    output = export.get("output_tail", "")
+    assert "Invalid export preset name" not in output
+    if export["ok"]:
+        assert (real_project.ROOT / "build/Linux").exists()
+    else:
+        assert 'Cannot export project with preset "Linux"' in output
+        assert "No export template found" in output
+
+
+@needs_godot
+@pytest.mark.skipif(os.environ.get("GODOT_MCP_WINDOWED") != "1",
+                    reason="opens a window: set GODOT_MCP_WINDOWED=1 (needs a display)")
+def test_real_godot_takes_a_screenshot(real_project: ModuleType) -> None:
+    root: Path = real_project.ROOT
+    (root / "scenes").mkdir()
+    (root / "scenes/box.tscn").write_text(
+        '[gd_scene format=3]\n\n[node name="Root" type="Control"]\nlayout_mode = 3\nanchors_preset = 15\n'
+        'anchor_right = 1.0\nanchor_bottom = 1.0\n\n[node name="Box" type="ColorRect" parent="."]\n'
+        'offset_right = 100.0\noffset_bottom = 100.0\ncolor = Color(1, 0, 0, 1)\n')
+    assert real_project.build()["ok"] is True
+
+    result = real_project.screenshot("res://scenes/box.tscn", width=320, height=180, frames=5, hover="Box")
+
+    assert (result["ok"], result["blank"], result["errors"]) == (True, False, []), result
+    assert Path(result["path"]).name == "box_hover-Box.png"
+    assert Path(result["path"]).stat().st_size > 0

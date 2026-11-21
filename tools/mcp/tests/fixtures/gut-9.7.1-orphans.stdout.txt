@@ -1,0 +1,57 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[1m[INFO]:  [0musing [~/.local/share/godot/app_userdata/Starter Kit City Builder] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+[4m
+
+res://tests/leak/test_leak_a.gd
+[0m* test_leaks_one_node
+[33m    1 Orphans[0m
+[33m        * [<Node#67259860889>][0m
+[33m1 orphans[0m
+[1m1/1 passed.
+[0m[4m
+
+res://tests/leak/test_leak_b.gd
+[0m* test_leaks_two_nodes
+[33m    2 Orphans[0m
+[33m        * [<Node#67628959661>]
+        * [<Node#67645736878>][0m
+* test_clean
+[33m2 orphans[0m
+[1m2/2 passed.
+[0m
+
+
+
+[33m==============================================[0m
+[33m= 3 Orphans[0m
+[33m==============================================[0m
+test_leak_a.gd
+    - test_leaks_one_node
+[33m        * [<Node#67259860889>][0m
+test_leak_b.gd
+    - test_leaks_two_nodes
+[33m        * [<Node#67628959661>]
+        * [<Node#67645736878>][0m
+
+
+[33m==============================================
+[0m[33m= Run Summary
+[0m[33m==============================================
+[0m
+Totals
+------
+Scripts               2
+Tests                 3
+Passing Tests         3
+Asserts               3
+Orphans               3
+Time              0.455s
+
+
+[32m---- All tests passed! ----
+[0m
+Results saved to res://.godot/gut_results.xml

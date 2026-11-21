@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="GutTests" failures="0" tests="3" >
+  <testsuite name="tests/leak/test_leak_a.gd" tests="1" failures="0" skipped="0" time="0.000169" >
+      <testcase name="test_leaks_one_node" assertions="1" status="pass" classname="tests/leak/test_leak_a.gd" time="0.000169" >
+      </testcase>
+  </testsuite>
+  <testsuite name="tests/leak/test_leak_b.gd" tests="2" failures="0" skipped="0" time="0.000211" >
+      <testcase name="test_leaks_two_nodes" assertions="1" status="pass" classname="tests/leak/test_leak_b.gd" time="0.000152" >
+      </testcase>
+      <testcase name="test_clean" assertions="1" status="pass" classname="tests/leak/test_leak_b.gd" time="0.000059" >
+      </testcase>
+  </testsuite>
+</testsuites>

@@ -374,6 +374,20 @@ def test_build_imports_then_checks_scripts(mod: ModuleType, godot) -> None:
     assert set(result["steps"]) == {"import", "check_scripts"}
 
 
+def test_build_fails_on_a_shader_that_does_not_compile(mod: ModuleType, godot) -> None:
+    # Real headless --import with an unknown identifier in backdrop_blur.gdshader: the dummy
+    # renderer compiles shaders too. The `at:` line is `(null) (:12)`, with no path.
+    godot.on("--import", capture="godot-4.7.2-import-shader-error").on()
+
+    result = mod.build()
+
+    assert result["ok"] is False
+    assert result["steps"]["import"]["errors"] == [
+        "SHADER ERROR: Unknown identifier in expression: 'undefined_thing'.",
+        "ERROR: Shader compilation failed.",
+    ]
+
+
 def test_only_failed_steps_keep_output_tail(mod: ModuleType, godot) -> None:
     godot.on("res://tools/mcp/check_scripts.gd", code=1,
              stderr="SCRIPT ERROR: Parse Error: x\n   at: GDScript::reload (res://scripts/x.gd:3)\n")

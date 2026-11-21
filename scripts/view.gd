@@ -1,7 +1,7 @@
 class_name View
 extends Node3D
 
-const ORBIT_SPEED := 6.0 # Degrees per second while auto_orbit is on
+@export var orbit_speed := 3.0 # Degrees per second while auto_orbit is on
 
 var input_enabled := true # Off: camera ignores the player (e.g. under a menu)
 var auto_orbit := false # On: camera slowly turns around its target
@@ -31,7 +31,7 @@ func _process(delta):
 	camera.position = camera.position.lerp(Vector3(0, 0, zoom), delta * 8)
 	
 	if auto_orbit:
-		camera_rotation.y += ORBIT_SPEED * delta
+		camera_rotation.y += orbit_speed * delta
 	
 	if input_enabled:
 		handle_input(delta)

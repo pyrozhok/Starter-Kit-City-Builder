@@ -33,4 +33,12 @@ func test_auto_orbit_turns_camera_around_center() -> void:
 	var yaw_before: float = view.camera_rotation.y
 	view.auto_orbit = true
 	view._process(0.5)
-	assert_almost_eq(view.camera_rotation.y, yaw_before + view.ORBIT_SPEED * 0.5, 0.001)
+	assert_almost_eq(view.camera_rotation.y, yaw_before + 3.0 * 0.5, 0.001, "default orbit is 3 deg/s")
+
+
+func test_orbit_speed_is_tunable() -> void:
+	var yaw_before: float = view.camera_rotation.y
+	view.auto_orbit = true
+	view.orbit_speed = 10.0
+	view._process(0.5)
+	assert_almost_eq(view.camera_rotation.y, yaw_before + 5.0, 0.001)

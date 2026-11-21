@@ -4,6 +4,8 @@ extends Node3D
 
 const MAP_SAVED := "Map saved"
 const MAP_LOADED := "Map loaded"
+const OPTIONS_SOON := "Options — coming soon"
+const CREDITS_SOON := "Credits — coming soon"
 
 @export var builder: Builder
 @export var view: View
@@ -18,6 +20,8 @@ func _ready() -> void:
 	menu.new_game.connect(_start.bind(builder.new_map))
 	menu.continue_game.connect(_start.bind(_load_save))
 	menu.load_game.connect(_start.bind(_load_save))
+	menu.options_requested.connect(notifications.push.bind(OPTIONS_SOON))
+	menu.credits_requested.connect(notifications.push.bind(CREDITS_SOON))
 	menu.exit_requested.connect(get_tree().quit)
 	open_menu()
 

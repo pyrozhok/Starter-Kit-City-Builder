@@ -128,3 +128,12 @@ func test_notifications_stay_in_the_menu() -> void:
 	builder.map_saved.emit()
 	await wait_seconds(0.1)
 	assert_true(notifications.visible)
+
+
+func test_options_and_credits_say_coming_soon() -> void:
+	_start()
+	menu.options_requested.emit()
+	assert_eq(notifications.items()[0].text, Main.OPTIONS_SOON)
+	menu.credits_requested.emit()
+	assert_eq(notifications.items()[0].text, Main.CREDITS_SOON)
+	assert_true(notifications.visible)

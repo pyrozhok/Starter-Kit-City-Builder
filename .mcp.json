@@ -3,7 +3,7 @@
     "godot": {
       "command": "uv",
       "args": ["run", "--script", "tools/mcp/godot_mcp.py"],
-      "env": { "GODOT_BIN": "godot" }
+      "env": { "GODOT_BIN": "${GODOT_BIN:-godot}" }
     }
   }
 }

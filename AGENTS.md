@@ -1,7 +1,7 @@
 ## Engine
 
 Godot **4.7** — the single source for the engine version (`config/features` in `project.godot` matches it).
-`GODOT_BIN` (in `.mcp.json` or the environment) must run a 4.7 binary: any other version rewrites `*.import` on every build.
+`GODOT_BIN` (the environment; `.mcp.json` passes it through as `${GODOT_BIN:-godot}`) must run a 4.7 binary: any other version rewrites `*.import` on every build.
 
 ## Agent skills
 

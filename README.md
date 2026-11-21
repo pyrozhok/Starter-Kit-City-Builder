@@ -45,7 +45,7 @@ Since 001, findings checked before reporting went from 1/9 to 8/9 and wrong fixe
   - [#5 Options and Credits screens](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/5)
   - [#6 save slots and Load screen](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/6)
 - Run it in Claude Code:
-  1. Install Godot 4.7 and [uv](https://docs.astral.sh/uv/). [`.mcp.json`](.mcp.json) starts the server with `uv run --script tools/mcp/godot_mcp.py`; set `GODOT_BIN` there or in your environment.
+  1. Install Godot 4.7 and [uv](https://docs.astral.sh/uv/). [`.mcp.json`](.mcp.json) starts the server with `uv run --script tools/mcp/godot_mcp.py`. It runs `godot` by default; to run another binary, set `GODOT_BIN` in your environment before starting Claude Code.
   2. Install the plugin: `/plugin install mattpocock-skills@claude-plugins-official`.
   3. Check that `/mcp` lists `godot` as connected. Then try `/review-pr <n>`, or ask for UI from a mockup (generate-ui) or for a test (write-test).
 - Rules for agents: [`AGENTS.md`](AGENTS.md).
@@ -125,7 +125,7 @@ Assets included in this package (2D sprites, 3D models and sound effects) are [C
   - `build` — reimport assets and compile all project scripts (optionally `export_preset`)
   - `run_tests` — run the GUT suite in `tests/` (filter by `script` or `test_name`)
   - `find_scenes` / `scene_tree` — search scenes by node name, type or script; dump a scene's node tree
-  - Set `GODOT_BIN` in `.mcp.json` to the Godot binary matching the project version.
+  - `GODOT_BIN` in your environment picks the Godot binary (default `godot`); it must match the project version.
 - **Tests**: [GUT](https://github.com/bitwes/Gut) 9.7.1 in `addons/gut`; CLI:
   `godot --headless -s res://addons/gut/gut_cmdln.gd -gconfig=res://.gutconfig.json -gexit`
 - **Skills** (`.claude/skills/`): `generate-ui`, `write-test`, `review-pr`.

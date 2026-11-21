@@ -8,6 +8,7 @@ var auto_orbit := false # On: camera slowly turns around its target
 
 var camera_position:Vector3
 var camera_rotation:Vector3
+var _home_rotation:Vector3 # camera_rotation at start, restored by reset()
 
 var zoom:float = 30.0 # 30 = Standard zoom level, in meters
 
@@ -16,6 +17,7 @@ var zoom:float = 30.0 # 30 = Standard zoom level, in meters
 func _ready():
 	
 	camera_rotation = rotation_degrees # Initial rotation
+	_home_rotation = camera_rotation
 	
 	pass
 
@@ -35,6 +37,13 @@ func _process(delta):
 	
 	if input_enabled:
 		handle_input(delta)
+
+## Back to the start position and angle. After an orbit it turns the short way
+## (to the nearest angle equal to the start one), not back through every lap.
+func reset() -> void:
+	camera_position = Vector3.ZERO
+	var laps := roundf((rotation_degrees.y - _home_rotation.y) / 360.0)
+	camera_rotation = _home_rotation + Vector3(0, laps * 360.0, 0)
 
 # Handle input
 

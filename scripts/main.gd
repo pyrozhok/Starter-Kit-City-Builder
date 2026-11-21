@@ -40,7 +40,7 @@ func _preview_state(state: String) -> void:
 func _start(prepare: Callable) -> void:
 	prepare.call()
 	_set_playing(true)
-	view.camera_position = Vector3.ZERO
+	view.reset()
 
 
 ## Playing: HUD, building and camera controls on, menu closed. Off: the menu over an orbiting city.

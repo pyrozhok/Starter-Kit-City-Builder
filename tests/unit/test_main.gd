@@ -60,6 +60,14 @@ func test_new_game_starts_empty_map_with_controls_on() -> void:
 	assert_eq(builder.gridmap.get_used_cells().size(), 0)
 
 
+func test_start_resets_the_orbited_camera_angle() -> void:
+	_start()
+	var home: Vector3 = view.camera_rotation
+	view.camera_rotation.y += 100.0  # the menu orbit
+	menu.new_game.emit()
+	assert_almost_eq(fposmod(view.camera_rotation.y - home.y, 360.0), 0.0, 0.001)
+
+
 func test_continue_loads_save_and_announces_it() -> void:
 	var map := DataMap.new()
 	var cell := DataStructure.new()

@@ -27,3 +27,18 @@ func test_build_charges_price_and_places_tile() -> void:
 	assert_eq(builder.gridmap.get_cell_item(Vector3i(2, 0, 3)), 0)
 	assert_eq(builder.map.cash, cash_before - builder.structures[0].price)
 	assert_eq(builder.cash_display.text, "$" + str(builder.map.cash))
+
+func test_preview_is_not_rebuilt_without_toggle() -> void:
+	var preview: Node = builder.selector_container.get_child(0)
+	builder.action_structure_toggle()  # nothing pressed, like an idle _process frame
+	assert_eq(builder.selector_container.get_child_count(), 1)
+	assert_same(builder.selector_container.get_child(0), preview)
+
+func test_structure_next_switches_preview() -> void:
+	var preview: Node = builder.selector_container.get_child(0)
+	Input.action_press("structure_next")
+	builder.action_structure_toggle()
+	assert_eq(builder.index, 1)
+	assert_eq(builder.selector_container.get_child_count(), 1)
+	assert_ne(builder.selector_container.get_child(0), preview)
+	await get_tree().process_frame  # let the replaced preview's queue_free() run before GUT counts orphans

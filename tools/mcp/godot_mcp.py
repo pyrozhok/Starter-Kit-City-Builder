@@ -50,7 +50,9 @@ def _failure(error: str, tail: str = "") -> dict:
 def _godot(args: list[str], timeout: int, headless: bool = True) -> dict:
     cmd = [GODOT, *(["--headless"] if headless else []), "--path", str(ROOT), *args]
     try:
-        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, cwd=ROOT)
+        # errors="replace": one byte that isn't UTF-8 (a file name, a printed string) must not
+        # turn the whole run into a UnicodeDecodeError.
+        proc = subprocess.run(cmd, capture_output=True, text=True, errors="replace", timeout=timeout, cwd=ROOT)
     except FileNotFoundError:
         return _failure(f"Godot binary not found: {GODOT} (set GODOT_BIN)")
     except subprocess.TimeoutExpired as e:

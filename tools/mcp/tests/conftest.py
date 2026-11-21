@@ -55,9 +55,10 @@ if rule["layout"] is not None and shot:
     png = Path(shot)
     png.write_bytes(b"\\x89PNG\\r\\n\\x1a\\n")  # screenshot only checks that the file exists
     png.with_suffix(".layout.json").write_text(rule["layout"])
-sys.stdout.write(rule["stdout"])
+# As bytes: a str holding surrogate escapes ("\\udcff") comes out as the raw byte it stands for.
+sys.stdout.buffer.write(rule["stdout"].encode("utf-8", "surrogateescape"))
 sys.stdout.flush()
-sys.stderr.write(rule["stderr"])
+sys.stderr.buffer.write(rule["stderr"].encode("utf-8", "surrogateescape"))
 sys.stderr.flush()
 time.sleep(rule["sleep"])
 sys.exit(rule["code"])

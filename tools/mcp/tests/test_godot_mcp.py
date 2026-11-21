@@ -92,6 +92,16 @@ def test_at_line_is_appended_to_its_error(mod: ModuleType, godot) -> None:
     ]
 
 
+def test_output_that_is_not_utf8_does_not_break_the_run(mod: ModuleType, godot) -> None:
+    # synthetic: no capture holds a byte that isn't UTF-8. Godot prints file names and strings a
+    # script printed as they are; one such byte used to raise UnicodeDecodeError in every tool.
+    godot.on(stderr="ERROR: Cannot open file 'caf\udce9.png'.\n", code=1)
+
+    result = mod._godot([], timeout=5)
+
+    assert result["errors"] == ["ERROR: Cannot open file 'caf\ufffd.png'."]
+
+
 def test_duplicate_errors_are_collapsed(mod: ModuleType, godot) -> None:
     godot.on(stderr="ERROR: same\nERROR: same\nWARNING: other\nERROR: same\n")
 

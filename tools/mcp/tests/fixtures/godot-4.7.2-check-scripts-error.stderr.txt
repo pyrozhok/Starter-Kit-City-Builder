@@ -1,0 +1,12 @@
+SCRIPT ERROR: Parse Error: Cannot assign a value of type "String" as "int".
+          at: GDScript::reload (res://scripts/broken_script.gd:5)
+          GDScript backtrace (most recent call first):
+              [0] _initialize (res://tools/mcp/check_scripts.gd:16)
+SCRIPT ERROR: Parse Error: Cannot assign a value of type String to variable "x" with specified type int.
+          at: GDScript::reload (res://scripts/broken_script.gd:5)
+          GDScript backtrace (most recent call first):
+              [0] _initialize (res://tools/mcp/check_scripts.gd:16)
+ERROR: Failed to load script "res://scripts/broken_script.gd" with error "Parse error".
+   at: load (modules/gdscript/gdscript_resource_format.cpp:46)
+   GDScript backtrace (most recent call first):
+       [0] _initialize (res://tools/mcp/check_scripts.gd:16)

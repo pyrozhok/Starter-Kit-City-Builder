@@ -136,3 +136,15 @@ func test_demolish_is_ignored_while_pointer_is_over_ui() -> void:
 	Input.action_press("demolish")
 	builder.action_demolish(Vector3(2, 0, 3))
 	assert_eq(builder.gridmap.get_cell_item(Vector3i(2, 0, 3)), 0)
+
+
+func test_reload_without_saving_restores_saved_cash() -> void:
+	var saved := DataMap.new()
+	saved.cash = 500
+	ResourceSaver.save(saved, SAVE_PATH)
+	builder.load_map(SAVE_PATH)
+	Input.action_press("build")
+	builder.action_build(Vector3(0, 0, 0))  # spends cash on the loaded map object
+	builder.load_map(SAVE_PATH)
+	assert_eq(builder.map.cash, 500)
+	assert_eq(builder.gridmap.get_used_cells().size(), 0)

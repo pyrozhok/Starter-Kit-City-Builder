@@ -184,7 +184,8 @@ func save_map(path: String) -> bool:
 func load_map(path: String, announce: bool = true) -> bool:
 	print("Loading map...")
 	gridmap.clear()
-	var loaded := ResourceLoader.load(path) as DataMap if ResourceLoader.exists(path) else null
+	# CACHE_MODE_IGNORE: the cached copy is the object the player has been spending cash from.
+	var loaded := ResourceLoader.load(path, "", ResourceLoader.CACHE_MODE_IGNORE) as DataMap if ResourceLoader.exists(path) else null
 	map = loaded if loaded else DataMap.new()
 	for cell in map.structures:
 		gridmap.set_cell_item(Vector3i(cell.position.x, 0, cell.position.y), cell.structure, cell.orientation)

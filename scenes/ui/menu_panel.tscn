@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/menu_panel.gd" id="1_script"]
+[ext_resource type="Material" path="res://scenes/ui/backdrop_blur.tres" id="2_blur"]
+
+[node name="MenuPanel" type="PanelContainer"]
+theme_type_variation = &"MenuPanel"
+script = ExtResource("1_script")
+
+[node name="Blur" type="Panel" parent="."]
+show_behind_parent = true
+material = ExtResource("2_blur")
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"BackdropBlurPanel"
+
+[node name="Box" type="VBoxContainer" parent="."]
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"MenuPanelBox"
+
+[node name="Header" type="Label" parent="Box"]
+layout_mode = 2
+theme_type_variation = &"PanelHeader"
+text = "PANEL"
+horizontal_alignment = 1
+uppercase = true
+
+[node name="Divider" type="HSeparator" parent="Box"]
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"PanelDivider"
+
+[node name="Content" type="VBoxContainer" parent="Box"]
+layout_mode = 2
+mouse_filter = 2

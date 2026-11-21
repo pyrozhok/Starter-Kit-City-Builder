@@ -5,7 +5,7 @@
 - **Date**: 2026-11-21
 - **Skill version**: `.claude/skills/generate-ui/` at `ad1ab10` (SKILL.md + mockup.md) for the run; `0b1c590` adds this run's lessons.
 - **Tools**: `godot.screenshot` and `tools/design/figcraft.py` from `64d30d1`. The figcraft MCP was not connected, so the layer tree came from `figcraft.py tree`.
-- **Graded by**: the user, in the "Grade" columns (left empty by the agent).
+- **Graded by**: the user, after a manual check of the game: #1–#11 ✅ (#3–#10 expected, #11 a correct escalation).
 
 ## Run
 
@@ -33,25 +33,33 @@ Geometry from `figcraft.py diff design/main_menu.figcraft MainMenu <layout.json>
 
 | # | Element | Property | Mockup | Iter 0 | Iter 1 | Fixed? | Expected? | Grade |
 |---|---|---|---|---|---|---|---|---|
-| 1 | Title (44) | rect x / w | 413 / 1094 (hugs text) | 0 / 1920 (full-width label) | 413 / 1094 | Yes: centre anchors, hugs text | — | |
-| 2 | Tips/Text, Line1, Line2 (82–84) | width | 298 (fills row) | 248 | 298 | Yes: EXPAND_FILL | — | |
-| 3 | Tips/Text (82) | height | 56 | 59 | 59 | No | Yes: Godot line height = ascent + descent (24px → 29, 20px → 24) | |
-| 4 | Tips/Header, Divider, Body (73–80) | y | — | +2px | +2px | No | Yes: same cause as #3, within ±2px | |
-| 5 | Notifications Item2 Text/Time (94/95) | x / w | Time 67px wide ("12 min ago") | 55px, Δx +12 ("just now") | same | No | Yes: relative time cut from the run → #3 | |
-| 6 | Shade (43) | gradient | #0a0e14 α0 → α0.65 | same as mockup | α0.45 → α0.75 | Yes, against the mockup on purpose | Yes: the live day scene is brighter than the mockup's night sky; without it the title and disabled buttons read worse than in the mockup | |
-| 7 | Background (42) | sky colour | dark blue evening image | grey-blue day scene | same | No | Yes: the live scene replaces the placeholder image (user decision) | |
-| 8 | Title (44) | shadow | drop shadow (0,6) blur 18 | hard (0,6), no blur | same | No | Yes: Godot Label shadows don't blur; no workaround (user decision) | |
-| 9 | Button labels, headers | letter-spacing | 2% / 4% (0.6–1px) | 1px | same | No | Yes: Godot glyph spacing is whole pixels | |
-| 10 | Tip image (81) | content | "TIP IMAGE" placeholder | rendered `building-small-a` | same | — | Yes: real content replaces the placeholder | |
-| 11 | Disabled Continue/Load icon (103/111) | opacity | 1.0 in the NoSave frame, 0.35 in component `State=Disabled` | 0.35 | 0.35 | No | **Needs a human**: the frame's instances lost the component's override; the agent followed the component | |
+| 1 | Title (44) | rect x / w | 413 / 1094 (hugs text) | 0 / 1920 (full-width label) | 413 / 1094 | Yes: centre anchors, hugs text | — | ✅ |
+| 2 | Tips/Text, Line1, Line2 (82–84) | width | 298 (fills row) | 248 | 298 | Yes: EXPAND_FILL | — | ✅ |
+| 3 | Tips/Text (82) | height | 56 | 59 | 59 | No | Yes: Godot line height = ascent + descent (24px → 29, 20px → 24) | ✅ expected |
+| 4 | Tips/Header, Divider, Body (73–80) | y | — | +2px | +2px | No | Yes: same cause as #3, within ±2px | ✅ expected |
+| 5 | Notifications Item2 Text/Time (94/95) | x / w | Time 67px wide ("12 min ago") | 55px, Δx +12 ("just now") | same | No | Yes: relative time cut from the run → #3 | ✅ expected |
+| 6 | Shade (43) | gradient | #0a0e14 α0 → α0.65 | same as mockup | α0.45 → α0.75 | Yes, against the mockup on purpose | Yes: the live day scene is brighter than the mockup's night sky; without it the title and disabled buttons read worse than in the mockup | ✅ expected |
+| 7 | Background (42) | sky colour | dark blue evening image | grey-blue day scene | same | No | Yes: the live scene replaces the placeholder image (user decision) | ✅ expected |
+| 8 | Title (44) | shadow | drop shadow (0,6) blur 18 | hard (0,6), no blur | same | No | Yes: Godot Label shadows don't blur; no workaround (user decision) | ✅ expected |
+| 9 | Button labels, headers | letter-spacing | 2% / 4% (0.6–1px) | 1px | same | No | Yes: Godot glyph spacing is whole pixels | ✅ expected |
+| 10 | Tip image (81) | content | "TIP IMAGE" placeholder | rendered `building-small-a` | same | — | Yes: real content replaces the placeholder | ✅ expected |
+| 11 | Disabled Continue/Load icon (103/111) | opacity | 1.0 in the NoSave frame, 0.35 in component `State=Disabled` | 0.35 | 0.35 | No | **Needs a human**: the frame's instances lost the component's override; the agent followed the component. User: the component is right | ✅ correct escalation |
 
 Values pass: 32 of 33 theme values equal the mockup (button states, bar colour/width, radii, paddings, gaps, font colours and sizes, divider, dot, title); the 33rd is the Shade gradient, changed on purpose (#6).
 
 ## Needs a human
 
-- Disabled icon opacity (#11): which one is right, the component or the frame?
+- Disabled icon opacity (#11): which one is right, the component or the frame? **Resolved: the component** (0.35).
 - Hover feel, the orbit speed (6°/s), backdrop blur strength over the moving city (shader `lod 3`), and how readable the text is as the camera turns. A still frame can't show these.
+- **Manual check (user)**: orbit speed 6°/s → 3°/s (`8b00598`, now `View.orbit_speed`, an `@export`); the rest (hover, New Game, building, F1 → "Map saved", Continue after a restart) is OK.
 - Keyboard focus: the focus style is the accent bar without the hover fill; not in the mockup.
+
+## Summary
+
+- 1 of 3 fix iterations; geometry 28/31 within ±2px, theme values 32/33 exact; every remaining row is expected or escalated, and all 11 rows were graded ✅.
+- One manual-check change after the eval: orbit 6°/s → 3°/s.
+- Removed a test that was never red (the load → new game → save → load cache case: not a bug in Godot 4.7), per write-test's "seen red, then green".
+- Side fix: `e297f75` (reloading restores the saved cash).
 
 ## Skill and tool changes from this run
 

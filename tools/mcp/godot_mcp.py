@@ -139,7 +139,7 @@ def build(export_preset: str | None = None, export_path: str | None = None) -> d
 
     if export_preset:
         if not (ROOT / "export_presets.cfg").exists():
-            steps["export"] = {"ok": False, "errors": ["export_presets.cfg missing: create a preset in the editor (Project > Export)."]}
+            steps["export"] = _failure("export_presets.cfg missing: create a preset in the editor (Project > Export).")
         else:
             out = _to_path(export_path or f"build/{export_preset}")
             out.parent.mkdir(parents=True, exist_ok=True)
@@ -164,7 +164,7 @@ def run_tests(path: str = "res://tests", test_name: str | None = None, script: s
     test_name: only tests whose name contains this. Returns pass/fail counts, failures and orphans
     (nodes tests left unfreed; any orphan fails the run)."""
     if not (ROOT / "addons/gut/gut_cmdln.gd").exists():
-        return {"ok": False, "errors": ["GUT not installed at addons/gut"]}
+        return {**_failure("GUT not installed at addons/gut"), "passed": 0, "failed": 0, "pending": 0, "failures": []}
     RESULTS_XML.unlink(missing_ok=True)
     args = ["-s", "res://addons/gut/gut_cmdln.gd", "-gconfig=res://.gutconfig.json", "-gexit",
             f"-gjunit_xml_file={_res(RESULTS_XML)}"]
@@ -196,7 +196,7 @@ def run_tests(path: str = "res://tests", test_name: str | None = None, script: s
             else:
                 summary["passed"] += 1
     else:
-        summary["errors"] = run["errors"] or ["No JUnit results produced; see output_tail"]
+        summary["errors"] = run["errors"] + ["No JUnit results produced; see output_tail"]
 
     # GUT exits 0 even when a test script fails to parse (it is just skipped), so script errors
     # and "nothing ran" both count as failure. Not _godot's tuple: a plain ERROR during a test

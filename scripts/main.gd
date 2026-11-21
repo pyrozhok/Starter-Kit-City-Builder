@@ -26,6 +26,7 @@ func open_menu() -> void:
 	view.input_enabled = false
 	view.auto_orbit = true
 	hud.hide()
+	notifications.auto_hide = false
 	menu.has_save = FileAccess.file_exists(builder.save_path)
 	menu.open()
 
@@ -42,6 +43,7 @@ func _start(prepare: Callable) -> void:
 	prepare.call()
 	menu.close()
 	hud.show()
+	notifications.auto_hide = true
 	builder.set_active(true)
 	view.input_enabled = true
 	view.auto_orbit = false

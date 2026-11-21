@@ -37,3 +37,46 @@ func test_mark_all_read_clears_dots() -> void:
 	panel.push("Map saved")
 	panel.mark_all_read()
 	assert_false(panel.items()[0].unread)
+
+
+func test_hover_marks_all_read() -> void:
+	panel.push("Map saved")
+	panel.mouse_entered.emit()
+	assert_false(panel.items()[0].unread)
+
+
+func test_without_auto_hide_stays_visible() -> void:
+	panel.hide_delay = 0.05
+	panel.push("Map saved")
+	await wait_seconds(0.1)
+	assert_true(panel.visible)
+
+
+func test_auto_hide_hides_after_last_push() -> void:
+	panel.hide_delay = 0.05
+	panel.auto_hide = true
+	panel.push("Map saved")
+	assert_true(panel.visible)
+	await wait_seconds(0.1)
+	assert_false(panel.visible)
+
+
+func test_auto_hide_waits_while_hovered() -> void:
+	panel.hide_delay = 0.05
+	panel.auto_hide = true
+	panel.push("Map saved")
+	panel.mouse_entered.emit()
+	await wait_seconds(0.1)
+	assert_true(panel.visible, "pointer is over it")
+	panel.mouse_exited.emit()
+	await wait_seconds(0.1)
+	assert_false(panel.visible)
+
+
+func test_turning_auto_hide_off_shows_items_again() -> void:
+	panel.hide_delay = 0.05
+	panel.auto_hide = true
+	panel.push("Map saved")
+	await wait_seconds(0.1)
+	panel.auto_hide = false
+	assert_true(panel.visible, "in the menu the panel shows whenever it has items")

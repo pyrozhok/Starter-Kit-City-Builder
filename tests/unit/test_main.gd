@@ -19,6 +19,7 @@ func before_each() -> void:
 
 
 func after_each() -> void:
+	Input.action_release("build")
 	if FileAccess.file_exists(SAVE_PATH):
 		DirAccess.remove_absolute(SAVE_PATH)
 
@@ -77,3 +78,44 @@ func test_save_notifies_and_enables_continue() -> void:
 	assert_eq(notifications.items()[0].text, "Map saved")
 	assert_true(notifications.items()[0].unread)
 	assert_true(menu.has_save)
+
+
+func _move_mouse(viewport: SubViewport, position: Vector2) -> void:
+	var motion := InputEventMouseMotion.new()
+	motion.position = position
+	motion.global_position = position
+	viewport.push_input(motion)
+
+
+func test_notifications_hide_while_playing_and_free_the_corner() -> void:
+	var viewport := SubViewport.new()  # own viewport: GUT's panel can't be the hovered Control
+	viewport.size = Vector2i(1920, 1080)
+	add_child_autofree(viewport)
+	notifications.hide_delay = 0.3  # above the first frames' load time
+	viewport.add_child(main)
+	menu.new_game.emit()
+	await wait_process_frames(2)
+	builder.map_saved.emit()
+	await wait_process_frames(2)  # container layout
+	var corner := notifications.get_global_rect().get_center()
+	_move_mouse(viewport, corner)
+	assert_true(builder.pointer_over_ui(), "precondition: the panel covers the corner")
+	await wait_seconds(0.5)
+	assert_true(notifications.visible, "stays while the pointer is over it")
+	_move_mouse(viewport, Vector2(960, 300))
+	await wait_seconds(0.5)
+	assert_false(notifications.visible, "hides after the delay")
+	_move_mouse(viewport, corner)
+	assert_false(builder.pointer_over_ui())
+	await wait_process_frames(1)  # wait_seconds resumes in a physics frame, where just_pressed is false
+	Input.action_press("build")
+	builder.action_build(Vector3(2, 0, 3))
+	assert_ne(builder.gridmap.get_cell_item(Vector3i(2, 0, 3)), GridMap.INVALID_CELL_ITEM, "building works again")
+
+
+func test_notifications_stay_in_the_menu() -> void:
+	notifications.hide_delay = 0.05
+	_start()
+	builder.map_saved.emit()
+	await wait_seconds(0.1)
+	assert_true(notifications.visible)

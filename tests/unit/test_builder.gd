@@ -1,9 +1,9 @@
 extends GutTest
 
-var builder
+var builder: Builder
 
 func before_each() -> void:
-	builder = load("res://scripts/builder.gd").new()
+	builder = Builder.new()
 	builder.structures.assign([load("res://structures/road-straight.tres"), load("res://structures/grass.tres")])
 	builder.gridmap = GridMap.new()
 	builder.selector = Node3D.new()
@@ -17,7 +17,7 @@ func before_each() -> void:
 	add_child_autofree(builder)
 
 func after_each() -> void:
-	for action in ["build", "structure_next", "structure_previous"]:
+	for action: String in ["build", "structure_next", "structure_previous"]:
 		Input.action_release(action)
 
 func test_build_charges_price_and_places_tile() -> void:

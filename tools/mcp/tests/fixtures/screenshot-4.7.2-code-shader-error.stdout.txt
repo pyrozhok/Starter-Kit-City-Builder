@@ -1,0 +1,10 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+Vulkan 1.4.351 - Forward+ - Using Device #0: <GPU>
+
+--Main Shader--
+    1 | shader_type canvas_item;
+    2 | void fragment() {
+E   3->  COLOR = nope;
+    4 | }
+    5 | 
+SCREENSHOT <out>/code-shader-error.png

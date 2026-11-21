@@ -634,16 +634,60 @@ def test_script_error_in_the_scene_fails_the_screenshot(scenes: ModuleType, godo
         "SCRIPT ERROR: Cannot call method 'queue_free' on a null value. [res://scripts/broken_ready.gd:6]"]
 
 
-def test_project_warning_is_reported_without_failing(scenes: ModuleType, godot) -> None:
-    # Same line format as the captures; no capture has a project WARNING.
-    warning = "WARNING: The local variable 'x' is declared but never used.\n   at: GDScript::reload (res://scripts/main.gd:3)\n"
-    godot.on(stderr=warning + godot.fixture("screenshot-4.7.2-ok.stderr.txt"),
-             layout=godot.fixture("screenshot-4.7.2-ok.layout.json"))
+def test_scene_push_warning_is_reported_without_failing(scenes: ModuleType, godot) -> None:
+    # Real run: _ready() calls push_warning(). Godot 4.7 names only the engine on the `at:` line;
+    # the script is the first frame of the GDScript backtrace.
+    godot.on(capture="screenshot-4.7.2-push-warning")
 
     result = scenes.screenshot("res://scenes/main.tscn")
 
     assert result["ok"] is True
-    assert result["errors"] == ["WARNING: The local variable 'x' is declared but never used. [res://scripts/main.gd:3]"]
+    assert result["errors"] == ["WARNING: the scene warns [res://scripts/pw.gd:5]"]
+    assert result["environment_errors"] == []
+
+
+def test_scene_push_error_fails_the_screenshot(scenes: ModuleType, godot) -> None:
+    # Real run: _ready() calls push_error(), printed as a plain ERROR, located by the backtrace.
+    godot.on(capture="screenshot-4.7.2-push-error")
+
+    result = scenes.screenshot("res://scenes/main.tscn")
+
+    assert result["ok"] is False
+    assert result["errors"] == ["ERROR: the scene says no [res://scripts/pe.gd:5]"]
+
+
+def test_error_repeated_every_frame_is_reported_once(scenes: ModuleType, godot) -> None:
+    # Real run: push_error() in _process() for three frames.
+    godot.on(capture="screenshot-4.7.2-repeated-error")
+
+    assert scenes.screenshot("res://scenes/main.tscn")["errors"] == ["ERROR: every frame [res://scripts/re.gd:9]"]
+
+
+def test_shader_built_in_code_is_located_by_its_script(scenes: ModuleType, godot) -> None:
+    # Real run: a script sets Shader.code with an unknown identifier. The `at:` line has no
+    # res:// path (`(null) (:3)`); the backtrace names the script that set the code.
+    godot.on(capture="screenshot-4.7.2-code-shader-error")
+
+    result = scenes.screenshot("res://scenes/main.tscn")
+
+    assert result["ok"] is False
+    assert result["errors"] == [
+        "SHADER ERROR: Unknown identifier in expression: 'nope'. [res://scripts/cs.gd:8]",
+        "ERROR: Shader compilation failed. [res://scripts/cs.gd:8]",
+    ]
+    assert result["environment_errors"] == ['ERROR: Parameter "version" is null.']
+
+
+def test_shader_in_a_scene_is_located_by_the_scene(scenes: ModuleType, godot) -> None:
+    # Real run: a Shader sub-resource in a .tscn, no script. The backtrace holds only
+    # screenshot.gd, which locates nothing in the project.
+    godot.on(capture="screenshot-4.7.2-builtin-shader-error")
+
+    result = scenes.screenshot("res://scenes/main.tscn")
+
+    assert result["ok"] is False
+    assert result["errors"] == ["SHADER ERROR: Unknown identifier in expression: 'nope'. [res://scenes/bs.tscn::Shader_bad:3]"]
+    assert result["environment_errors"] == ["ERROR: Shader compilation failed.", 'ERROR: Parameter "version" is null.']
 
 
 def test_shader_error_fails_the_screenshot(scenes: ModuleType, godot) -> None:

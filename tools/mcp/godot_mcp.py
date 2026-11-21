@@ -32,6 +32,11 @@ mcp = MCPServer("godot")
 # SHADER ERROR comes only from a renderer (screenshot); headless runs never compile shaders.
 _ERR_RE = re.compile(r"^(SCRIPT ERROR|SHADER ERROR|ERROR|WARNING|USER ERROR|USER WARNING):\s*(.*)$")
 _AT_RE = re.compile(r"^\s+at:\s.*?\((res://[^)]+)\)")
+# A GDScript backtrace frame, e.g. "       [0] _ready (res://scripts/x.gd:5)". push_error(), push_warning()
+# and engine errors raised from a script name the engine on their `at:` line; the script is here.
+_FRAME_RE = re.compile(r"^\s+\[\d+\] .*?\((res://[^)]+)\)")
+# Frames of the harness that runs the project (this tool's scripts, GUT) locate nothing in it.
+_HARNESS = ("res://tools/mcp/", "res://addons/gut/")
 _ANSI_RE = re.compile(r"\x1b\[[0-9;]*m")
 # GUT prints "<n> orphans" after each test script that leaked nodes (never printed when 0).
 _ORPHANS_RE = re.compile(r"^(\d+) orphans$", re.MULTILINE)
@@ -72,14 +77,20 @@ def _text(stream: str | bytes | None) -> str:
 
 def _parse_errors(output: str) -> list[str]:
     errors: list[str] = []
+    located = True  # errors[-1] has its res:// location, or there is no error yet
     for line in output.splitlines():
         m = _ERR_RE.match(line)
         if m:
             errors.append(f"{m.group(1)}: {m.group(2)}")
+            located = False
+            continue
+        if located:
             continue
         at = _AT_RE.match(line)
-        if at and errors:
-            errors[-1] += f" [{at.group(1)}]"
+        frame = _FRAME_RE.match(line)
+        if at or (frame and not frame.group(1).startswith(_HARNESS)):
+            errors[-1] += f" [{(at or frame).group(1)}]"
+            located = True
     return list(dict.fromkeys(errors))
 
 

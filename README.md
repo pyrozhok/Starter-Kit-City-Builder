@@ -44,10 +44,14 @@ Since 001, findings checked before reporting went from 1/9 to 8/9 and wrong fixe
   - [#3 rotating tips and relative notification times](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/3)
   - [#5 Options and Credits screens](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/5)
   - [#6 save slots and Load screen](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/6)
+  - [#8 Figma input for generate-ui](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/8)
 - Run it in Claude Code:
   1. Install Godot 4.7 and [uv](https://docs.astral.sh/uv/). [`.mcp.json`](.mcp.json) starts the server with `uv run --script tools/mcp/godot_mcp.py`. It runs `godot` by default; to run another binary, set `GODOT_BIN` in your environment before starting Claude Code.
   2. Install the plugin: `/plugin install mattpocock-skills@claude-plugins-official`.
   3. Check that `/mcp` lists `godot` as connected. Then try `/review-pr <n>`, or ask for UI from a mockup (generate-ui) or for a test (write-test).
+- Evals were run with mattpocock-skills as of 2026-11-21. The plugin auto-updates, so later runs may differ.
+- You don't need figcraft to check the evals. The mockups, the layer tree reader ([`tools/design/figcraft.py`](tools/design/figcraft.py), uv only) and every screenshot are in the repo.
+- Figma isn't supported yet. Step 1 of generate-ui needs an adapter that writes the same `design/<name>.map.json`, for example through the Figma MCP ([#8](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/8)).
 - Rules for agents: [`AGENTS.md`](AGENTS.md).
 
 ---

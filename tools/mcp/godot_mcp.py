@@ -263,7 +263,7 @@ def screenshot(scene: str, width: int = 1920, height: int = 1080, state: str | N
     return result
 
 
-# --- .tscn parsing (text format)---------------------------------------------------------
+# --- .tscn parsing (text format) ---------------------------------------------------------
 
 _SECTION_RE = re.compile(r"^\[(\w+)\s*(.*?)\]\s*$")
 _ATTR_RE = re.compile(r'(\w+)=("(?:[^"\\]|\\.)*"|\w+\("[^"]*"\)|[^\s\]]+)')

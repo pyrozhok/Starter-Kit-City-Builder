@@ -654,6 +654,15 @@ def test_shader_error_fails_the_screenshot(scenes: ModuleType, godot) -> None:
             "[res://scenes/ui/backdrop_blur.gdshader:12]") in result["errors"]
 
 
+def test_failed_screenshot_says_why(scenes: ModuleType, godot) -> None:
+    # Real run with --hover naming no node: screenshot.gd prints the reason and exits 1.
+    godot.on(capture="screenshot-4.7.2-hover-missing", code=1)
+
+    result = scenes.screenshot("res://scenes/main.tscn", hover="Nope")
+
+    assert (result["ok"], result["path"]) == (False, None)
+    assert result["errors"][0] == "SCREENSHOT FAILED: hover target not found or not a Control: Nope"
+
 
 def test_previous_screenshot_is_not_reported(scenes: ModuleType, godot) -> None:
     out = scenes.ROOT / ".godot/screenshots/main.png"

@@ -251,7 +251,9 @@ def screenshot(scene: str, width: int = 1920, height: int = 1080, state: str | N
     run = _godot(["--audio-driver", "Dummy", "--resolution", "320x180",
                   "-s", "res://tools/mcp/screenshot.gd", "--", *user_args], timeout=180, headless=False)
     if not out.exists() or not layout.exists():
-        return {"ok": False, "path": None, "errors": run["errors"] or ["No screenshot produced"],
+        # screenshot.gd prints its own reason ("SCREENSHOT FAILED: ...") without an error prefix.
+        reasons = re.findall(r"^SCREENSHOT FAILED: .*$", run["output_tail"], re.MULTILINE)
+        return {"ok": False, "path": None, "errors": reasons + run["errors"] or ["No screenshot produced"],
                 "output_tail": run["output_tail"]}
     blank = json.loads(layout.read_text())["blank"]
     # A windowed run logs driver/display noise (Vulkan, Wayland, portals) as plain ERROR without a

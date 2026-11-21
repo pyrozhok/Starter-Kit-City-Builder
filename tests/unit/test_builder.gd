@@ -50,6 +50,16 @@ func test_structure_next_switches_preview() -> void:
 	assert_ne(builder.selector_container.get_child(0), preview)
 	await get_tree().process_frame  # let the replaced preview's queue_free() run before GUT counts orphans
 
+func test_structure_previous_from_first_wraps_to_last_and_switches_preview() -> void:
+	var preview: Node = builder.selector_container.get_child(0)
+	Input.action_press("structure_previous")
+	builder.action_structure_toggle()
+	assert_eq(builder.index, 1)  # two structures: 0 - 1 wraps to the last one
+	assert_eq(builder.selector_container.get_child_count(), 1)
+	assert_ne(builder.selector_container.get_child(0), preview)
+	assert_eq(builder.selector_container.get_child(0).scene_file_path, "res://models/grass.glb")
+	await get_tree().process_frame  # let the replaced preview's queue_free() run before GUT counts orphans
+
 func test_save_map_writes_tiles_and_emits_map_saved() -> void:
 	watch_signals(builder)
 	builder.gridmap.set_cell_item(Vector3i(1, 0, 2), 1)

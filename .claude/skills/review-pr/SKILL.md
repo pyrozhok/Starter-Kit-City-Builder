@@ -81,7 +81,8 @@ Before writing the report:
 - Every finding is verified before it's reported: read the code path or reproduce it.
   Unverified → put it under **Unverified** instead of Blocking/Nits.
 - Every proposed fix is checked to work: for GDScript, the fixed code must still compile
-  against the members it uses (`godot.build`); for refactors, show that behavior is unchanged.
+  against the members it uses (`godot.build`); for refactors, show that behavior is unchanged;
+  for types: the narrowest existing type, adding a class_name if needed.
 
 Three lists, most severe first, one line each: `path:line — problem — concrete fix`.
 **Blocking**: bugs, broken resources, failing gates. **Nits**: the rest. **Unverified**: findings

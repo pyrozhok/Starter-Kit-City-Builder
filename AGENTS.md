@@ -1,7 +1,7 @@
 ## Engine
 
 Godot **4.7** — the single source for the engine version (`config/features` in `project.godot` matches it).
-`GODOT_BIN` (in `.mcp.json` or the environment) must run a 4.7 binary: any other version rewrites `*.import` on every build.
+`GODOT_BIN` (the environment; `.mcp.json` passes it through as `${GODOT_BIN:-godot}`) must run a 4.7 binary: any other version rewrites `*.import` on every build.
 
 ## Agent skills
 
@@ -21,3 +21,11 @@ Default five labels: needs-triage, needs-info, ready-for-agent, ready-for-human,
 ### Domain docs
 
 Single-context: root `GLOSSARY.md` + `docs/adr/`. See `docs/agents/domain.md`.
+
+## Git workflow
+
+- `main` on the fork changes only through a merged PR.
+- One branch per task, cut from a fresh `fork/main`: `feat/…`, `fix/…`, `docs/…`, `chore/…`.
+- Atomic Conventional Commits; PRs merge with a merge commit, never squashed.
+- Push and merge only after the user's explicit "yes" to that step.
+- Before a merge: `/review-pr <n>` in a fresh session.

@@ -2,6 +2,60 @@
 
 # Starter Kit City Builder
 
+## Agent workflow for game development
+
+This fork adds skills, MCP tools and evals so that coding agents can build UI from a mockup, write tests and review PRs in a Godot project.
+
+```mermaid
+flowchart LR
+  A["mattpocock-skills<br/>code-review, tdd, …"] --> B["project skills<br/>review-pr, generate-ui, write-test"]
+  B --> C["godot MCP<br/>build, run_tests, screenshot, scene_tree"]
+  B -. reads .-> D["AGENTS.md, GLOSSARY.md, docs/adr/"]
+```
+
+Skills live in [`.claude/skills/`](.claude/skills), the MCP server in [`tools/mcp/godot_mcp.py`](tools/mcp/godot_mcp.py). No ADRs have been written yet.
+
+### review-pr evals, graded by the PR author
+
+| Run | PR | Findings | Correct | False | Wrong fixes | Verified before reporting |
+|---|---|---|---|---|---|---|
+| [001](evals/review-pr/001-pr1.md) | #1 | 9 | 7 | 1 | 1 | 1/9 |
+| [002](evals/review-pr/002-pr1.md) ⚠ | #1 | 7 | 6 | 0 | 0 | 7/7 |
+| [003](evals/review-pr/003-pr1.md) | #1 | 5 | 4 | 1 | 0 | 4/5 |
+| [004](evals/review-pr/004-pr4.md) | #4 | 9 | 8 | 1 | 0 | 8/9 |
+
+⚠ 002 reviewed only 6 new commits, not the full PR, so it isn't directly comparable with the other runs.
+
+Since 001, findings checked before reporting went from 1/9 to 8/9 and wrong fixes from 1 to 0. 001, 003 and 004 each had one false finding, and each one became a rule in the skill.
+
+### generate-ui 001: main menu from a figcraft mockup
+
+| Mockup ([`design/main_menu.png`](design/main_menu.png)) | Result, iteration 1 (`godot.screenshot`) |
+|---|---|
+| <img src="design/main_menu.png" width="420"/> | <img src="evals/generate-ui/001/iter1_main_save.png" width="420"/> |
+
+28/31 layers fall within ±2px, and 32/33 theme values match exactly. It took 1 of 3 fix iterations. Details: [`evals/generate-ui/001-main-menu.md`](evals/generate-ui/001-main-menu.md).
+
+### Links and setup
+
+- PRs: [#1 Agent skills](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/1) and [#4 generate-ui + main menu](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/4).
+- Open issues:
+  - [#2 pytest suite for the MCP server](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/2)
+  - [#3 rotating tips and relative notification times](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/3)
+  - [#5 Options and Credits screens](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/5)
+  - [#6 save slots and Load screen](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/6)
+  - [#8 Figma input for generate-ui](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/8)
+- Run it in Claude Code:
+  1. Install Godot 4.7 and [uv](https://docs.astral.sh/uv/). [`.mcp.json`](.mcp.json) starts the server with `uv run --script tools/mcp/godot_mcp.py`. It runs `godot` by default; to run another binary, set `GODOT_BIN` in your environment before starting Claude Code.
+  2. Install the plugin: `/plugin install mattpocock-skills@claude-plugins-official`.
+  3. Check that `/mcp` lists `godot` as connected. Then try `/review-pr <n>`, or ask for UI from a mockup (generate-ui) or for a test (write-test).
+- Evals were run with mattpocock-skills as of 2026-11-21. The plugin auto-updates, so later runs may differ.
+- You don't need figcraft or Godot to check the generate-ui geometry. The repo has the mockups, every screenshot, and the iteration-1 `.layout.json` files. With uv alone you can rerun `uv run --script tools/design/figcraft.py diff design/main_menu.figcraft MainMenu evals/generate-ui/001/iter1_main_save.layout.json design/main_menu.map.json`, which gives 28/31.
+- Figma isn't supported yet. Step 1 of generate-ui needs an adapter that writes the same `design/<name>.map.json`, for example through the Figma MCP ([#8](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/8)).
+- Rules for agents: [`AGENTS.md`](AGENTS.md).
+
+---
+
 This package includes a basic template for a 3D city builder in Godot 4.7. Includes features like;
 
 - Building and removing structures
@@ -75,7 +129,8 @@ Assets included in this package (2D sprites, 3D models and sound effects) are [C
   - `build` — reimport assets and compile all project scripts (optionally `export_preset`)
   - `run_tests` — run the GUT suite in `tests/` (filter by `script` or `test_name`)
   - `find_scenes` / `scene_tree` — search scenes by node name, type or script; dump a scene's node tree
-  - Set `GODOT_BIN` in `.mcp.json` to the Godot binary matching the project version.
+  - `screenshot` — render a scene in windowed Godot at an exact size (optional `state`, `hover`) and save a PNG plus a `.layout.json` of every visible Control's rect
+  - `GODOT_BIN` in your environment picks the Godot binary (default `godot`); it must match the project version.
 - **Tests**: [GUT](https://github.com/bitwes/Gut) 9.7.1 in `addons/gut`; CLI:
   `godot --headless -s res://addons/gut/gut_cmdln.gd -gconfig=res://.gutconfig.json -gexit`
 - **Skills** (`.claude/skills/`): `generate-ui`, `write-test`, `review-pr`.

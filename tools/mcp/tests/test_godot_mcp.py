@@ -9,6 +9,9 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
+import shutil
+import subprocess
 from pathlib import Path
 from types import ModuleType
 
@@ -684,3 +687,49 @@ def test_screenshot_of_a_non_scene_runs_no_godot(scenes: ModuleType, godot, scen
 
     assert (result["ok"], result["path"], result["errors"]) == (False, None, [f"Not a scene: {scene}"])
     assert godot.calls == []
+
+
+# --- 11. Real Godot, where one is installed ------------------------------------------------
+# Everything above pins command lines to runs made by hand. These re-run them on a real Godot 4.7
+# (GODOT_BIN or `godot` on PATH) in a minimal project; skipped without one, e.g. in CI.
+
+
+def _real_godot() -> str | None:
+    binary = shutil.which(os.environ.get("GODOT_BIN", "godot"))
+    if not binary:
+        return None
+    try:
+        version = subprocess.run([binary, "--version"], capture_output=True, text=True, timeout=30).stdout
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    return binary if version.startswith("4.7.") else None
+
+
+REAL_GODOT = _real_godot()
+REPO = Path(__file__).resolve().parents[3]
+
+
+@pytest.mark.skipif(REAL_GODOT is None, reason="needs Godot 4.7: GODOT_BIN or godot on PATH")
+def test_real_godot_builds_and_runs_gut(mod: ModuleType, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    root: Path = mod.ROOT
+    shutil.copytree(REPO / "addons/gut", root / "addons/gut")
+    shutil.copy(REPO / ".gutconfig.json", root)
+    (root / "tools/mcp").mkdir(parents=True)
+    shutil.copy(REPO / "tools/mcp/check_scripts.gd", root / "tools/mcp")
+    (root / "project.godot").write_text(
+        'config_version=5\n\n[application]\n\nconfig/name="pytest"\nconfig/features=PackedStringArray("4.7")\n')
+    (root / "tests").mkdir()
+    (root / "tests/test_real.gd").write_text(
+        "extends GutTest\n\n\nfunc test_passes() -> void:\n\tassert_eq(1, 1)\n\n\n"
+        "func test_fails() -> void:\n\tassert_eq(2, 3, \"a real failure\")\n")
+    for var in ("XDG_DATA_HOME", "XDG_CONFIG_HOME", "XDG_CACHE_HOME"):  # Godot's user:// and caches
+        monkeypatch.setenv(var, str(tmp_path / var.lower()))
+    mod.GODOT = REAL_GODOT
+
+    build = mod.build()
+    result = mod.run_tests()
+
+    assert build["ok"] is True, build
+    assert (result["passed"], result["failed"], result["orphans"]) == (1, 1, 0), result
+    assert result["failures"][0]["test"] == "tests/test_real.gd::test_fails"
+    assert "a real failure" in result["failures"][0]["message"]

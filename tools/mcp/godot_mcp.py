@@ -39,19 +39,29 @@ def _godot(args: list[str], timeout: int) -> dict:
     try:
         proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, cwd=ROOT)
     except FileNotFoundError:
-        return {"ok": False, "exit_code": None, "errors": [f"Godot binary not found: {GODOT} (set GODOT_BIN)"], "output_tail": ""}
+        return {"ok": False, "exit_code": None, "errors": [f"Godot binary not found: {GODOT} (set GODOT_BIN)"],
+                "output_tail": "", "orphans": 0}
     except subprocess.TimeoutExpired as e:
-        out = (e.stdout or b"").decode() if isinstance(e.stdout, bytes) else (e.stdout or "")
-        return {"ok": False, "exit_code": None, "errors": [f"Timed out after {timeout}s: {' '.join(cmd)}"], "output_tail": out[-4000:]}
+        out = _ANSI_RE.sub("", _text(e.stdout) + _text(e.stderr))
+        return {"ok": False, "exit_code": None, "errors": [f"Timed out after {timeout}s: {' '.join(cmd)}"],
+                "output_tail": out[-4000:], "orphans": 0}
     output = _ANSI_RE.sub("", proc.stdout + proc.stderr)
     errors = _parse_errors(output)
     return {
+        # Fatal for build: any engine ERROR (broken import, missing resource). run_tests uses a
+        # narrower tuple on purpose: GUT turns an engine ERROR raised during a test into that
+        # test's failure, already counted from the JUnit results, so there only SCRIPT/USER ERROR
+        # (scripts GUT skipped as unloadable) count on top.
         "ok": proc.returncode == 0 and not any(e.startswith(("SCRIPT ERROR", "ERROR", "USER ERROR")) for e in errors),
         "exit_code": proc.returncode,
         "errors": errors,
         "output_tail": output[-4000:],
         "orphans": sum(int(n) for n in _ORPHANS_RE.findall(output)),
     }
+
+
+def _text(stream: str | bytes | None) -> str:
+    return stream.decode(errors="replace") if isinstance(stream, bytes) else (stream or "")
 
 
 def _parse_errors(output: str) -> list[str]:
@@ -162,8 +172,12 @@ def run_tests(path: str = "res://tests", test_name: str | None = None, script: s
     run = _godot(args, timeout=900)
 
     summary = {"passed": 0, "failed": 0, "pending": 0, "failures": []}
-    if RESULTS_XML.exists():
-        for case in ET.parse(RESULTS_XML).iter("testcase"):
+    try:
+        cases = list(ET.parse(RESULTS_XML).iter("testcase")) if RESULTS_XML.exists() else None
+    except ET.ParseError:  # truncated file, e.g. Godot killed mid-write
+        cases = None
+    if cases is not None:
+        for case in cases:
             name = f"{case.get('classname')}::{case.get('name')}"
             failure = case.find("failure")
             if failure is not None:
@@ -179,7 +193,8 @@ def run_tests(path: str = "res://tests", test_name: str | None = None, script: s
         summary["errors"] = run["errors"] or ["No JUnit results produced; see output_tail"]
 
     # GUT exits 0 even when a test script fails to parse (it is just skipped), so script errors
-    # and "nothing ran" both count as failure.
+    # and "nothing ran" both count as failure. Not _godot's tuple: a plain ERROR during a test
+    # already fails that test in the JUnit results (see _godot).
     script_errors = [e for e in run["errors"] if e.startswith(("SCRIPT ERROR", "USER ERROR"))]
     ran = summary["passed"] + summary["failed"]
     if not ran:

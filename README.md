@@ -1,5 +1,55 @@
 <p align="center"><img src="icon.png"/></p>
 
+## Agent workflow for game development
+
+This fork adds skills, MCP tools and evals so that coding agents can build UI from a mockup, write tests and review PRs in a Godot project.
+
+```mermaid
+flowchart LR
+  A["mattpocock-skills<br/>code-review, tdd, …"] --> B["project skills<br/>review-pr, generate-ui, write-test"]
+  B --> C["godot MCP<br/>build, run_tests, screenshot, scene_tree"]
+  C --> D["AGENTS.md, GLOSSARY.md, docs/adr/"]
+```
+
+Skills live in [`.claude/skills/`](.claude/skills), the MCP server in [`tools/mcp/godot_mcp.py`](tools/mcp/godot_mcp.py). No ADRs have been written yet.
+
+### review-pr evals, graded by the PR author
+
+| Run | PR | Findings | Correct | False | Wrong fixes | Verified before reporting |
+|---|---|---|---|---|---|---|
+| [001](evals/review-pr/001-pr1.md) | #1 | 9 | 7 | 1 | 1 | 1/9 |
+| [002](evals/review-pr/002-pr1.md) ⚠ | #1 | 7 | 6 | 0 | 0 | 7/7 |
+| [003](evals/review-pr/003-pr1.md) | #1 | 5 | 4 | 1 | 0 | 4/5 |
+| [004](evals/review-pr/004-pr4.md) | #4 | 9 | 8 | 1 | 0 | 8/9 |
+
+⚠ 002 reviewed only 6 new commits, not the full PR, so it isn't directly comparable with the other runs.
+
+Since 001, findings checked before reporting went from 1/9 to 8/9 and wrong fixes from 1 to 0. Each run still had about one false finding, and each one became a rule in the skill.
+
+### generate-ui 001: main menu from a figcraft mockup
+
+| Mockup ([`design/main_menu.png`](design/main_menu.png)) | Result, iteration 1 (`godot.screenshot`) |
+|---|---|
+| <img src="design/main_menu.png" width="420"/> | <img src="evals/generate-ui/001/iter1_main_save.png" width="420"/> |
+
+28/31 layers fall within ±2px, and 32/33 theme values match exactly. It took 1 of 3 fix iterations. Details: [`evals/generate-ui/001-main-menu.md`](evals/generate-ui/001-main-menu.md).
+
+### Links and setup
+
+- PRs: [#1 Agent skills](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/1) and [#4 generate-ui + main menu](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/4).
+- Open issues:
+  - [#2 pytest suite for the MCP server](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/2)
+  - [#3 rotating tips and relative notification times](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/3)
+  - [#5 Options and Credits screens](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/5)
+  - [#6 save slots and Load screen](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/6)
+- Run it in Claude Code:
+  1. Install Godot 4.7 and [uv](https://docs.astral.sh/uv/). [`.mcp.json`](.mcp.json) starts the server with `uv run --script tools/mcp/godot_mcp.py`; set `GODOT_BIN` there or in your environment.
+  2. Install the plugin: `/plugin install mattpocock-skills@claude-plugins-official`.
+  3. Check that `/mcp` lists `godot` as connected. Then try `/review-pr <n>`, or ask for UI from a mockup (generate-ui) or for a test (write-test).
+- Rules for agents: [`AGENTS.md`](AGENTS.md).
+
+---
+
 # Starter Kit City Builder
 
 This package includes a basic template for a 3D city builder in Godot 4.7. Includes features like;

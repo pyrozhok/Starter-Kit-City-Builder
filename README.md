@@ -129,6 +129,7 @@ Assets included in this package (2D sprites, 3D models and sound effects) are [C
   - `build` — reimport assets and compile all project scripts (optionally `export_preset`)
   - `run_tests` — run the GUT suite in `tests/` (filter by `script` or `test_name`)
   - `find_scenes` / `scene_tree` — search scenes by node name, type or script; dump a scene's node tree
+  - `screenshot` — render a scene in windowed Godot at an exact size (optional `state`, `hover`) and save a PNG plus a `.layout.json` of every visible Control's rect
   - `GODOT_BIN` in your environment picks the Godot binary (default `godot`); it must match the project version.
 - **Tests**: [GUT](https://github.com/bitwes/Gut) 9.7.1 in `addons/gut`; CLI:
   `godot --headless -s res://addons/gut/gut_cmdln.gd -gconfig=res://.gutconfig.json -gexit`

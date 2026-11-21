@@ -34,17 +34,20 @@ _ANSI_RE = re.compile(r"\x1b\[[0-9;]*m")
 _ORPHANS_RE = re.compile(r"^(\d+) orphans$", re.MULTILINE)
 
 
+def _failure(error: str, tail: str = "") -> dict:
+    """Result of a Godot run that never finished; same keys as a finished run."""
+    return {"ok": False, "exit_code": None, "errors": [error], "output_tail": tail, "orphans": 0}
+
+
 def _godot(args: list[str], timeout: int) -> dict:
     cmd = [GODOT, "--headless", "--path", str(ROOT), *args]
     try:
         proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, cwd=ROOT)
     except FileNotFoundError:
-        return {"ok": False, "exit_code": None, "errors": [f"Godot binary not found: {GODOT} (set GODOT_BIN)"],
-                "output_tail": "", "orphans": 0}
+        return _failure(f"Godot binary not found: {GODOT} (set GODOT_BIN)")
     except subprocess.TimeoutExpired as e:
         out = _ANSI_RE.sub("", _text(e.stdout) + _text(e.stderr))
-        return {"ok": False, "exit_code": None, "errors": [f"Timed out after {timeout}s: {' '.join(cmd)}"],
-                "output_tail": out[-4000:], "orphans": 0}
+        return _failure(f"Timed out after {timeout}s: {' '.join(cmd)}", out[-4000:])
     output = _ANSI_RE.sub("", proc.stdout + proc.stderr)
     errors = _parse_errors(output)
     return {

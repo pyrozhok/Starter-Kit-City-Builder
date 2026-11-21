@@ -1,6 +1,8 @@
-# Agent workflow for a Godot game
+# Design-to-UI agent for a game engine
 
-Fork of Kenney's Starter Kit City Builder.
+Agents that build game UI from a mockup and check the result against it, write tests and review PRs.
+They work in a Godot 4.7 city builder, a fork of Kenney's Starter Kit City Builder.
+An eval grades every run, and every mistake it finds becomes a rule in the skill.
 
 <p align="center"><img src="docs/media/main-menu.gif" width="720"
 alt="Main menu built by the agent: live city behind, hover, New Game"/></p>
@@ -9,9 +11,9 @@ alt="Main menu built by the agent: live city behind, hover, New Game"/></p>
 
 ## TL;DR
 
-- **generate-ui**: 28/31 layers of the mockup within ±2px, after 1 fix iteration.
-- **review-pr**: 4 graded runs; findings verified before reporting went from 1/9 to 8/9, wrong fixes from 1 to 0.
-- Every agent mistake an eval finds becomes a rule in the skill.
+- **generate-ui** built the main menu from a mockup in 16 minutes, from the approved plan to the final screenshot, my review of the first draft included. It took 1 fix iteration of 3. 28/31 layers are within ±2px, and the other 3 come from Godot's line height. Where the mockup contradicted itself, the agent asked me instead of guessing.
+- **review-pr**: 4 runs on 2 PRs, graded by me as the PR author. False findings didn't go down: 3 of 4 runs had one. Two other numbers changed. Findings checked against the code before reporting went from 1/9 to 8/9, and wrong fixes went from 1 to 0. Recall isn't measured yet.
+- **Setup**: Claude Code with Opus 5.5 and mattpocock-skills 1.3.1. The skills, the MCP server, the menu and the evals were built in one day: 64 commits on 2026-11-21.
 
 | Mockup ([`design/main_menu.png`](design/main_menu.png)) | Result, iteration 1 (`godot.screenshot`) |
 |---|---|

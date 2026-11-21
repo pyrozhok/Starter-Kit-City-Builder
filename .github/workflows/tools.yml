@@ -1,0 +1,25 @@
+# pytest for the Python tools (tools/). No Godot: GODOT_BIN points nowhere, as in the write-pytest Done check.
+# Same command as AGENTS.md (Python tools).
+name: tools
+
+on:
+  pull_request:
+    paths: ["tools/**", ".github/workflows/tools.yml"]
+  push:
+    branches: [main]
+    paths: ["tools/**", ".github/workflows/tools.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+      - name: pytest
+        env:
+          GODOT_BIN: /nonexistent
+        run: uv run --with pytest --with 'mcp>=2.3,<3' pytest --import-mode=importlib tools

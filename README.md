@@ -9,7 +9,7 @@ alt="Main menu built by the agent: live city behind, hover, New Game"/></p>
 
 <p align="center">Main menu built by an agent from a figcraft mockup.</p>
 
-## TL;DR
+## Results
 
 - **generate-ui** built the main menu from a mockup in 16 minutes, from the approved plan to the final screenshot, my review of the first draft included. It took 1 fix iteration of 3. 28/31 layers are within ±2px. The other 3 are expected: one comes from Godot's line height, and two from a text cut from the run. Where the mockup contradicted itself, the agent asked me instead of guessing.
 - **review-pr**: 4 runs on 2 PRs, graded by me as the PR author. False findings didn't go down: 3 of 4 runs had one. Two other numbers changed. Findings checked against the code before reporting went from 1/9 to 8/9, and wrong fixes went from 1 to 0. Recall isn't measured yet.

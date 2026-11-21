@@ -68,3 +68,14 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 Assets included in this package (2D sprites, 3D models and sound effects) are [CC0 licensed](https://creativecommons.org/publicdomain/zero/1.0/)
+
+### Claude Code tooling
+
+- **MCP server** `godot` (`tools/mcp/godot_mcp.py`, registered in `.mcp.json`, needs [uv](https://docs.astral.sh/uv/)):
+  - `build` — reimport assets and compile all project scripts (optionally `export_preset`)
+  - `run_tests` — run the GUT suite in `tests/` (filter by `script` or `test_name`)
+  - `find_scenes` / `scene_tree` — search scenes by node name, type or script; dump a scene's node tree
+  - Set `GODOT_BIN` in `.mcp.json` to the Godot binary matching the project version.
+- **Tests**: [GUT](https://github.com/bitwes/Gut) 9.7.1 in `addons/gut`; CLI:
+  `godot --headless -s res://addons/gut/gut_cmdln.gd -gconfig=res://.gutconfig.json -gexit`
+- **Skills** (`.claude/skills/`): `generate-ui`, `write-test`, `review-pr`.

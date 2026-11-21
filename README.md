@@ -39,7 +39,7 @@ flowchart LR
   E -- done --> G["eval"]
 ```
 
-- 32/33 theme values match exactly. The 33rd is the shade gradient, which was made darker on purpose so the title stays readable over the live city.
+- 32/33 theme values match exactly. The 33rd is the shade gradient, which was made darker on purpose so the title and the disabled buttons stay readable over the live city, which is brighter than the mockup's night sky.
 - Of the 3 layers off by more than 2px, the eval lists all 3 as expected. One is 3px taller because Godot's line height is ascent + descent, and the skill now lists that mismatch as expected. The other two are a notification's text and time: the build shows "just now" where the mockup has "12 min ago", because relative times were cut from the run ([#3](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/3)).
 - **The agent asked instead of guessing.** In the mockup's "no save" frame the disabled button icons had opacity 1.0, but the component's `State=Disabled` variant says 0.35. The agent built 0.35 and asked me which one was right. The answer was the component.
 - You can check the geometry without figcraft or Godot. The repo has the mockups, every screenshot and the iteration-1 `.layout.json` files. With uv alone, `uv run --script tools/design/figcraft.py diff design/main_menu.figcraft MainMenu evals/generate-ui/001/iter1_main_save.layout.json design/main_menu.map.json` gives 28/31.

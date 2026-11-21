@@ -158,3 +158,13 @@ func test_reload_without_saving_restores_saved_cash() -> void:
 	builder.load_map(SAVE_PATH)
 	assert_eq(builder.map.cash, 500)
 	assert_eq(builder.gridmap.get_used_cells().size(), 0)
+
+
+func test_rebuilding_same_structure_on_its_tile_does_not_charge() -> void:
+	Input.action_press("build")
+	builder.action_build(Vector3(2, 0, 3))  # first build: pays for structure 0
+	var cash_after_first: int = builder.map.cash
+	builder.action_build(Vector3(2, 0, 3))  # same structure, same tile
+	assert_eq(builder.gridmap.get_cell_item(Vector3i(2, 0, 3)), 0)
+	assert_eq(builder.map.cash, cash_after_first)
+	assert_eq(builder.cash_display.text, "$" + str(cash_after_first))

@@ -184,6 +184,7 @@ func test_changed_settings_are_applied_and_saved() -> void:
 func test_slider_ticks_apply_live_and_save_when_the_drag_ends() -> void:
 	_start()
 	var slider := options.get_node(OptionsMenu.ROWS + "MasterVolume/Box/VolumeSlider") as OptionSlider
+	slider.drag_started.emit()
 	slider.value = 30.0
 	assert_almost_eq(AudioServer.get_bus_volume_linear(0), 0.3, 0.001)
 	assert_false(FileAccess.file_exists(SETTINGS_PATH), "a tick does not write the file")

@@ -105,3 +105,23 @@ func test_preview_keeps_editing_the_given_settings() -> void:
 	assert_eq((_node("MasterVolume/Box/Value") as Label).text, "70%")
 	(_node("MasterVolume/Box/VolumeSlider") as Range).value = 40.0
 	assert_almost_eq(given.volume, 0.4, 0.0001)
+
+
+func test_slider_change_outside_a_drag_is_committed() -> void:
+	watch_signals(options)
+	(_node("MasterVolume/Box/VolumeSlider") as Range).value = 40.0
+	(_node("CameraOrbitSpeed/Box/OrbitSpeedSlider") as Range).value = 1.5
+	assert_signal_emit_count(options, "settings_committed", 2)
+
+
+func test_slider_change_during_a_drag_is_committed_when_the_drag_ends() -> void:
+	watch_signals(options)
+	var commits := 0
+	for path: String in ["MasterVolume/Box/VolumeSlider", "CameraOrbitSpeed/Box/OrbitSpeedSlider"]:
+		var slider := _node(path) as OptionSlider
+		slider.drag_started.emit()
+		slider.value = 1.0
+		assert_signal_emit_count(options, "settings_committed", commits, path + " mid-drag")
+		slider.drag_ended.emit(true)
+		commits += 1
+		assert_signal_emit_count(options, "settings_committed", commits, path + " drag end")

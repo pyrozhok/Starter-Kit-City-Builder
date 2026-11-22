@@ -10,9 +10,12 @@ var view: View
 var menu: MainMenu
 var notifications: Notifications
 var options: OptionsMenu
+## The fullscreen toggle sets the real window mode; after_each puts this one back.
+var window_mode: DisplayServer.WindowMode
 
 
 func before_each() -> void:
+	window_mode = DisplayServer.window_get_mode()
 	main = (load("res://scenes/main.tscn") as PackedScene).instantiate()
 	builder = main.get_node("Builder")
 	builder.save_path = SAVE_PATH  # before _ready: main checks it when it opens the menu
@@ -29,6 +32,8 @@ func after_each() -> void:
 		if FileAccess.file_exists(path):
 			DirAccess.remove_absolute(path)
 	AudioServer.set_bus_volume_linear(0, 1.0)
+	if DisplayServer.window_get_mode() != window_mode:
+		DisplayServer.window_set_mode(window_mode)
 
 
 func _start() -> void:

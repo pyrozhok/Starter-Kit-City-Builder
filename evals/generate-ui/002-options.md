@@ -30,6 +30,12 @@
 
 **Iterations used: 2 of 3. Human edits to the code: 0.**
 
+After the run, review of PR #27 led to fix commits on the agent's options/settings code, so the
+grade above describes the run, not the merged code: `45a178f` (read whole-number volume and orbit
+speed from the file), `6814e63` (keep editing the owner's settings after a preview state), `b34def1`
+(save on drag end, toggle and Back, not every slider tick), `affb0ce` (commit wheel and keyboard
+slider changes), `6d2758c` (slider labels read the slider values).
+
 ## Screenshots
 
 | | Mockup | Result |

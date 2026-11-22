@@ -74,7 +74,7 @@ func test_structure_previous_from_first_wraps_to_last_and_switches_preview() -> 
 	assert_eq(builder.index, 2)  # 0 - 1 wraps to the last one (next would give 1)
 	assert_eq(builder.selector_container.get_child_count(), 1)
 	assert_ne(builder.selector_container.get_child(0), preview)
-	assert_eq(builder.selector_container.get_child(0).scene_file_path, "res://models/pavement.glb")
+	assert_eq(builder.selector_container.get_child(0).scene_file_path, builder.structures[2].model.resource_path)
 	await get_tree().process_frame  # let the replaced preview's queue_free() run before GUT counts orphans
 
 func test_save_map_writes_tiles_and_emits_map_saved() -> void:

@@ -53,3 +53,23 @@ func test_reset_returns_to_start_angle_the_short_way() -> void:
 	assert_eq(view.camera_position, Vector3.ZERO)
 	assert_almost_eq(fposmod(view.camera_rotation.y - home.y, 360.0), 0.0, 0.001, "start angle")
 	assert_almost_eq(view.rotation_degrees.y - view.camera_rotation.y, 5.0, 0.001, "turns back 5 degrees, not 725")
+
+# A tap: hold for a frame, release, poll in the release frame, let the frame end.
+func _tap(action: String) -> void:
+	Input.action_press(action)
+	await wait_process_frames(1)
+	Input.action_release(action)
+	view.handle_input(0.1)
+	await wait_process_frames(1)
+
+func test_zoom_in_stops_at_15_meters() -> void:
+	view.zoom = 20.0
+	for i in 3:
+		await _tap("zoom_in")
+	assert_eq(view.zoom, 15.0)
+
+func test_zoom_out_stops_at_80_meters() -> void:
+	view.zoom = 75.0
+	for i in 3:
+		await _tap("zoom_out")
+	assert_eq(view.zoom, 80.0)

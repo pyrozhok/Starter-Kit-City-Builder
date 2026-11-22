@@ -57,7 +57,8 @@ Figma isn't supported yet. Step 1 of generate-ui needs an adapter that writes th
 ### write-test and write-pytest
 
 [`write-test`](.claude/skills/write-test/SKILL.md) writes GUT tests for the game's GDScript. [`write-pytest`](.claude/skills/write-pytest/SKILL.md) writes pytest tests for `tools/`. Both call the plugin's `tdd`.
-The skills reach Godot only through the `godot` MCP server, so a bug there misleads every agent.
+
+**write-pytest.** The skills reach Godot only through the `godot` MCP server, so a bug there misleads every agent.
 
 ```mermaid
 flowchart LR
@@ -107,7 +108,7 @@ Each task has a prompt, a known answer and grading mutations, kept outside the r
 | [003](evals/write-test/003.md) | e–h, new, no example in the skill names them | 4/4, 37 s to 1 min 4 s each | 0 |
 
 - In 001 one agent read the answer from git history. That run was discarded, and since then each run starts from an orphan branch with no history.
-- 003 found a test on `main` that passed only because of test order: a release in `after_each` takes effect on the next frame, so the next test still sees the press. Fixed in #19, together with a rule in the skill.
+- 003 found a test on `main` that passed only because of test order: a release in `after_each` takes effect on the next frame, so the next test still sees the press. Fixed in [#19](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/19), together with a rule in the skill.
 
 **Limits**
 
@@ -118,10 +119,10 @@ Each task has a prompt, a known answer and grading mutations, kept outside the r
 
 | Run | PR | Findings | Correct | False | Wrong fixes | Verified before reporting |
 |---|---|---|---|---|---|---|
-| [001](evals/review-pr/001-pr1.md) | #1 | 9 | 7 | 1 | 1 | 1/9 |
-| [002](evals/review-pr/002-pr1.md) ⚠ | #1 | 7 | 6 | 0 | 0 | 7/7 |
-| [003](evals/review-pr/003-pr1.md) | #1 | 5 | 4 | 1 | 0 | 4/5 |
-| [004](evals/review-pr/004-pr4.md) | #4 | 9 | 8 | 1 | 0 | 8/9 |
+| [001](evals/review-pr/001-pr1.md) | [#1](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/1) | 9 | 7 | 1 | 1 | 1/9 |
+| [002](evals/review-pr/002-pr1.md) ⚠ | [#1](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/1) | 7 | 6 | 0 | 0 | 7/7 |
+| [003](evals/review-pr/003-pr1.md) | [#1](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/1) | 5 | 4 | 1 | 0 | 4/5 |
+| [004](evals/review-pr/004-pr4.md) | [#4](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/4) | 9 | 8 | 1 | 0 | 8/9 |
 
 Findings: reported by the agent; Correct / False: as graded; Wrong fixes: correct findings with a wrong proposed fix; Verified: findings the agent checked against the code before reporting.
 
@@ -135,7 +136,7 @@ Findings: reported by the agent; Correct / False: as graded; Wrong fixes: correc
 
 **Limits**
 
-- Runs 001–003 all reviewed PR #1, and the rules added after them came from that PR. Only 004 tests the skill on a PR it wasn't tuned on.
+- Runs 001–003 all reviewed PR [#1](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/1), and the rules added after them came from that PR. Only 004 tests the skill on a PR it wasn't tuned on.
 - Precision is graded, recall isn't: nobody counted the bugs the agent missed.
 - Next: a set of PRs with planted bugs, rerun after every rule change, to measure both.
 
@@ -153,7 +154,7 @@ Details: [`evals/write-pytest/001-issue2.md`](evals/write-pytest/001-issue2.md).
 
 ## How it was made
 
-- Built in one day with Claude Code: 105 commits on 2026-11-21. The evals ran on Opus 5.5.
+- Built in one day with Claude Code: 105 commits on 2026-11-21 (109 with merges). The evals ran on Opus 5.5.
 - The game is a fork of Kenney's Starter Kit City Builder ([below](#original-starter-kit-kenney)).
 - The mockup was made in another session: I gave an agent a reference screenshot, and it drew the layers through the FigCraft MCP.
 - Each task got its own branch and PR: [#1 Agent skills](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/1), [#4 generate-ui + main menu](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/4), [#11 write-pytest + MCP server tests](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/11). Rules for agents: [`AGENTS.md`](AGENTS.md).
@@ -189,7 +190,7 @@ Details: [`evals/write-pytest/001-issue2.md`](evals/write-pytest/001-issue2.md).
 
 **Tests**
 
-- Game: [GUT](https://github.com/bitwes/Gut) 9.7.1 in `addons/gut`. From the CLI: `godot --headless -s res://addons/gut/gut_cmdln.gd -gconfig=res://.gutconfig.json -gexit`.
+- Game: [GUT](https://github.com/bitwes/Gut) 9.7.1 in `addons/gut`. From the CLI: `"${GODOT_BIN:-godot}" --headless -s res://addons/gut/gut_cmdln.gd -gconfig=res://.gutconfig.json -gexit`.
 - MCP server, no Godot needed: `uv run --with pytest --with 'mcp>=2.3,<3' pytest --import-mode=importlib tools`.
 
 `docs/agents/` refers to the plugin's `/triage`, `/domain-modeling` and `/grill-with-docs`.

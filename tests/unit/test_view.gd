@@ -53,3 +53,10 @@ func test_reset_returns_to_start_angle_the_short_way() -> void:
 	assert_eq(view.camera_position, Vector3.ZERO)
 	assert_almost_eq(fposmod(view.camera_rotation.y - home.y, 360.0), 0.0, 0.001, "start angle")
 	assert_almost_eq(view.rotation_degrees.y - view.camera_rotation.y, 5.0, 0.001, "turns back 5 degrees, not 725")
+
+func test_zoom_in_moves_camera_closer() -> void:
+	var before := view.zoom
+	Input.action_press("zoom_in")
+	Input.action_release("zoom_in")
+	view.handle_input(0.1)
+	assert_lt(view.zoom, before)

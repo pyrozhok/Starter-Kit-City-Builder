@@ -10,6 +10,10 @@ var camera_position:Vector3
 var camera_rotation:Vector3
 var _home_rotation:Vector3 # camera_rotation at start, restored by reset()
 
+@export var min_zoom := 15.0 # Closest zoom level, in meters
+@export var max_zoom := 80.0 # Farthest zoom level, in meters
+@export var zoom_step := 5.0 # Meters per wheel step
+
 var zoom:float = 30.0 # 30 = Standard zoom level, in meters
 
 @onready var camera = $Camera
@@ -63,10 +67,10 @@ func handle_input(_delta):
 	# Zoom in/out
 	
 	if Input.is_action_just_released("zoom_in"):
-		zoom = max(15, zoom - 5) # 15 = Minimum zoom level, in meters
+		zoom = min(min_zoom, zoom - zoom_step)
 		
 	if Input.is_action_just_released("zoom_out"):
-		zoom = min(80, zoom + 5) # 80 = Maximum zoom level, in meters
+		zoom = max(max_zoom, zoom + zoom_step)
 	
 	# Back to center
 	

@@ -22,19 +22,19 @@ func save(path: String) -> Error:
 	return config.save(path)
 
 
-## Defaults for a missing file and for each missing or mistyped value.
+## Defaults for a missing file and for each missing or mistyped value; whole numbers count as floats.
 static func load_from(path: String) -> Settings:
 	var settings := Settings.new()
 	var config := ConfigFile.new()
 	if config.load(path) != OK:
 		return settings
 	var value: Variant = config.get_value(SECTION, "volume", settings.volume)
-	if value is float:
-		settings.volume = clampf(value, 0.0, 1.0)
+	if value is float or value is int:
+		settings.volume = clampf(float(value), 0.0, 1.0)
 	value = config.get_value(SECTION, "fullscreen", settings.fullscreen)
 	if value is bool:
 		settings.fullscreen = value
 	value = config.get_value(SECTION, "orbit_speed", settings.orbit_speed)
-	if value is float:
-		settings.orbit_speed = clampf(value, 0.0, ORBIT_SPEED_MAX)
+	if value is float or value is int:
+		settings.orbit_speed = clampf(float(value), 0.0, ORBIT_SPEED_MAX)
 	return settings

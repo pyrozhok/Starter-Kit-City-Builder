@@ -1,14 +1,19 @@
-# Design-to-UI agent for a game engine
+# AI toolkit for game development
 
-An agent that builds game UI from a mockup and checks the result against it, a second agent that reviews PRs, and a third that writes the tests for the engine's MCP server.
-All three work in a Godot 4.7 city builder, a fork of Kenney's Starter Kit City Builder.
-An eval grades every run, and every mistake it finds becomes a rule in the skill.
-Built in one day with Claude Code: 105 commits on 2026-11-21.
+A Claude Code toolkit for Godot 4.7 that builds game UI from mockups, reviews pull requests, and writes tests.
+The skills share a Godot MCP server, so agents can inspect scenes, render UI and run tests to check their work.
+
+- **Build UI** (`generate-ui`): turn a mockup into a Godot scene, then compare the rendered layout with the design.
+- **Review PRs** (`review-pr`): check findings against the code and engine behavior before reporting them.
+- **Write tests** (`write-test`, `write-pytest`): write gameplay tests and Python tests for the MCP server.
+
+An eval grades every run, and each mistake it finds becomes a rule in the skill.
+The game is a fork of Kenney's Starter Kit City Builder. Built in one day with Claude Code: 105 commits on 2026-11-21.
 
 <p align="center"><img src="docs/media/main-menu.gif" width="720"
-alt="Main menu built by the agent: live city behind, hover, New Game"/></p>
+alt="Main menu built by generate-ui: live city behind, hover, New Game"/></p>
 
-<p align="center">Main menu built by an agent from a figcraft mockup.</p>
+<p align="center">Main menu built by generate-ui from a figcraft mockup.</p>
 
 ## Results
 

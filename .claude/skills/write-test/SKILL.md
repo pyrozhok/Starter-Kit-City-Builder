@@ -7,9 +7,9 @@ description: GUT tests for this project's GDScript. Use when adding or fixing a 
 
 Follow `mattpocock-skills:tdd` for the loop (if it isn't available, tell the user to install the
 plugin — see `AGENTS.md`): every new test is seen **red** before it goes green: against the bug
-before the fix, or, for behavior already in the code, against a temporary break of the line under
-test (revert it after). A broken expectation alone doesn't count. This skill adds what is
-specific to GUT and this project. Terms follow `GLOSSARY.md`.
+before the fix, or, for behavior already in the code, against a mutant of the code under test
+(reverted after). A broken expectation alone doesn't count. This skill adds what is specific to
+GUT and this project. Terms follow `GLOSSARY.md`.
 
 Run through MCP `godot.run_tests`: `script=` one file, `test_name=` a substring, no args for the suite.
 Models to copy: `tests/unit/test_data_map.gd` (resources, save/load) and
@@ -46,7 +46,7 @@ collaborator whose side effect the test must observe or block.
 
 ## Done
 
-- The new test was seen red against broken code, then green.
+- The new test was seen red on the unfixed code or a mutant, then green.
 - `godot.run_tests` with no args: `ok: true`, `orphans: 0`, `errors` empty (it lists test files GUT
   skipped on parse errors, and "No tests ran" when a filter matched nothing).
 - Report the behaviors covered and the ones left untested (e.g. mouse raycasting in `_process`).

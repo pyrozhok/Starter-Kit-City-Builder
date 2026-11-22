@@ -47,7 +47,8 @@ func open_menu() -> void:
 
 
 ## Mockup states for godot.screenshot: "save" (design/main_menu.png), "nosave" (main_menu_nosave.png),
-## and OptionsMenu's "options" / "options_drag" (design/options*.png), which change no setting.
+## and OptionsMenu's "options" / "options_drag" (design/options*.png). Those write their values into
+## main's settings without a signal: nothing is applied or saved then, but a later commit would save them.
 func _preview_state(state: String) -> void:
 	if state.begins_with("options"):
 		_open_options()

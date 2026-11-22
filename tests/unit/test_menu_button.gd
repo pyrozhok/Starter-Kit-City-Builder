@@ -9,14 +9,14 @@ func _instance(path: String) -> Control:
 
 
 func test_menu_button_without_key_hides_keycap() -> void:
-	var button := _instance("res://scenes/ui/menu_button.tscn") as Button
+	var button := _instance("res://scenes/ui/menu_button.tscn") as KeyedMenuButton
 	assert_false(button.get_node("Keycap").visible)
 	assert_eq(button.theme_type_variation, &"MainMenuButton")
 
 
 func test_menu_button_key_shows_keycap_left_of_text() -> void:
-	var button := _instance("res://scenes/ui/menu_button.tscn") as Button
-	button.set("key", "ESC")
+	var button := _instance("res://scenes/ui/menu_button.tscn") as KeyedMenuButton
+	button.key = "ESC"
 	button.size = Vector2(260, 64)
 	await wait_process_frames(2)
 	var keycap := button.get_node("Keycap") as Control

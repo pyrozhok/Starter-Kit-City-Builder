@@ -92,7 +92,7 @@ I wrote the generate-ui and review-pr skills, graded their runs, and wrote both 
 
 Details: [`evals/generate-ui/001-main-menu.md`](evals/generate-ui/001-main-menu.md).
 
-- [002](evals/generate-ui/002-options.md), Options, held out from the skill's tuning: 26/29 layers within ±2px in x and width, 2 of 3 iterations, 8 min 37 s, no code edits. Stacked text rows drift down by Godot's line height (the panel ends 11px lower), so only 3/29 match in all of x, y, w, h.
+- [002](evals/generate-ui/002-options.md), Options, held out from the skill's tuning: 26/29 layers within ±2px in x and width, 2 of 3 iterations, 8 min 37 s, no code edits during the run (review of #27 then fixed its settings code). Stacked text rows drift down by Godot's line height (the panel ends 11px lower), so only 3/29 match in all of x, y, w, h.
 
 **Limits**
 

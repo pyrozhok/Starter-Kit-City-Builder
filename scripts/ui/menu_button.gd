@@ -1,3 +1,4 @@
+class_name KeyedMenuButton
 extends Button
 ## Mockup component "MenuButton". With a key (prop ShowKey), a Keycap stands where the icon would,
 ## one h_separation before the text; MainMenuButtonKeyed makes room for it.

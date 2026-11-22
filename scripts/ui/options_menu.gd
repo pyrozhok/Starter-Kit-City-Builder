@@ -75,10 +75,12 @@ func _show() -> void:
 	_update_labels()
 
 
+## Sliders snap to their step, so the numbers come from them: a file value off the step (volume
+## 0.33) shows what the slider shows (35%).
 func _update_labels() -> void:
-	_volume_value.text = VOLUME_FORMAT % roundi(settings.volume * 100.0)
+	_volume_value.text = VOLUME_FORMAT % roundi(_volume.value)
 	_fullscreen_value.text = FULLSCREEN_TEXT if settings.fullscreen else WINDOWED_TEXT
-	_orbit_value.text = ORBIT_FORMAT % settings.orbit_speed
+	_orbit_value.text = ORBIT_FORMAT % _orbit.value
 
 
 func _on_volume_changed(value: float) -> void:

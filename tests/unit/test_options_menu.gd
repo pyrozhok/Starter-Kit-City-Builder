@@ -125,3 +125,9 @@ func test_slider_change_during_a_drag_is_committed_when_the_drag_ends() -> void:
 		slider.drag_ended.emit(true)
 		commits += 1
 		assert_signal_emit_count(options, "settings_committed", commits, path + " drag end")
+
+
+func test_volume_label_agrees_with_the_slider_off_its_step() -> void:
+	options.settings = _settings(0.33, false, 1.0)
+	assert_eq((_node("MasterVolume/Box/VolumeSlider") as Range).value, 35.0)
+	assert_eq((_node("MasterVolume/Box/Value") as Label).text, "35%")

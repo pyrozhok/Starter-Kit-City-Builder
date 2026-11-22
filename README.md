@@ -1,111 +1,29 @@
-# Design-to-UI agent for a game engine
+# AI toolkit for game development
 
-An agent that builds game UI from a mockup and checks the result against it, a second agent that reviews PRs, and a third that writes the tests for the engine's MCP server.
-All three work in a Godot 4.7 city builder, a fork of Kenney's Starter Kit City Builder.
-An eval grades every run, and every mistake it finds becomes a rule in the skill.
-Built in one day with Claude Code: 105 commits on 2026-11-21.
+A Claude Code toolkit for Godot 4.7 that builds game UI from mockups, reviews pull requests, and writes tests.
+The skills share a Godot MCP server, so agents can inspect scenes, render UI and run tests to check their work.
+
+- **Build UI** (`generate-ui`): turn a mockup into a Godot scene, then compare the rendered layout with the design.
+- **Review PRs** (`review-pr`): check findings against the code and engine behavior before reporting them.
+- **Write tests** (`write-test`, `write-pytest`): write GUT tests for the game's GDScript and Python tests for the MCP server.
+
+An eval grades every run, and each mistake it finds becomes a rule in the skill.
 
 <p align="center"><img src="docs/media/main-menu.gif" width="720"
-alt="Main menu built by the agent: live city behind, hover, New Game"/></p>
+alt="Main menu built by generate-ui: live city behind, hover, New Game"/></p>
 
-<p align="center">Main menu built by an agent from a figcraft mockup.</p>
+<p align="center">Main menu built by generate-ui from a figcraft mockup.</p>
 
 ## Results
 
 - **generate-ui**: 28/31 layers of the mockup within ±2px, after 1 fix iteration of 3. The run took 16 minutes from the approved plan to the final screenshot. When the mockup contradicted itself, the agent asked instead of guessing.
+- **write-test**: 8 tasks with a hidden known answer, each given to a fresh agent and graded by planting the bug its test must catch. After the rules from the first eval, all 4 new tasks passed with no human edits, in under 65 seconds each.
 - **review-pr**: in 4 runs on 2 PRs, findings checked against the code before reporting went from 1/9 to 8/9, and wrong fixes from 1 to 0. False findings didn't go down: 3 of the 4 runs had one.
 - **write-pytest**: 93 tests for the `godot` MCP server that run without Godot and kill 450 of 477 generated mutants. Writing them found 6 bugs in the server, each fixed together with a test that failed before the fix.
 
-| Mockup ([`design/main_menu.png`](design/main_menu.png)) | Result, iteration 1 (`godot.screenshot`) |
-|---|---|
-| <img src="design/main_menu.png" width="420"/> | <img src="evals/generate-ui/001/iter1_main_save.png" width="420"/> |
+Details in [Evals](#evals).
 
-## Requirements
-
-- Godot 4.7 and [uv](https://docs.astral.sh/uv/).
-- Claude Code. The evals ran on Opus 5.5.
-- The plugin [mattpocock-skills](https://github.com/mattpocock/skills). The evals ran with version 1.3.1 (`49dd158`). The plugin updates itself, so later runs may use a newer version.
-  - Install: `/plugin install mattpocock-skills@claude-plugins-official`. `.claude/settings.json` enables it, so Claude Code also offers to install it when you trust the folder.
-  - `review-pr` calls its `code-review`; `write-test` and `write-pytest` call its `tdd`. Without the plugin these skills stop and ask you to install it.
-  - The project skills add what the plugin can't know about Godot and this game: the build and test gates, a Godot checklist, the screenshot-and-compare loop, and the rules that came out of the evals.
-
-## generate-ui: main menu from a mockup
-
-The mockup was made in figcraft, a Figma-like design tool with an MCP server. `tools/design/figcraft.py` reads its layer tree, so the agent can compare its screenshot with the mockup layer by layer.
-
-```mermaid
-flowchart LR
-  A["mockup<br/>(figcraft)"] --> B["map.json<br/>layer → node"] --> C["build scenes"] --> D["godot.screenshot<br/>PNG + layout.json"] --> E["figcraft.py diff<br/>±2px"]
-  E -- mismatches --> F["fix<br/>(≤3 iterations)"] --> D
-  E -- done --> G["eval"]
-```
-
-- 32/33 theme values match exactly. The 33rd is the shade gradient, which was made darker on purpose so the title and the disabled buttons stay readable over the live city, which is brighter than the mockup's night sky.
-- Of the 3 layers off by more than 2px, the eval lists all 3 as expected. One is 3px taller because Godot's line height is ascent + descent, and the skill now lists that mismatch as expected. The other two are a notification's text and time: the build shows "just now" where the mockup has "12 min ago", because relative times were cut from the run ([#3](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/3)).
-- **The agent asked instead of guessing.** In the mockup's "no save" frame the disabled button icons had opacity 1.0, but the component's `State=Disabled` variant says 0.35. The agent built 0.35 and asked me which one was right. The answer was the component.
-- You can check the geometry without figcraft or Godot. The repo has the mockups, every screenshot and the iteration-1 `.layout.json` files. With uv alone, `uv run --script tools/design/figcraft.py diff design/main_menu.figcraft MainMenu evals/generate-ui/001/iter1_main_save.layout.json design/main_menu.map.json` gives 28/31.
-- Figma isn't supported yet. Step 1 of generate-ui needs an adapter that writes the same `design/<name>.map.json`, for example through the Figma MCP ([#8](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/8)).
-
-Details: [`evals/generate-ui/001-main-menu.md`](evals/generate-ui/001-main-menu.md).
-
-### Limits
-
-- One run on one screen.
-- An agent made the mockup too, in another session: I gave it a reference screenshot, and it drew the layers through the FigCraft MCP. Its layers are probably cleaner and better named than in a designer's file. A designer's Figma file would be the real test ([#8](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/8)).
-- I wrote the skill and graded the run.
-
-## review-pr: 4 graded runs
-
-| Run | PR | Findings | Correct | False | Wrong fixes | Verified before reporting |
-|---|---|---|---|---|---|---|
-| [001](evals/review-pr/001-pr1.md) | #1 | 9 | 7 | 1 | 1 | 1/9 |
-| [002](evals/review-pr/002-pr1.md) ⚠ | #1 | 7 | 6 | 0 | 0 | 7/7 |
-| [003](evals/review-pr/003-pr1.md) | #1 | 5 | 4 | 1 | 0 | 4/5 |
-| [004](evals/review-pr/004-pr4.md) | #4 | 9 | 8 | 1 | 0 | 8/9 |
-
-Findings: reported by the agent; Correct / False: as graded; Wrong fixes: correct findings with a wrong proposed fix; Verified: findings the agent checked against the code before reporting.
-
-⚠ 002 reviewed only 6 new commits, not the full PR, so it isn't directly comparable with the other runs.
-
-001, 003 and 004 each had one false finding, and each one became a rule in the skill (`f32e83f`, `7e4f65b`, `5297b37`).
-
-### From a false finding to a rule
-
-In run 004, finding #6 said a cleanup line would leak if the assert before it failed, and proposed moving it to `after_each`. That's false: a failed GUT assert doesn't stop the test. The agent had read the test code but never checked how GUT behaves. Commit `5297b37` added this to step 5 of [`review-pr`](.claude/skills/review-pr/SKILL.md):
-
-> GUT asserts don't abort the test: the lines after a failed assert still run. Don't suggest moving cleanup out of a test body on that ground.
-
-### Limits
-
-- Runs 001–003 all reviewed PR #1, and the rules added after them came from that PR. Only 004 tests the skill on a PR it wasn't tuned on.
-- Precision is graded, recall isn't: nobody counted the bugs the agent missed.
-- I graded every run, and I'm also the author of the skill and of both PRs.
-- Next: a set of PRs with planted bugs, rerun after every rule change, to measure both.
-
-## write-pytest: tests for the MCP server
-
-The skills reach Godot only through the `godot` MCP server, so a bug there misleads every agent. [`write-pytest`](.claude/skills/write-pytest/SKILL.md) writes pytest tests for `tools/`. Its first run wrote the suite for the server ([#2](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/2)).
-
-```mermaid
-flowchart LR
-  A["real Godot runs<br/>(19 captures)"] --> B["FakeGodot<br/>reads argv like Godot"] --> C["93 tests<br/>no Godot"] --> D["generated mutants<br/>450/477 killed"]
-  D -- "each survivor: a test, or a<br/>reason checked on the engine" --> C
-  C -. "where Godot 4.7 is installed" .-> E["same commands<br/>on real Godot"]
-```
-
-- Godot is tested as a separate process. A fake executable finds the project through `--path`, writes JUnit or the screenshot where the arguments point, and replays a captured run of Godot 4.7.2. A wrong command line loses its results here, as it would with Godot. Where Godot 4.7 is installed, the same commands also run on the real engine.
-- Bugs the tests found: `screenshot` returned `ok: true` for a scene with a broken shader or a `push_error`, a path outside the project reached the agent as a bare "Error executing tool", and one byte of Godot's output that isn't UTF-8 broke every tool.
-- CI runs the suite on every PR that touches `tools/`, in about 20 seconds, without Godot.
-
-Details: [`evals/write-pytest/001-issue2.md`](evals/write-pytest/001-issue2.md).
-
-### Limits
-
-- One run on one module. `tools/design/figcraft.py` has no suite yet.
-- The agent's first report was wrong. It claimed 26 of 26 mutations caught, but it had picked those 26 itself, after writing the tests. Generated mutants gave 299 of 453, and the suite was reworked to 450 of 477.
-- The eval was graded by a separate Claude session, not by a person. That grading found 6 surviving mutants the eval had wrongly called equivalent, and led to 3 of the 6 bugs.
-
-## How it's built
+## How it works
 
 ```mermaid
 flowchart LR
@@ -116,35 +34,166 @@ flowchart LR
   E -- "each mistake → a rule" --> B
 ```
 
-Skills live in [`.claude/skills/`](.claude/skills), the MCP server in [`tools/mcp/godot_mcp.py`](tools/mcp/godot_mcp.py) with its tests in [`tools/mcp/tests/`](tools/mcp/tests), and the evals in [`evals/`](evals). write-test's evals are in [`evals/write-test/`](evals/write-test).
+The project skills build on the general skills of [mattpocock-skills](https://github.com/mattpocock/skills) and add what they can't know about Godot and this game: the build and test gates, a Godot checklist, the screenshot-and-compare loop, and the rules that came out of the evals.
+Skills live in [`.claude/skills/`](.claude/skills), the MCP server in [`tools/mcp/godot_mcp.py`](tools/mcp/godot_mcp.py) with its tests in [`tools/mcp/tests/`](tools/mcp/tests), and the evals in [`evals/`](evals).
 
-### What carries over to another engine
+### generate-ui
+
+Mockups come from figcraft, a Figma-like design tool with an MCP server. `tools/design/figcraft.py` reads its layer tree, so the agent can compare its screenshot with the mockup layer by layer.
+
+```mermaid
+flowchart LR
+  A["mockup<br/>(figcraft)"] --> B["map.json<br/>layer → node"] --> C["build scenes"] --> D["godot.screenshot<br/>PNG + layout.json"] --> E["figcraft.py diff<br/>±2px"]
+  E -- mismatches --> F["fix<br/>(≤3 iterations)"] --> D
+  E -- done --> G["eval"]
+```
+
+Figma isn't supported yet. Step 1 of generate-ui needs an adapter that writes the same `design/<name>.map.json`, for example through the Figma MCP ([#8](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/8)).
+
+### review-pr
+
+[`review-pr`](.claude/skills/review-pr/SKILL.md) runs the Godot build and test gates, then the plugin's `code-review` with a Godot checklist, and checks every finding against the code and the engine's behavior before it reports it.
+
+### write-test and write-pytest
+
+[`write-test`](.claude/skills/write-test/SKILL.md) writes GUT tests for the game's GDScript. [`write-pytest`](.claude/skills/write-pytest/SKILL.md) writes pytest tests for `tools/`. Both call the plugin's `tdd`.
+
+**write-pytest.** The skills reach Godot only through the `godot` MCP server, so a bug there misleads every agent.
+
+```mermaid
+flowchart LR
+  A["real Godot runs<br/>(19 captures)"] --> B["FakeGodot<br/>reads argv like Godot"] --> C["tests<br/>no Godot"] --> D["generated mutants"]
+  D -- "each survivor: a test, or a<br/>reason checked on the engine" --> C
+  C -. "where Godot 4.7 is installed" .-> E["same commands<br/>on real Godot"]
+```
+
+- Godot is tested as a separate process. A fake executable finds the project through `--path`, writes JUnit or the screenshot where the arguments point, and replays a captured run of Godot 4.7.2. A wrong command line loses its results here, as it would with Godot. Where Godot 4.7 is installed, the same commands also run on the real engine.
+- CI runs the suite on every PR that touches `tools/`, without Godot.
+
+### Porting to another engine
 
 The skills run the engine only through the MCP tools: `build`, `run_tests`, `screenshot` (a PNG plus a `.layout.json` with every visible Control's rect), and `scene_tree` / `find_scenes`. The layout diff compares mockup rects with `.layout.json` and knows nothing about Godot. To port the workflow, reimplement those tools for the new engine (`godot_mcp.py` is 356 lines; its tests show what each tool must return) and rewrite the Godot-specific rules in the skills (scene text, mouse filters, GUT).
 
-<details>
-<summary>Links and setup</summary>
+## Evals
 
-- PRs: [#1 Agent skills](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/1), [#4 generate-ui + main menu](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/4) and [#11 write-pytest + MCP server tests](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/11).
-- Roadmap:
-  - [#3 rotating tips and relative notification times](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/3)
-  - [#5 Options and Credits screens](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/5)
-  - [#6 save slots and Load screen](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/6)
-  - [#8 Figma input for generate-ui](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/8)
-- Run it in Claude Code:
-  1. Install everything under [Requirements](#requirements). [`.mcp.json`](.mcp.json) starts the server with `uv run --script tools/mcp/godot_mcp.py`. It runs `godot` by default; to run another binary, set `GODOT_BIN` in your environment before starting Claude Code. The binary must be Godot 4.7: any other version rewrites `*.import` on every build.
-  2. Check that `/mcp` lists `godot` as connected. Then try `/review-pr <n>`, or ask for UI from a mockup (generate-ui), a game test (write-test) or a test for the MCP server (write-pytest).
-- MCP tools of the `godot` server ([`tools/mcp/godot_mcp.py`](tools/mcp/godot_mcp.py)):
-  - `build`: reimport assets and compile all project scripts (optionally `export_preset`).
-  - `run_tests`: run the GUT suite in `tests/` (filter by `script` or `test_name`).
-  - `find_scenes` / `scene_tree`: search scenes by node name, type or script; dump a scene's node tree.
-  - `screenshot`: render a scene in windowed Godot at an exact size (optional `state`, `hover`) and save a PNG plus a `.layout.json` of every visible Control's rect.
-- Tests: [GUT](https://github.com/bitwes/Gut) 9.7.1 in `addons/gut`. From the CLI: `godot --headless -s res://addons/gut/gut_cmdln.gd -gconfig=res://.gutconfig.json -gexit`.
-- Tests for the MCP server, no Godot needed: `uv run --with pytest --with 'mcp>=2.3,<3' pytest --import-mode=importlib tools`.
-- `docs/agents/` refers to the plugin's `/triage`, `/domain-modeling` and `/grill-with-docs`.
-- Rules for agents: [`AGENTS.md`](AGENTS.md).
+Each eval is a run of a skill on a real task, graded and written up in [`evals/`](evals).
+I wrote the generate-ui and review-pr skills, graded their runs, and wrote both PRs that review-pr reviewed. The write-test runs were graded by the session that set the tasks, and I approved each grade. The write-pytest run was graded by a separate Claude session.
 
-</details>
+### generate-ui: main menu from a mockup
+
+| Mockup ([`design/main_menu.png`](design/main_menu.png)) | Result, iteration 1 (`godot.screenshot`) |
+|---|---|
+| <img src="design/main_menu.png" width="420"/> | <img src="evals/generate-ui/001/iter1_main_save.png" width="420"/> |
+
+- 32/33 theme values match exactly. The 33rd is the shade gradient, which was made darker on purpose so the title and the disabled buttons stay readable over the live city, which is brighter than the mockup's night sky.
+- Of the 3 layers off by more than 2px, the eval lists all 3 as expected. One is 3px taller because Godot's line height is ascent + descent, and the skill now lists that mismatch as expected. The other two are a notification's text and time: the build shows "just now" where the mockup has "12 min ago", because relative times were cut from the run ([#3](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/3)).
+- **The agent asked instead of guessing.** In the mockup's "no save" frame the disabled button icons had opacity 1.0, but the component's `State=Disabled` variant says 0.35. The agent built 0.35 and asked me which one was right. The answer was the component.
+- You can check the geometry without figcraft or Godot. The repo has the mockups, every screenshot and the iteration-1 `.layout.json` files. With uv alone, `uv run --script tools/design/figcraft.py diff design/main_menu.figcraft MainMenu evals/generate-ui/001/iter1_main_save.layout.json design/main_menu.map.json` gives 28/31.
+
+Details: [`evals/generate-ui/001-main-menu.md`](evals/generate-ui/001-main-menu.md).
+
+**Limits**
+
+- One run on one screen.
+- The mockup was drawn by an agent, so its layers are probably cleaner and better named than in a designer's file. A designer's Figma file would be the real test ([#8](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/8)).
+
+### write-test: 8 tasks with a known answer
+
+Each task has a prompt, a known answer and grading mutations, kept outside the repo until every run had finished. A fresh agent gets only the prompt. The grader applies each mutation on top of the agent's result: the new tests must fail on it.
+
+| Eval | Tasks | Result | Human edits |
+|---|---|---|---|
+| [001](evals/write-test/001.md) | a–d | 3 passed; (a) caught 1 of 2 mutations | 1 |
+| [002](evals/write-test/002.md) | a, c again, after 3 rules from 001 | 2/2 | 0 |
+| [003](evals/write-test/003.md) | e–h, new, no example in the skill names them | 4/4, 37 s to 1 min 4 s each | 0 |
+
+- In 001 one agent read the answer from git history. That run was discarded, and since then each run starts from an orphan branch with no history.
+- 003 found a test on `main` that passed only because of test order: a release in `after_each` takes effect on the next frame, so the next test still sees the press. Fixed in [#19](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/19), together with a rule in the skill.
+
+**Limits**
+
+- All 8 tasks test one script, `builder.gd`.
+- No baseline: nothing shows how the same agent does without the skill ([#22](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/22)).
+
+### review-pr: 4 graded runs
+
+| Run | PR | Findings | Correct | False | Wrong fixes | Verified before reporting |
+|---|---|---|---|---|---|---|
+| [001](evals/review-pr/001-pr1.md) | [#1](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/1) | 9 | 7 | 1 | 1 | 1/9 |
+| [002](evals/review-pr/002-pr1.md) ⚠ | [#1](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/1) | 7 | 6 | 0 | 0 | 7/7 |
+| [003](evals/review-pr/003-pr1.md) | [#1](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/1) | 5 | 4 | 1 | 0 | 4/5 |
+| [004](evals/review-pr/004-pr4.md) | [#4](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/4) | 9 | 8 | 1 | 0 | 8/9 |
+
+Findings: reported by the agent; Correct / False: as graded; Wrong fixes: correct findings with a wrong proposed fix; Verified: findings the agent checked against the code before reporting.
+
+⚠ 002 reviewed only 6 new commits, not the full PR, so it isn't directly comparable with the other runs.
+
+001, 003 and 004 each had one false finding, and each one became a rule in the skill (`f32e83f`, `7e4f65b`, `5297b37`).
+
+**From a false finding to a rule.** In run 004, finding #6 said a cleanup line would leak if the assert before it failed, and proposed moving it to `after_each`. That's false: a failed GUT assert doesn't stop the test. The agent had read the test code but never checked how GUT behaves. Commit `5297b37` added this to step 5 of [`review-pr`](.claude/skills/review-pr/SKILL.md):
+
+> GUT asserts don't abort the test: the lines after a failed assert still run. Don't suggest moving cleanup out of a test body on that ground.
+
+**Limits**
+
+- Runs 001–003 all reviewed PR [#1](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/1), and the rules added after them came from that PR. Only 004 tests the skill on a PR it wasn't tuned on.
+- Precision is graded, recall isn't: nobody counted the bugs the agent missed.
+- Next: a set of PRs with planted bugs, rerun after every rule change, to measure both.
+
+### write-pytest: tests for the MCP server
+
+write-pytest's first run wrote the suite for the server ([#2](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/2)). Bugs the tests found: `screenshot` returned `ok: true` for a scene with a broken shader or a `push_error`, a path outside the project reached the agent as a bare "Error executing tool", and one byte of Godot's output that isn't UTF-8 broke every tool.
+
+Details: [`evals/write-pytest/001-issue2.md`](evals/write-pytest/001-issue2.md).
+
+**Limits**
+
+- One run on one module. `tools/design/figcraft.py` has no suite yet.
+- The agent's first report was wrong. It claimed 26 of 26 mutations caught, but it had picked those 26 itself, after writing the tests. Generated mutants gave 299 of 453, and the suite was reworked to 450 of 477.
+- The separate grading session found 6 surviving mutants the eval had wrongly called equivalent, and led to 3 of the 6 bugs.
+
+## How it was made
+
+- Built in one day with Claude Code: 105 commits on 2026-11-21 (109 with merges). The evals ran on Opus 5.5.
+- The game is a fork of Kenney's Starter Kit City Builder ([below](#original-starter-kit-kenney)).
+- The mockup was made in another session: I gave an agent a reference screenshot, and it drew the layers through the FigCraft MCP.
+- Each task got its own branch and PR: [#1 Agent skills](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/1), [#4 generate-ui + main menu](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/4), [#11 write-pytest + MCP server tests](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/11). Rules for agents: [`AGENTS.md`](AGENTS.md).
+
+## Roadmap
+
+- [#3 rotating tips and relative notification times](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/3)
+- [#5 Options and Credits screens](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/5)
+- [#6 save slots and Load screen](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/6)
+- [#8 Figma input for generate-ui](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/8)
+
+## Setup
+
+**Requirements**
+
+- Godot 4.7 and [uv](https://docs.astral.sh/uv/).
+- Claude Code.
+- The plugin [mattpocock-skills](https://github.com/mattpocock/skills). The evals ran with version 1.3.1 (`49dd158`). The plugin updates itself, so later runs may use a newer version.
+  - Install: `/plugin install mattpocock-skills@claude-plugins-official`. `.claude/settings.json` enables it, so Claude Code also offers to install it when you trust the folder.
+  - `review-pr` calls its `code-review`; `write-test` and `write-pytest` call its `tdd`. Without the plugin these skills stop and ask you to install it.
+
+**Run it in Claude Code**
+
+1. [`.mcp.json`](.mcp.json) starts the server with `uv run --script tools/mcp/godot_mcp.py`. It runs `godot` by default; to run another binary, set `GODOT_BIN` in your environment before starting Claude Code. The binary must be Godot 4.7: any other version rewrites `*.import` on every build.
+2. Check that `/mcp` lists `godot` as connected. Then try `/review-pr <n>`, or ask for UI from a mockup (generate-ui), a game test (write-test) or a test for the MCP server (write-pytest).
+
+**MCP tools** of the `godot` server ([`tools/mcp/godot_mcp.py`](tools/mcp/godot_mcp.py)):
+
+- `build`: reimport assets and compile all project scripts (optionally `export_preset`).
+- `run_tests`: run the GUT suite in `tests/` (filter by `script` or `test_name`).
+- `find_scenes` / `scene_tree`: search scenes by node name, type or script; dump a scene's node tree.
+- `screenshot`: render a scene in windowed Godot at an exact size (optional `state`, `hover`) and save a PNG plus a `.layout.json` of every visible Control's rect.
+
+**Tests**
+
+- Game: [GUT](https://github.com/bitwes/Gut) 9.7.1 in `addons/gut`. From the CLI: `"${GODOT_BIN:-godot}" --headless -s res://addons/gut/gut_cmdln.gd -gconfig=res://.gutconfig.json -gexit`.
+- MCP server, no Godot needed: `uv run --with pytest --with 'mcp>=2.3,<3' pytest --import-mode=importlib tools`.
+
+`docs/agents/` refers to the plugin's `/triage`, `/domain-modeling` and `/grill-with-docs`.
 
 ---
 

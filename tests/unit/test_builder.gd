@@ -57,13 +57,15 @@ func test_structure_next_switches_preview() -> void:
 	await get_tree().process_frame  # let the replaced preview's queue_free() run before GUT counts orphans
 
 func test_structure_previous_from_first_wraps_to_last_and_switches_preview() -> void:
+	# A third structure: with two, previous and next both take 0 to 1 and can't be told apart.
+	builder.structures.append(load("res://structures/pavement.tres"))
 	var preview: Node = builder.selector_container.get_child(0)
 	Input.action_press("structure_previous")
 	builder.action_structure_toggle()
-	assert_eq(builder.index, 1)  # two structures: 0 - 1 wraps to the last one
+	assert_eq(builder.index, 2)  # 0 - 1 wraps to the last one (next would give 1)
 	assert_eq(builder.selector_container.get_child_count(), 1)
 	assert_ne(builder.selector_container.get_child(0), preview)
-	assert_eq(builder.selector_container.get_child(0).scene_file_path, "res://models/grass.glb")
+	assert_eq(builder.selector_container.get_child(0).scene_file_path, "res://models/pavement.glb")
 	await get_tree().process_frame  # let the replaced preview's queue_free() run before GUT counts orphans
 
 func test_save_map_writes_tiles_and_emits_map_saved() -> void:

@@ -1,0 +1,11 @@
+[gd_scene format=3]
+
+[node name="Keycap" type="PanelContainer"]
+mouse_filter = 2
+theme_type_variation = &"Keycap"
+
+[node name="Key" type="Label" parent="."]
+layout_mode = 2
+theme_type_variation = &"KeycapText"
+text = "ESC"
+uppercase = true

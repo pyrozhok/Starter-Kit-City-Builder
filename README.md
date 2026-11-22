@@ -116,7 +116,7 @@ flowchart LR
   E -- "each mistake → a rule" --> B
 ```
 
-Skills live in [`.claude/skills/`](.claude/skills), the MCP server in [`tools/mcp/godot_mcp.py`](tools/mcp/godot_mcp.py) with its tests in [`tools/mcp/tests/`](tools/mcp/tests), and the evals in [`evals/`](evals). write-test's first eval is [`evals/write-test/001.md`](evals/write-test/001.md).
+Skills live in [`.claude/skills/`](.claude/skills), the MCP server in [`tools/mcp/godot_mcp.py`](tools/mcp/godot_mcp.py) with its tests in [`tools/mcp/tests/`](tools/mcp/tests), and the evals in [`evals/`](evals). write-test's evals are in [`evals/write-test/`](evals/write-test).
 
 ### What carries over to another engine
 

@@ -10,3 +10,4 @@ ERROR: Failed to load script "res://scripts/broken_script.gd" with error "Parse 
    at: load (modules/gdscript/gdscript_resource_format.cpp:46)
    GDScript backtrace (most recent call first):
        [0] _initialize (res://tools/mcp/check_scripts.gd:16)
+CHECK FAILED: res://scripts/broken_script.gd

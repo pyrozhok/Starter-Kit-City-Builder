@@ -44,6 +44,18 @@ func test_rebuilding_same_structure_on_its_tile_does_not_charge() -> void:
 	assert_eq(builder.map.cash, cash_after_first)
 	assert_eq(builder.cash_display.text, "$" + str(cash_after_first))
 
+func test_building_different_structure_over_tile_charges_new_price() -> void:
+	# The two prices differ, so charging the old tile's price would give another total.
+	assert_ne(builder.structures[0].price, builder.structures[1].price, "precondition: prices differ")
+	builder.gridmap.set_cell_item(Vector3i(2, 0, 3), 0)
+	builder.index = 1
+	var cash_before: int = builder.map.cash
+	Input.action_press("build")
+	builder.action_build(Vector3(2, 0, 3))
+	assert_eq(builder.gridmap.get_cell_item(Vector3i(2, 0, 3)), 1)
+	assert_eq(builder.map.cash, cash_before - builder.structures[1].price)
+	assert_eq(builder.cash_display.text, "$" + str(builder.map.cash))
+
 func test_demolish_empties_tile() -> void:
 	builder.gridmap.set_cell_item(Vector3i(2, 0, 3), 1)
 	Input.action_press("demolish")
@@ -76,6 +88,20 @@ func test_structure_next_switches_preview() -> void:
 	assert_ne(builder.selector_container.get_child(0), preview)
 	await get_tree().process_frame  # let the replaced preview's queue_free() run before GUT counts orphans
 
+func test_structure_next_from_last_structure_wraps_to_first() -> void:
+	# Three structures: from the last one, index - 1 (wrong direction) would land on 1, not 0
+	builder.structures.append(load("res://structures/pavement.tres"))
+	builder.index = 2
+	builder.update_structure()
+	var preview: Node = builder.selector_container.get_child(0)
+	Input.action_press("structure_next")
+	builder.action_structure_toggle()
+	assert_eq(builder.index, 0)
+	assert_eq(builder.selector_container.get_child_count(), 1)
+	assert_ne(builder.selector_container.get_child(0), preview)
+	assert_eq(builder.selector_container.get_child(0).scene_file_path, builder.structures[0].model.resource_path)
+	await get_tree().process_frame  # let the replaced previews' queue_free() run before GUT counts orphans
+
 func test_structure_previous_from_first_wraps_to_last_and_switches_preview() -> void:
 	# A third structure: with two, previous and next both take 0 to 1 and can't be told apart.
 	builder.structures.append(load("res://structures/pavement.tres"))
@@ -87,6 +113,18 @@ func test_structure_previous_from_first_wraps_to_last_and_switches_preview() -> 
 	assert_ne(builder.selector_container.get_child(0), preview)
 	assert_eq(builder.selector_container.get_child(0).scene_file_path, builder.structures[2].model.resource_path)
 	await get_tree().process_frame  # let the replaced preview's queue_free() run before GUT counts orphans
+
+func test_rotate_turns_selector_quarter_turn_counterclockwise() -> void:
+	Input.action_press("rotate")
+	builder.action_rotate()
+	# +90 degrees about Y maps local -Z (forward) to world -X; -90 would give +X.
+	assert_almost_eq(builder.selector.rotation.y, deg_to_rad(90), 0.0001)
+	assert_almost_eq(builder.selector.basis * Vector3.FORWARD, Vector3.LEFT, Vector3.ONE * 0.0001)
+
+func test_rotate_is_ignored_without_press() -> void:
+	await get_tree().process_frame  # a press released in the previous test's after_each still reads as just pressed this frame
+	builder.action_rotate()  # nothing pressed, like an idle _process frame
+	assert_almost_eq(builder.selector.rotation.y, 0.0, 0.0001)
 
 func test_save_map_writes_tiles_and_emits_map_saved() -> void:
 	watch_signals(builder)
@@ -186,44 +224,3 @@ func test_reload_without_saving_restores_saved_cash() -> void:
 	builder.load_map(SAVE_PATH)
 	assert_eq(builder.map.cash, 500)
 	assert_eq(builder.gridmap.get_used_cells().size(), 0)
-
-
-func test_building_different_structure_over_tile_charges_new_price() -> void:
-	# Road (0) costs 25, grass (1) costs 10: charging the old tile's price would differ.
-	assert_ne(builder.structures[0].price, builder.structures[1].price, "precondition: prices differ")
-	builder.gridmap.set_cell_item(Vector3i(2, 0, 3), 0)
-	builder.index = 1
-	var cash_before: int = builder.map.cash
-	Input.action_press("build")
-	builder.action_build(Vector3(2, 0, 3))
-	assert_eq(builder.gridmap.get_cell_item(Vector3i(2, 0, 3)), 1)
-	assert_eq(builder.map.cash, cash_before - builder.structures[1].price)
-	assert_eq(builder.cash_display.text, "$" + str(builder.map.cash))
-
-
-func test_rotate_turns_selector_quarter_turn_counterclockwise() -> void:
-	Input.action_press("rotate")
-	builder.action_rotate()
-	# +90 degrees about Y maps local -Z (forward) to world -X; -90 would give +X.
-	assert_almost_eq(builder.selector.rotation.y, deg_to_rad(90), 0.0001)
-	assert_almost_eq(builder.selector.basis * Vector3.FORWARD, Vector3.LEFT, Vector3.ONE * 0.0001)
-
-
-func test_rotate_is_ignored_without_press() -> void:
-	await get_tree().process_frame  # a press released in the previous test's after_each still reads as just pressed this frame
-	builder.action_rotate()  # nothing pressed, like an idle _process frame
-	assert_almost_eq(builder.selector.rotation.y, 0.0, 0.0001)
-
-
-func test_structure_next_from_last_structure_wraps_to_first() -> void:
-	# Three structures: from the last one, index - 1 (wrong direction) would land on 1, not 0
-	builder.structures.append(load("res://structures/pavement.tres"))
-	builder.index = 2
-	builder.update_structure()
-	var preview: Node = builder.selector_container.get_child(0)
-	Input.action_press("structure_next")
-	builder.action_structure_toggle()
-	assert_eq(builder.index, 0)
-	assert_eq(builder.selector_container.get_child_count(), 1)
-	assert_ne(builder.selector_container.get_child(0), preview)
-	await get_tree().process_frame  # let the replaced previews' queue_free() run before GUT counts orphans

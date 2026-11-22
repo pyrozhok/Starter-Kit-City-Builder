@@ -126,7 +126,7 @@ Each task has a prompt, a known answer and grading mutations, kept outside the r
 | [002](evals/review-pr/002-pr1.md) ⚠ | [#1](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/1) | 7 | 6 | 0 | 0 | 7/7 |
 | [003](evals/review-pr/003-pr1.md) | [#1](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/1) | 5 | 4 | 1 | 0 | 4/5 |
 | [004](evals/review-pr/004-pr4.md) | [#4](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/4) | 9 | 8 | 1 | 0 | 8/9 |
-| [005](evals/review-pr/005-planted.md) | [#32](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/32)–[#36](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/36) | 20 | 16 | 4 | 0 | 6/6 planted |
+| [005](evals/review-pr/005-planted.md) | [#32](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/32)–[#36](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/36) | 20 | 16 | 4 | 0 | 3/4 bugged PRs run; #34 read only |
 
 Findings: reported by the agent; Correct / False: as graded; Wrong fixes: correct findings with a wrong proposed fix; Verified: findings the agent checked against the code before reporting.
 

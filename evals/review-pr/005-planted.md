@@ -11,20 +11,20 @@
 
 ## Answer key
 
-- **A #32** `eval/zoom-limits` (`91d326f`) "refactor(view): zoom limits and step as exported settings"
+- **A #32** `refactor/zoom-limits` (`91d326f`) "refactor(view): zoom limits and step as exported settings"
   - A1 `zoom_in`: `zoom = min(min_zoom, zoom - zoom_step)`: `min` instead of `max`, so zoom drops to ≤15 and keeps falling instead of clamping.
   - A2 `zoom_out`: `zoom = max(max_zoom, zoom + zoom_step)`: `max` instead of `min`, so zoom jumps to ≥80 with no upper clamp.
   - (Not scored: `test_zoom_in_moves_camera_closer` only asserts that zoom decreased, so it passes on A1.)
-- **B #33** `eval/hud-top-bar` (`7a9c79b`) "feat(ui): dark bar behind the cash display"
+- **B #33** `feat/hud-top-bar` (`7a9c79b`) "feat(ui): dark bar behind the cash display"
   - B1 the TopBar Panel (1920×130) keeps the default `mouse_filter` (STOP), so build/demolish is blocked under the top strip.
   - B2 the style is hard-coded in `main.tscn` (`theme_override_styles` + inline `StyleBoxFlat`) instead of a `theme.tres` type variation (project rule).
-- **C #34** `eval/data-map-tests` (`b362ffe`) "test(data_map): cover new_map cash reset and structures after reload"
+- **C #34** `test/data-map-tests` (`b362ffe`) "test(data_map): cover new_map cash reset and structures after reload"
   - C1 `test_new_map_resets_cash_after_spending` never calls `Builder.new_map()`; it tests `DataMap.new()` defaults and can't fail for the behaviour it names.
   - C2 `test_saved_map_keeps_structures_after_reload` never saves, so the `if FileAccess.file_exists` branch never runs and no assertion runs.
-- **D #35** `eval/orbit-docs` (`6e16dc1`) "docs(view): document orbit_speed"
+- **D #35** `docs/orbit-docs` (`6e16dc1`) "docs(view): document orbit_speed"
   - D1 a behaviour change hidden in a docs commit: `orbit_speed` default 3.0 → 12.0. `test_auto_orbit_turns_camera_around_center` fails, so the gate is red.
   - D2 the doc comment says radians per second; the code adds it to `rotation_degrees`.
-- **E #36** `eval/zoom-tests`: clean, correct tests of the existing 15/80 zoom clamp. Any finding is false.
+- **E #36** `test/zoom-tests`: clean, correct tests of the existing 15/80 zoom clamp. Any finding is false.
 
 ## Per PR
 
@@ -45,7 +45,7 @@
 | False findings on bugged PRs | 0 |
 | Clean PR #36 | false Blocking 0, false Nits 4 |
 | Wrong fixes | 0 |
-| Planted findings verified or explicitly scoped | 6/6 |
+| Bugged PRs whose planted findings were verified by a run or probe | 3/4 (#34 read the code only, and said so) |
 
 On the clean PR the verdict "nothing blocks" was correct. Its 4 Nits are style/process remarks and none claims a defect, but they are graded false.
 

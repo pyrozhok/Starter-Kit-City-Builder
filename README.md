@@ -17,7 +17,7 @@ alt="Main menu built by generate-ui: live city behind, hover, New Game"/></p>
 ## Results
 
 - **generate-ui**: 28/31 layers of the mockup within ±2px, after 1 fix iteration of 3. The run took 16 minutes from the approved plan to the final screenshot. When the mockup contradicted itself, the agent asked instead of guessing.
-- **write-test**: 8 tasks with a hidden known answer, each given to a fresh agent and graded by planting the bug its test must catch. After the rules from the first eval, all 4 new tasks passed with no human edits, in under 65 seconds each.
+- **write-test**: 8 tasks with a hidden known answer, each given to a fresh agent and graded by planting the bug its test must catch. After the rules from the first eval, all 4 new tasks passed with no human edits, in under 65 seconds each. Against a baseline without the skill, the 8 tasks caught 19/20 mutations with it and 18/20 without: on this model the skill adds its project knowledge, not its method.
 - **review-pr**: in 4 runs on 2 PRs, findings checked against the code before reporting went from 1/9 to 8/9, and wrong fixes from 1 to 0. False findings didn't go down: 3 of the 4 runs had one.
 - **write-pytest**: 93 tests for the `godot` MCP server that run without Godot and kill 450 of 477 generated mutants. Writing them found 6 bugs in the server, each fixed together with a test that failed before the fix.
 
@@ -106,6 +106,7 @@ Each task has a prompt, a known answer and grading mutations, kept outside the r
 | [001](evals/write-test/001.md) | a–d | 3 passed; (a) caught 1 of 2 mutations | 1 |
 | [002](evals/write-test/002.md) | a, c again, after 3 rules from 001 | 2/2 | 0 |
 | [003](evals/write-test/003.md) | e–h, new, no example in the skill names them | 4/4, 37 s to 1 min 4 s each | 0 |
+| [004](evals/write-test/004-baseline.md) | a–h, with vs without the skill | mutations caught 19/20 vs 18/20; only (h) differs: the `set_process` rule and its inputs | 0 |
 
 - In 001 one agent read the answer from git history. That run was discarded, and since then each run starts from an orphan branch with no history.
 - 003 found a test on `main` that passed only because of test order: a release in `after_each` takes effect on the next frame, so the next test still sees the press. Fixed in [#19](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/19), together with a rule in the skill.
@@ -113,7 +114,7 @@ Each task has a prompt, a known answer and grading mutations, kept outside the r
 **Limits**
 
 - All 8 tasks test one script, `builder.gd`.
-- No baseline: nothing shows how the same agent does without the skill ([#22](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/22)).
+- The baseline (004) barely separates the arms: one run per arm per task, tasks easy for Opus 5.5 ([#30](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/30)).
 
 ### review-pr: 4 graded runs
 

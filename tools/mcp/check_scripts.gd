@@ -14,7 +14,8 @@ func _initialize() -> void:
 		# Fresh process, so the default cache is fine; CACHE_MODE_IGNORE on already-loaded
 		# scripts (autoloads) can crash the engine.
 		var script := load(path) as GDScript
-		if script == null:
+		# Godot 4.7 still returns a GDScript for a script that doesn't parse; it can't be instantiated.
+		if script == null or not script.can_instantiate():
 			failed += 1
 			printerr("CHECK FAILED: %s" % path)
 	print("CHECKED %d scripts, %d failed" % [checked, failed])

@@ -30,6 +30,19 @@ corner_radius_bottom_left = 6
 border_width_left = 6
 border_color = Color(0.960784, 0.721569, 0.254902, 1)
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_pressed"]
+content_margin_left = 28.0
+content_margin_top = 0.0
+content_margin_right = 24.0
+content_margin_bottom = 0.0
+bg_color = Color(0.0392157, 0.054902, 0.0784314, 0.95)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+border_width_left = 6
+border_color = Color(0.960784, 0.721569, 0.254902, 1)
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_disabled"]
 content_margin_left = 22.0
 content_margin_top = 0.0
@@ -150,8 +163,8 @@ MenuSidebar/constants/separation = 16
 MainMenuButton/base_type = &"Button"
 MainMenuButton/colors/font_color = Color(0.94902, 0.956863, 0.968627, 1)
 MainMenuButton/colors/font_hover_color = Color(1, 0.843137, 0.537255, 1)
-MainMenuButton/colors/font_pressed_color = Color(1, 0.843137, 0.537255, 1)
-MainMenuButton/colors/font_hover_pressed_color = Color(1, 0.843137, 0.537255, 1)
+MainMenuButton/colors/font_pressed_color = Color(0.960784, 0.721569, 0.254902, 1)
+MainMenuButton/colors/font_hover_pressed_color = Color(0.960784, 0.721569, 0.254902, 1)
 MainMenuButton/colors/font_focus_color = Color(1, 0.843137, 0.537255, 1)
 MainMenuButton/colors/font_disabled_color = Color(0.94902, 0.956863, 0.968627, 0.35)
 MainMenuButton/colors/icon_normal_color = Color(1, 1, 1, 1)
@@ -166,8 +179,8 @@ MainMenuButton/font_sizes/font_size = 30
 MainMenuButton/fonts/font = SubResource("FontVariation_spaced")
 MainMenuButton/styles/normal = SubResource("StyleBoxFlat_btn_normal")
 MainMenuButton/styles/hover = SubResource("StyleBoxFlat_btn_hover")
-MainMenuButton/styles/pressed = SubResource("StyleBoxFlat_btn_hover")
-MainMenuButton/styles/hover_pressed = SubResource("StyleBoxFlat_btn_hover")
+MainMenuButton/styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+MainMenuButton/styles/hover_pressed = SubResource("StyleBoxFlat_btn_pressed")
 MainMenuButton/styles/disabled = SubResource("StyleBoxFlat_btn_disabled")
 MainMenuButton/styles/focus = SubResource("StyleBoxFlat_btn_focus")
 MenuPanel/base_type = &"PanelContainer"

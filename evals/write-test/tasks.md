@@ -32,7 +32,7 @@ the mutation does not catch the behavior it was written for.
 - **Prompt**: "Building the same structure again on a tile that already holds it must not charge cash.
   Cover this with a GUT test. Use the project skill `write-test`. Don't commit; leave your changes in
   the working tree and report what you did."
-- **Known answer** (`builder.gd:94-99`): `previous_tile != index` gates the charge, the cash display
+- **Known answer** (`builder.gd:94-101`): `previous_tile != index` gates the charge, the cash display
   and the sound; the tile is still rewritten (orientation can change). Building a *different* structure
   over a tile does charge.
 - **Grading mutations**:

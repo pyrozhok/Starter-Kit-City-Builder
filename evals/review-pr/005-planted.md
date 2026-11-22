@@ -1,6 +1,6 @@
 # review-pr eval 005: recall on 5 PRs with planted bugs
 
-- **Target**: PRs [#32](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/32)–[#36](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/36) on `pyrozhok/Starter-Kit-City-Builder`, each cut from `fork/main` `ffec0c5`. 7 planted bugs across 4 PRs; #36 is clean.
+- **Target**: PRs [#32](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/32)–[#36](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/36) on `pyrozhok/Starter-Kit-City-Builder`, each cut from `fork/main` `ffec0c5`. 8 planted bugs across 4 PRs; #36 is clean.
 - **Why**: runs 001–004 graded precision only. This run counts the bugs the agent missed ([#23](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/23)).
 - **Date**: 2026-11-22
 - **Setup**:
@@ -40,7 +40,7 @@
 
 | Metric | Value |
 |---|---|
-| Recall (planted bugs found) | 6/7 (missed B2) |
+| Recall (planted bugs found) | 7/8 (missed B2) |
 | Correct unplanned findings | 10 |
 | False findings on bugged PRs | 0 |
 | Clean PR #36 | false Blocking 0, false Nits 4 |

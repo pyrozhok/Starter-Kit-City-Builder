@@ -175,3 +175,16 @@ func test_reload_without_saving_restores_saved_cash() -> void:
 	builder.load_map(SAVE_PATH)
 	assert_eq(builder.map.cash, 500)
 	assert_eq(builder.gridmap.get_used_cells().size(), 0)
+
+
+func test_building_different_structure_over_tile_charges_new_price() -> void:
+	# Road (0) costs 25, grass (1) costs 10: charging the old tile's price would differ.
+	assert_ne(builder.structures[0].price, builder.structures[1].price, "precondition: prices differ")
+	builder.gridmap.set_cell_item(Vector3i(2, 0, 3), 0)
+	builder.index = 1
+	var cash_before: int = builder.map.cash
+	Input.action_press("build")
+	builder.action_build(Vector3(2, 0, 3))
+	assert_eq(builder.gridmap.get_cell_item(Vector3i(2, 0, 3)), 1)
+	assert_eq(builder.map.cash, cash_before - builder.structures[1].price)
+	assert_eq(builder.cash_display.text, "$" + str(builder.map.cash))

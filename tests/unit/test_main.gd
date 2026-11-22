@@ -10,9 +10,12 @@ var view: View
 var menu: MainMenu
 var notifications: Notifications
 var options: OptionsMenu
+## The fullscreen toggle sets the real window mode; after_each puts this one back.
+var window_mode: DisplayServer.WindowMode
 
 
 func before_each() -> void:
+	window_mode = DisplayServer.window_get_mode()
 	main = (load("res://scenes/main.tscn") as PackedScene).instantiate()
 	builder = main.get_node("Builder")
 	builder.save_path = SAVE_PATH  # before _ready: main checks it when it opens the menu
@@ -29,6 +32,8 @@ func after_each() -> void:
 		if FileAccess.file_exists(path):
 			DirAccess.remove_absolute(path)
 	AudioServer.set_bus_volume_linear(0, 1.0)
+	if DisplayServer.window_get_mode() != window_mode:
+		DisplayServer.window_set_mode(window_mode)
 
 
 func _start() -> void:
@@ -184,6 +189,7 @@ func test_changed_settings_are_applied_and_saved() -> void:
 func test_slider_ticks_apply_live_and_save_when_the_drag_ends() -> void:
 	_start()
 	var slider := options.get_node(OptionsMenu.ROWS + "MasterVolume/Box/VolumeSlider") as OptionSlider
+	slider.drag_started.emit()
 	slider.value = 30.0
 	assert_almost_eq(AudioServer.get_bus_volume_linear(0), 0.3, 0.001)
 	assert_false(FileAccess.file_exists(SETTINGS_PATH), "a tick does not write the file")

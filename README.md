@@ -16,7 +16,7 @@ alt="Main menu built by generate-ui: live city behind, hover, New Game"/></p>
 
 ## Results
 
-- **generate-ui**: 28/31 layers of the mockup within ±2px, after 1 fix iteration of 3. The run took 16 minutes from the approved plan to the final screenshot. When the mockup contradicted itself, the agent asked instead of guessing. On a held-out Options screen with sliders and a toggle: x and width within ±2px for 26/29 layers, 2 iterations, 8.5 minutes.
+- **generate-ui**: 28/31 layers of the mockup within ±2px in x, y, width and height, after 1 fix iteration of 3. The run took 16 minutes from the approved plan to the final screenshot. When the mockup contradicted itself, the agent asked instead of guessing. On a held-out Options screen with sliders and a toggle: 26/29 layers within ±2px in x and width, 3/29 in all four (stacked text rows drift down by Godot's line height), 2 iterations, 8.5 minutes.
 - **write-test**: 8 tasks with a hidden known answer, each given to a fresh agent and graded by planting the bug its test must catch. After the rules from the first eval, all 4 new tasks passed with no human edits, in under 65 seconds each. Against a baseline without the skill, the 8 tasks caught 19/20 mutations with it and 18/20 without: on this model the skill adds its project knowledge, not its method.
 - **review-pr**: in 4 runs on 2 PRs, findings checked against the code before reporting went from 1/9 to 8/9, and wrong fixes from 1 to 0. False findings didn't go down: 3 of the 4 runs had one. On 5 PRs with 8 planted bugs ([005](evals/review-pr/005-planted.md)) it found 7/8 (missed a theme.tres rule) with 0 wrong fixes; on the clean PR: false Blocking 0, false Nits 4.
 - **write-pytest**: 93 tests for the `godot` MCP server that run without Godot and kill 450 of 477 generated mutants. Writing them found 6 bugs in the server, each fixed together with a test that failed before the fix.
@@ -126,7 +126,7 @@ Each task has a prompt, a known answer and grading mutations, kept outside the r
 | [002](evals/review-pr/002-pr1.md) ⚠ | [#1](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/1) | 7 | 6 | 0 | 0 | 7/7 |
 | [003](evals/review-pr/003-pr1.md) | [#1](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/1) | 5 | 4 | 1 | 0 | 4/5 |
 | [004](evals/review-pr/004-pr4.md) | [#4](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/4) | 9 | 8 | 1 | 0 | 8/9 |
-| [005](evals/review-pr/005-planted.md) | [#32](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/32)–[#36](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/36) | 20 | 16 | 4 | 0 | 3/4 bugged PRs run; #34 read only |
+| [005](evals/review-pr/005-planted.md) | [#32](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/32)–[#36](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/36) | 21 | 17 | 4 | 0 | 3/4 bugged PRs run; #34 read only |
 
 Findings: reported by the agent; Correct / False: as graded; Wrong fixes: correct findings with a wrong proposed fix; Verified: findings the agent checked against the code before reporting.
 

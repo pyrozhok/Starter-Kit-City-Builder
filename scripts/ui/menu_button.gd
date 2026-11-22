@@ -2,7 +2,7 @@ extends Button
 ## Mockup component "MenuButton". With a key (prop ShowKey), a Keycap stands where the icon would,
 ## one h_separation before the text; MainMenuButtonKeyed makes room for it.
 
-const STYLES := {
+const STYLES: Dictionary[BaseButton.DrawMode, StringName] = {
 	DRAW_NORMAL: &"normal", DRAW_HOVER: &"hover", DRAW_PRESSED: &"pressed",
 	DRAW_HOVER_PRESSED: &"hover_pressed", DRAW_DISABLED: &"disabled",
 }

@@ -6,7 +6,8 @@ extends CanvasLayer
 
 ## Every edit, slider ticks included.
 signal settings_changed
-## A finished edit: a slider drag ends, a toggle flips, or the menu goes back.
+## A finished edit: a slider drag ends, a slider moves outside a drag (wheel, keys), a toggle
+## flips, or the menu goes back.
 signal settings_committed
 signal back_requested
 
@@ -74,15 +75,18 @@ func _show() -> void:
 	_update_labels()
 
 
+## Sliders snap to their step, so the numbers come from them: a file value off the step (volume
+## 0.33) shows what the slider shows (35%).
 func _update_labels() -> void:
-	_volume_value.text = VOLUME_FORMAT % roundi(settings.volume * 100.0)
+	_volume_value.text = VOLUME_FORMAT % roundi(_volume.value)
 	_fullscreen_value.text = FULLSCREEN_TEXT if settings.fullscreen else WINDOWED_TEXT
-	_orbit_value.text = ORBIT_FORMAT % settings.orbit_speed
+	_orbit_value.text = ORBIT_FORMAT % _orbit.value
 
 
 func _on_volume_changed(value: float) -> void:
 	settings.volume = value / 100.0
 	_changed()
+	_commit_unless_dragging(_volume)
 
 
 func _on_fullscreen_toggled(on: bool) -> void:
@@ -94,11 +98,18 @@ func _on_fullscreen_toggled(on: bool) -> void:
 func _on_orbit_changed(value: float) -> void:
 	settings.orbit_speed = value
 	_changed()
+	_commit_unless_dragging(_orbit)
 
 
 func _changed() -> void:
 	_update_labels()
 	settings_changed.emit()
+
+
+## A drag commits once, when it ends.
+func _commit_unless_dragging(slider: OptionSlider) -> void:
+	if not slider.dragging:
+		settings_committed.emit()
 
 
 func _on_drag_ended(_value_changed: bool) -> void:

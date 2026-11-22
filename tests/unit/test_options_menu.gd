@@ -1,7 +1,5 @@
 extends GutTest
 
-const ROWS := "Root/Panel/Box/Content/"
-
 var options: OptionsMenu
 
 
@@ -11,7 +9,7 @@ func before_each() -> void:
 
 
 func _node(path: String) -> Node:
-	return options.get_node(ROWS + path)
+	return options.get_node(OptionsMenu.ROWS + path)
 
 
 func _settings(volume: float, fullscreen: bool, orbit_speed: float) -> Settings:
@@ -105,3 +103,29 @@ func test_preview_keeps_editing_the_given_settings() -> void:
 	assert_eq((_node("MasterVolume/Box/Value") as Label).text, "70%")
 	(_node("MasterVolume/Box/VolumeSlider") as Range).value = 40.0
 	assert_almost_eq(given.volume, 0.4, 0.0001)
+
+
+func test_slider_change_outside_a_drag_is_committed() -> void:
+	watch_signals(options)
+	(_node("MasterVolume/Box/VolumeSlider") as Range).value = 40.0
+	(_node("CameraOrbitSpeed/Box/OrbitSpeedSlider") as Range).value = 1.5
+	assert_signal_emit_count(options, "settings_committed", 2)
+
+
+func test_slider_change_during_a_drag_is_committed_when_the_drag_ends() -> void:
+	watch_signals(options)
+	var commits := 0
+	for path: String in ["MasterVolume/Box/VolumeSlider", "CameraOrbitSpeed/Box/OrbitSpeedSlider"]:
+		var slider := _node(path) as OptionSlider
+		slider.drag_started.emit()
+		slider.value = 1.0
+		assert_signal_emit_count(options, "settings_committed", commits, path + " mid-drag")
+		slider.drag_ended.emit(true)
+		commits += 1
+		assert_signal_emit_count(options, "settings_committed", commits, path + " drag end")
+
+
+func test_volume_label_agrees_with_the_slider_off_its_step() -> void:
+	options.settings = _settings(0.33, false, 1.0)
+	assert_eq((_node("MasterVolume/Box/VolumeSlider") as Range).value, 35.0)
+	assert_eq((_node("MasterVolume/Box/Value") as Label).text, "35%")

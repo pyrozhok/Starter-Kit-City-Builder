@@ -17,6 +17,7 @@ alt="Main menu built by generate-ui: live city behind, hover, New Game"/></p>
 ## Results
 
 - **generate-ui**: 28/31 layers of the mockup within ±2px, after 1 fix iteration of 3. The run took 16 minutes from the approved plan to the final screenshot. When the mockup contradicted itself, the agent asked instead of guessing.
+- **write-test**: 8 tasks with a hidden known answer, each given to a fresh agent and graded by planting the bug its test must catch. After the rules from the first eval, all 4 new tasks passed with no human edits, in under 65 seconds each.
 - **review-pr**: in 4 runs on 2 PRs, findings checked against the code before reporting went from 1/9 to 8/9, and wrong fixes from 1 to 0. False findings didn't go down: 3 of the 4 runs had one.
 - **write-pytest**: 93 tests for the `godot` MCP server that run without Godot and kill 450 of 477 generated mutants. Writing them found 6 bugs in the server, each fixed together with a test that failed before the fix.
 
@@ -75,7 +76,7 @@ The skills run the engine only through the MCP tools: `build`, `run_tests`, `scr
 ## Evals
 
 Each eval is a run of a skill on a real task, graded and written up in [`evals/`](evals).
-I wrote the generate-ui and review-pr skills, graded their runs, and wrote both PRs that review-pr reviewed. The write-pytest run was graded by a separate Claude session. write-test's evals are in [`evals/write-test/`](evals/write-test).
+I wrote the generate-ui and review-pr skills, graded their runs, and wrote both PRs that review-pr reviewed. The write-test runs were graded by the session that set the tasks, and I approved each grade. The write-pytest run was graded by a separate Claude session.
 
 ### generate-ui: main menu from a mockup
 
@@ -94,6 +95,24 @@ Details: [`evals/generate-ui/001-main-menu.md`](evals/generate-ui/001-main-menu.
 
 - One run on one screen.
 - The mockup was drawn by an agent, so its layers are probably cleaner and better named than in a designer's file. A designer's Figma file would be the real test ([#8](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/8)).
+
+### write-test: 8 tasks with a known answer
+
+Each task has a prompt, a known answer and grading mutations, kept outside the repo until every run had finished. A fresh agent gets only the prompt. The grader applies each mutation on top of the agent's result: the new tests must fail on it.
+
+| Eval | Tasks | Result | Human edits |
+|---|---|---|---|
+| [001](evals/write-test/001.md) | a–d | 3 passed; (a) caught 1 of 2 mutations | 1 |
+| [002](evals/write-test/002.md) | a, c again, after 3 rules from 001 | 2/2 | 0 |
+| [003](evals/write-test/003.md) | e–h, new, no example in the skill names them | 4/4, 37 s to 1 min 4 s each | 0 |
+
+- In 001 one agent read the answer from git history. That run was discarded, and since then each run starts from an orphan branch with no history.
+- 003 found a test on `main` that passed only because of test order: a release in `after_each` takes effect on the next frame, so the next test still sees the press. Fixed in #19, together with a rule in the skill.
+
+**Limits**
+
+- All 8 tasks test one script, `builder.gd`.
+- No baseline: nothing shows how the same agent does without the skill ([#22](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/22)).
 
 ### review-pr: 4 graded runs
 

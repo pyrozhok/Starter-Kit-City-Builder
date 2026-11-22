@@ -47,4 +47,4 @@ Each capture `godot-4.7.2-<name>` is one real headless run in a `git archive HEA
 |---|---|---|
 | `import` | `--import` of the project | 0 |
 | `import-shader-error` | `--import` with `COLOR = undefined_thing;` added to `backdrop_blur.gdshader` | 0 |
-| `check-scripts-error` | `-s res://tools/mcp/check_scripts.gd` with a script that doesn't parse (`var x: int = "not an int"`); Godot 4.7 still loads it, so the tool reports "0 failed" | 0 |
+| `check-scripts-error` | `-s res://tools/mcp/check_scripts.gd` with a script that doesn't parse (`var x: int = "not an int"`); Godot 4.7 still loads it, but it can't be instantiated, so the tool reports "1 failed" | 1 |

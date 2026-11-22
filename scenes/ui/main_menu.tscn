@@ -81,7 +81,6 @@ icon = ExtResource("5_folder")
 [node name="Options" parent="Root/Content/Buttons" instance=ExtResource("9_button")]
 unique_name_in_owner = true
 layout_mode = 2
-tooltip_text = "Coming soon"
 text = "OPTIONS"
 icon = ExtResource("6_gear")
 

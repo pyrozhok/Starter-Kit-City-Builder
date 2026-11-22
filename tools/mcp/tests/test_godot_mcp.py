@@ -420,15 +420,17 @@ def test_build_fails_on_a_shader_that_does_not_compile(mod: ModuleType, godot) -
 
 def test_only_failed_steps_keep_output_tail(mod: ModuleType, godot) -> None:
     # Real runs: a clean import, then check_scripts.gd over a script that doesn't parse. Godot 4.7
-    # still loads it, so check_scripts.gd says "0 failed" and exits 0; the SCRIPT ERROR lines are
-    # what fail the step.
-    godot.on("res://tools/mcp/check_scripts.gd", capture="godot-4.7.2-check-scripts-error", code=0)
+    # still loads it, but can_instantiate() is false, so check_scripts.gd counts it as failed and
+    # exits 1; the SCRIPT ERROR lines fail the step as well.
+    godot.on("res://tools/mcp/check_scripts.gd", capture="godot-4.7.2-check-scripts-error", code=1)
     godot.on(capture="godot-4.7.2-import")
 
     result = mod.build()
 
     assert "output_tail" not in result["steps"]["import"]
-    assert "CHECKED 22 scripts, 0 failed" in result["steps"]["check_scripts"]["output_tail"]
+    assert result["steps"]["check_scripts"]["exit_code"] == 1
+    assert "CHECKED 18 scripts, 1 failed" in result["steps"]["check_scripts"]["output_tail"]
+    assert "CHECK FAILED: res://scripts/broken_script.gd" in result["steps"]["check_scripts"]["output_tail"]
     assert result["steps"]["check_scripts"]["errors"][0].endswith("[res://scripts/broken_script.gd:5]")
     assert result["ok"] is False
 

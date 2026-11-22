@@ -16,9 +16,9 @@ alt="Main menu built by generate-ui: live city behind, hover, New Game"/></p>
 
 ## Results
 
-- **generate-ui**: 28/31 layers of the mockup within ±2px, after 1 fix iteration of 3. The run took 16 minutes from the approved plan to the final screenshot. When the mockup contradicted itself, the agent asked instead of guessing.
-- **write-test**: 8 tasks with a hidden known answer, each given to a fresh agent and graded by planting the bug its test must catch. After the rules from the first eval, all 4 new tasks passed with no human edits, in under 65 seconds each.
-- **review-pr**: in 4 runs on 2 PRs, findings checked against the code before reporting went from 1/9 to 8/9, and wrong fixes from 1 to 0. False findings didn't go down: 3 of the 4 runs had one.
+- **generate-ui**: 28/31 layers of the mockup within ±2px in x, y, width and height, after 1 fix iteration of 3. The run took 16 minutes from the approved plan to the final screenshot. When the mockup contradicted itself, the agent asked instead of guessing. On a held-out Options screen with sliders and a toggle: 26/29 layers within ±2px in x and width, 3/29 in all four (stacked text rows drift down by Godot's line height), 2 iterations, 8.5 minutes.
+- **write-test**: 8 tasks with a hidden known answer, each given to a fresh agent and graded by planting the bug its test must catch. After the rules from the first eval, all 4 new tasks passed with no human edits, in under 65 seconds each. Against a baseline without the skill, the 8 tasks caught 19/20 mutations with it and 18/20 without: on this model the skill adds its project knowledge, not its method.
+- **review-pr**: in 4 runs on 2 PRs, findings checked against the code before reporting went from 1/9 to 8/9, and wrong fixes from 1 to 0. False findings didn't go down: 3 of the 4 runs had one. On 5 PRs with 8 planted bugs ([005](evals/review-pr/005-planted.md)) it found 7/8 (missed a theme.tres rule) with 0 wrong fixes; on the clean PR: false Blocking 0, false Nits 4.
 - **write-pytest**: 93 tests for the `godot` MCP server that run without Godot and kill 450 of 477 generated mutants. Writing them found 6 bugs in the server, each fixed together with a test that failed before the fix.
 
 Details in [Evals](#evals).
@@ -92,9 +92,11 @@ I wrote the generate-ui and review-pr skills, graded their runs, and wrote both 
 
 Details: [`evals/generate-ui/001-main-menu.md`](evals/generate-ui/001-main-menu.md).
 
+- [002](evals/generate-ui/002-options.md), Options, held out from the skill's tuning: 26/29 layers within ±2px in x and width, 2 of 3 iterations, 8 min 37 s, no code edits during the run (review of #27 then fixed its settings code). Stacked text rows drift down by Godot's line height (the panel ends 11px lower), so only 3/29 match in all of x, y, w, h.
+
 **Limits**
 
-- One run on one screen.
+- One run per screen, two screens.
 - The mockup was drawn by an agent, so its layers are probably cleaner and better named than in a designer's file. A designer's Figma file would be the real test ([#8](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/8)).
 
 ### write-test: 8 tasks with a known answer
@@ -106,6 +108,7 @@ Each task has a prompt, a known answer and grading mutations, kept outside the r
 | [001](evals/write-test/001.md) | a–d | 3 passed; (a) caught 1 of 2 mutations | 1 |
 | [002](evals/write-test/002.md) | a, c again, after 3 rules from 001 | 2/2 | 0 |
 | [003](evals/write-test/003.md) | e–h, new, no example in the skill names them | 4/4, 37 s to 1 min 4 s each | 0 |
+| [004](evals/write-test/004-baseline.md) | a–h, with vs without the skill | mutations caught 19/20 vs 18/20; only (h) differs: the `set_process` rule and its inputs | 0 |
 
 - In 001 one agent read the answer from git history. That run was discarded, and since then each run starts from an orphan branch with no history.
 - 003 found a test on `main` that passed only because of test order: a release in `after_each` takes effect on the next frame, so the next test still sees the press. Fixed in [#19](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/19), together with a rule in the skill.
@@ -113,9 +116,9 @@ Each task has a prompt, a known answer and grading mutations, kept outside the r
 **Limits**
 
 - All 8 tasks test one script, `builder.gd`.
-- No baseline: nothing shows how the same agent does without the skill ([#22](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/22)).
+- The baseline (004) barely separates the arms: one run per arm per task, tasks easy for Opus 5.5 ([#30](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/30)).
 
-### review-pr: 4 graded runs
+### review-pr: 5 graded runs
 
 | Run | PR | Findings | Correct | False | Wrong fixes | Verified before reporting |
 |---|---|---|---|---|---|---|
@@ -123,6 +126,7 @@ Each task has a prompt, a known answer and grading mutations, kept outside the r
 | [002](evals/review-pr/002-pr1.md) ⚠ | [#1](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/1) | 7 | 6 | 0 | 0 | 7/7 |
 | [003](evals/review-pr/003-pr1.md) | [#1](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/1) | 5 | 4 | 1 | 0 | 4/5 |
 | [004](evals/review-pr/004-pr4.md) | [#4](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/4) | 9 | 8 | 1 | 0 | 8/9 |
+| [005](evals/review-pr/005-planted.md) | [#32](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/32)–[#36](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/36) | 21 | 17 | 4 | 0 | 3/4 bugged PRs run; #34 read only |
 
 Findings: reported by the agent; Correct / False: as graded; Wrong fixes: correct findings with a wrong proposed fix; Verified: findings the agent checked against the code before reporting.
 
@@ -137,8 +141,8 @@ Findings: reported by the agent; Correct / False: as graded; Wrong fixes: correc
 **Limits**
 
 - Runs 001–003 all reviewed PR [#1](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/1), and the rules added after them came from that PR. Only 004 tests the skill on a PR it wasn't tuned on.
-- Precision is graded, recall isn't: nobody counted the bugs the agent missed.
-- Next: a set of PRs with planted bugs, rerun after every rule change, to measure both.
+- Recall (005) rests on one run per PR, 5 PRs, all built by one session: rerun after every rule change to see a trend.
+- 005's 4 false findings are all Nits on the clean PR #36; on the 4 bugged PRs it had none.
 
 ### write-pytest: tests for the MCP server
 

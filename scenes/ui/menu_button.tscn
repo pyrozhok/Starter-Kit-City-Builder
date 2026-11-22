@@ -1,12 +1,15 @@
 [gd_scene format=3]
 
 [ext_resource type="Material" path="res://scenes/ui/backdrop_blur.tres" id="1_blur"]
+[ext_resource type="Script" path="res://scripts/ui/menu_button.gd" id="2_script"]
+[ext_resource type="PackedScene" path="res://scenes/ui/keycap.tscn" id="3_keycap"]
 
 [node name="MenuButton" type="Button"]
 custom_minimum_size = Vector2(0, 64)
 theme_type_variation = &"MainMenuButton"
 text = "BUTTON"
 alignment = 0
+script = ExtResource("2_script")
 
 [node name="Blur" type="Panel" parent="."]
 show_behind_parent = true
@@ -19,3 +22,11 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 theme_type_variation = &"BackdropBlur"
+
+[node name="Keycap" parent="." instance=ExtResource("3_keycap")]
+visible = false
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+grow_vertical = 2

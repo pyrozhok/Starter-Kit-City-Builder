@@ -22,7 +22,7 @@ func before_each() -> void:
 	builder.set_process(false)  # after entering the tree (READY turns _process on); _process needs a camera, drive actions directly
 
 func after_each() -> void:
-	for action: String in ["build", "demolish", "structure_next", "structure_previous"]:
+	for action: String in ["build", "demolish", "rotate", "structure_next", "structure_previous"]:
 		Input.action_release(action)
 	if FileAccess.file_exists(SAVE_PATH):
 		DirAccess.remove_absolute(SAVE_PATH)
@@ -188,3 +188,17 @@ func test_building_different_structure_over_tile_charges_new_price() -> void:
 	assert_eq(builder.gridmap.get_cell_item(Vector3i(2, 0, 3)), 1)
 	assert_eq(builder.map.cash, cash_before - builder.structures[1].price)
 	assert_eq(builder.cash_display.text, "$" + str(builder.map.cash))
+
+
+func test_rotate_turns_selector_quarter_turn_counterclockwise() -> void:
+	Input.action_press("rotate")
+	builder.action_rotate()
+	# +90 degrees about Y maps local -Z (forward) to world -X; -90 would give +X.
+	assert_almost_eq(builder.selector.rotation.y, deg_to_rad(90), 0.0001)
+	assert_almost_eq(builder.selector.basis * Vector3.FORWARD, Vector3.LEFT, Vector3.ONE * 0.0001)
+
+
+func test_rotate_is_ignored_without_press() -> void:
+	await get_tree().process_frame  # a press released in the previous test's after_each still reads as just pressed this frame
+	builder.action_rotate()  # nothing pressed, like an idle _process frame
+	assert_almost_eq(builder.selector.rotation.y, 0.0, 0.0001)

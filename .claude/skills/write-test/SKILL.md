@@ -26,8 +26,9 @@ Models to copy: `tests/unit/test_data_map.gd` (resources, save/load) and
 - Reload a saved file with `ResourceLoader.load(path, "", ResourceLoader.CACHE_MODE_IGNORE)` so the
   test reads the disk, not the cache.
 - Fill typed exported arrays (`Array[Structure]`) with `.assign([...])`.
-- Pick inputs where the behavior and its nearest wrong variant differ (e.g. ≥3 structures for
-  `structure_previous`: with two, wrapping back and forward land on the same index).
+- Pick inputs where the behavior and its nearest wrong variant differ, and see the test red with
+  that variant in place (e.g. ≥3 structures for `structure_previous`, red with `index + 1`: with
+  two, wrapping back and forward land on the same index).
 
 ## Testing `builder.gd`
 

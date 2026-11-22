@@ -32,9 +32,10 @@ Models to copy: `tests/unit/test_data_map.gd` (resources, save/load) and
 true for the current frame: press, then call the `action_*` method directly in the same frame;
 release every pressed action in `after_each`.
 
-Call `builder.set_process(false)` — `_process` raycasts from a camera the test doesn't have. Give the
-builder exactly what it touches: `gridmap`, `selector`, `selector_container`, `cash_display`,
-`structures` (see `before_each` in `test_builder.gd`).
+Call `builder.set_process(false)` after the builder enters the tree: READY turns `_process` back
+on, and `_process` raycasts from a camera the test doesn't have. Give the builder exactly what it
+touches: `gridmap`, `selector`, `selector_container`, `cash_display`, `structures` (see
+`before_each` in `test_builder.gd`).
 
 The `Audio` autoload runs for real and is silent headless. Reach for `double()` / `stub()` only for a
 collaborator whose side effect the test must observe or block.

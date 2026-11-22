@@ -16,10 +16,10 @@ func before_each() -> void:
 	builder.add_child(builder.selector)
 	builder.selector.add_child(builder.selector_container)
 	builder.add_child(builder.cash_display)
-	builder.set_process(false)  # _process needs a camera; drive actions directly
 	viewport = SubViewport.new()
 	add_child_autofree(viewport)
 	viewport.add_child(builder)
+	builder.set_process(false)  # after entering the tree (READY turns _process on); _process needs a camera, drive actions directly
 
 func after_each() -> void:
 	for action: String in ["build", "demolish", "structure_next", "structure_previous"]:
@@ -35,6 +35,12 @@ func test_build_charges_price_and_places_tile() -> void:
 	assert_eq(builder.map.cash, cash_before - builder.structures[0].price)
 	assert_eq(builder.cash_display.text, "$" + str(builder.map.cash))
 
+func test_demolish_empties_tile() -> void:
+	builder.gridmap.set_cell_item(Vector3i(2, 0, 3), 1)
+	Input.action_press("demolish")
+	builder.action_demolish(Vector3(2, 0, 3))
+	assert_eq(builder.gridmap.get_cell_item(Vector3i(2, 0, 3)), -1)
+
 func test_preview_is_not_rebuilt_without_toggle() -> void:
 	var preview: Node = builder.selector_container.get_child(0)
 	builder.action_structure_toggle()  # nothing pressed, like an idle _process frame
@@ -48,6 +54,18 @@ func test_structure_next_switches_preview() -> void:
 	assert_eq(builder.index, 1)
 	assert_eq(builder.selector_container.get_child_count(), 1)
 	assert_ne(builder.selector_container.get_child(0), preview)
+	await get_tree().process_frame  # let the replaced preview's queue_free() run before GUT counts orphans
+
+func test_structure_previous_from_first_wraps_to_last_and_switches_preview() -> void:
+	# A third structure: with two, previous and next both take 0 to 1 and can't be told apart.
+	builder.structures.append(load("res://structures/pavement.tres"))
+	var preview: Node = builder.selector_container.get_child(0)
+	Input.action_press("structure_previous")
+	builder.action_structure_toggle()
+	assert_eq(builder.index, 2)  # 0 - 1 wraps to the last one (next would give 1)
+	assert_eq(builder.selector_container.get_child_count(), 1)
+	assert_ne(builder.selector_container.get_child(0), preview)
+	assert_eq(builder.selector_container.get_child(0).scene_file_path, "res://models/pavement.glb")
 	await get_tree().process_frame  # let the replaced preview's queue_free() run before GUT counts orphans
 
 func test_save_map_writes_tiles_and_emits_map_saved() -> void:
@@ -148,3 +166,13 @@ func test_reload_without_saving_restores_saved_cash() -> void:
 	builder.load_map(SAVE_PATH)
 	assert_eq(builder.map.cash, 500)
 	assert_eq(builder.gridmap.get_used_cells().size(), 0)
+
+
+func test_rebuilding_same_structure_on_its_tile_does_not_charge() -> void:
+	Input.action_press("build")
+	builder.action_build(Vector3(2, 0, 3))  # first build: pays for structure 0
+	var cash_after_first: int = builder.map.cash
+	builder.action_build(Vector3(2, 0, 3))  # same structure, same tile
+	assert_eq(builder.gridmap.get_cell_item(Vector3i(2, 0, 3)), 0)
+	assert_eq(builder.map.cash, cash_after_first)
+	assert_eq(builder.cash_display.text, "$" + str(cash_after_first))

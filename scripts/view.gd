@@ -1,7 +1,9 @@
 class_name View
 extends Node3D
 
-@export var orbit_speed := 3.0 # Degrees per second while auto_orbit is on
+## Turn rate of the menu backdrop camera, in radians per second. Only used while
+## auto_orbit is on (main menu); the player's own camera input ignores it.
+@export var orbit_speed := 12.0
 
 var input_enabled := true # Off: camera ignores the player (e.g. under a menu)
 var auto_orbit := false # On: camera slowly turns around its target

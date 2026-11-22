@@ -1,7 +1,5 @@
 extends GutTest
 
-const ROWS := "Root/Panel/Box/Content/"
-
 var options: OptionsMenu
 
 
@@ -11,7 +9,7 @@ func before_each() -> void:
 
 
 func _node(path: String) -> Node:
-	return options.get_node(ROWS + path)
+	return options.get_node(OptionsMenu.ROWS + path)
 
 
 func _settings(volume: float, fullscreen: bool, orbit_speed: float) -> Settings:

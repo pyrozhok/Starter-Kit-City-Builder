@@ -1,0 +1,369 @@
+{
+	"blank": false,
+	"controls": [
+		{
+			"h": 1080.0,
+			"path": "OptionsMenu/Root",
+			"type": "Control",
+			"variation": "",
+			"w": 1920.0,
+			"x": 0.0,
+			"y": 0.0
+		},
+		{
+			"h": 1080.0,
+			"path": "OptionsMenu/Root/Shade",
+			"type": "Panel",
+			"variation": "MenuShade",
+			"w": 1920.0,
+			"x": 0.0,
+			"y": 0.0
+		},
+		{
+			"h": 129.0,
+			"path": "OptionsMenu/Root/Title",
+			"text": "City Builder Starter Kit",
+			"type": "Label",
+			"variation": "TitleLabel",
+			"w": 1093.0,
+			"x": 413.5,
+			"y": 150.0
+		},
+		{
+			"h": 415.0,
+			"path": "OptionsMenu/Root/Panel",
+			"type": "PanelContainer",
+			"variation": "MenuPanel",
+			"w": 720.0,
+			"x": 600.0,
+			"y": 380.0
+		},
+		{
+			"h": 375.0,
+			"path": "OptionsMenu/Root/Panel/Blur",
+			"type": "Panel",
+			"variation": "BackdropBlurPanel",
+			"w": 676.0,
+			"x": 622.0,
+			"y": 398.0
+		},
+		{
+			"h": 375.0,
+			"path": "OptionsMenu/Root/Panel/Box",
+			"type": "VBoxContainer",
+			"variation": "MenuPanelBox",
+			"w": 676.0,
+			"x": 622.0,
+			"y": 398.0
+		},
+		{
+			"h": 29.0,
+			"path": "OptionsMenu/Root/Panel/Box/Header",
+			"text": "OPTIONS",
+			"type": "Label",
+			"variation": "PanelHeader",
+			"w": 676.0,
+			"x": 622.0,
+			"y": 398.0
+		},
+		{
+			"h": 2.0,
+			"path": "OptionsMenu/Root/Panel/Box/Divider",
+			"type": "HSeparator",
+			"variation": "PanelDivider",
+			"w": 676.0,
+			"x": 622.0,
+			"y": 441.0
+		},
+		{
+			"h": 316.0,
+			"path": "OptionsMenu/Root/Panel/Box/Content",
+			"type": "VBoxContainer",
+			"variation": "OptionsContent",
+			"w": 676.0,
+			"x": 622.0,
+			"y": 457.0
+		},
+		{
+			"h": 70.0,
+			"path": "OptionsMenu/Root/Panel/Box/Content/MasterVolume",
+			"type": "MarginContainer",
+			"variation": "OptionRow",
+			"w": 676.0,
+			"x": 622.0,
+			"y": 457.0
+		},
+		{
+			"h": 50.0,
+			"path": "OptionsMenu/Root/Panel/Box/Content/MasterVolume/Box",
+			"type": "HBoxContainer",
+			"variation": "OptionRowBox",
+			"w": 676.0,
+			"x": 622.0,
+			"y": 467.0
+		},
+		{
+			"h": 50.0,
+			"path": "OptionsMenu/Root/Panel/Box/Content/MasterVolume/Box/Labels",
+			"type": "VBoxContainer",
+			"variation": "OptionLabels",
+			"w": 212.0,
+			"x": 622.0,
+			"y": 467.0
+		},
+		{
+			"h": 29.0,
+			"path": "OptionsMenu/Root/Panel/Box/Content/MasterVolume/Box/Labels/Title",
+			"text": "MASTER VOLUME",
+			"type": "Label",
+			"variation": "OptionTitle",
+			"w": 184.0,
+			"x": 622.0,
+			"y": 467.0
+		},
+		{
+			"h": 19.0,
+			"path": "OptionsMenu/Root/Panel/Box/Content/MasterVolume/Box/Labels/Caption",
+			"text": "All game sound",
+			"type": "Label",
+			"variation": "OptionCaption",
+			"w": 105.0,
+			"x": 622.0,
+			"y": 498.0
+		},
+		{
+			"h": 40.0,
+			"path": "OptionsMenu/Root/Panel/Box/Content/MasterVolume/Box/VolumeSlider",
+			"type": "HSlider",
+			"variation": "OptionSlider",
+			"w": 360.0,
+			"x": 854.0,
+			"y": 472.0
+		},
+		{
+			"h": 26.0,
+			"path": "OptionsMenu/Root/Panel/Box/Content/MasterVolume/Box/Value",
+			"text": "70%",
+			"type": "Label",
+			"variation": "OptionValue",
+			"w": 64.0,
+			"x": 1234.0,
+			"y": 479.0
+		},
+		{
+			"h": 70.0,
+			"path": "OptionsMenu/Root/Panel/Box/Content/DisplayMode",
+			"type": "MarginContainer",
+			"variation": "OptionRow",
+			"w": 676.0,
+			"x": 622.0,
+			"y": 535.0
+		},
+		{
+			"h": 50.0,
+			"path": "OptionsMenu/Root/Panel/Box/Content/DisplayMode/Box",
+			"type": "HBoxContainer",
+			"variation": "OptionRowBox",
+			"w": 676.0,
+			"x": 622.0,
+			"y": 545.0
+		},
+		{
+			"h": 50.0,
+			"path": "OptionsMenu/Root/Panel/Box/Content/DisplayMode/Box/Labels",
+			"type": "VBoxContainer",
+			"variation": "OptionLabels",
+			"w": 456.0,
+			"x": 622.0,
+			"y": 545.0
+		},
+		{
+			"h": 29.0,
+			"path": "OptionsMenu/Root/Panel/Box/Content/DisplayMode/Box/Labels/Title",
+			"text": "DISPLAY MODE",
+			"type": "Label",
+			"variation": "OptionTitle",
+			"w": 161.0,
+			"x": 622.0,
+			"y": 545.0
+		},
+		{
+			"h": 19.0,
+			"path": "OptionsMenu/Root/Panel/Box/Content/DisplayMode/Box/Labels/Caption",
+			"text": "Fullscreen or windowed",
+			"type": "Label",
+			"variation": "OptionCaption",
+			"w": 162.0,
+			"x": 622.0,
+			"y": 576.0
+		},
+		{
+			"h": 26.0,
+			"path": "OptionsMenu/Root/Panel/Box/Content/DisplayMode/Box/Value",
+			"text": "FULLSCREEN",
+			"type": "Label",
+			"variation": "OptionValue",
+			"w": 116.0,
+			"x": 1098.0,
+			"y": 557.0
+		},
+		{
+			"h": 32.0,
+			"path": "OptionsMenu/Root/Panel/Box/Content/DisplayMode/Box/FullscreenToggle",
+			"text": "",
+			"type": "CheckButton",
+			"variation": "OptionToggle",
+			"w": 64.0,
+			"x": 1234.0,
+			"y": 554.0
+		},
+		{
+			"h": 70.0,
+			"path": "OptionsMenu/Root/Panel/Box/Content/CameraOrbitSpeed",
+			"type": "MarginContainer",
+			"variation": "OptionRow",
+			"w": 676.0,
+			"x": 622.0,
+			"y": 613.0
+		},
+		{
+			"h": 50.0,
+			"path": "OptionsMenu/Root/Panel/Box/Content/CameraOrbitSpeed/Box",
+			"type": "HBoxContainer",
+			"variation": "OptionRowBox",
+			"w": 676.0,
+			"x": 622.0,
+			"y": 623.0
+		},
+		{
+			"h": 50.0,
+			"path": "OptionsMenu/Root/Panel/Box/Content/CameraOrbitSpeed/Box/Labels",
+			"type": "VBoxContainer",
+			"variation": "OptionLabels",
+			"w": 212.0,
+			"x": 622.0,
+			"y": 623.0
+		},
+		{
+			"h": 29.0,
+			"path": "OptionsMenu/Root/Panel/Box/Content/CameraOrbitSpeed/Box/Labels/Title",
+			"text": "CAMERA ORBIT",
+			"type": "Label",
+			"variation": "OptionTitle",
+			"w": 165.0,
+			"x": 622.0,
+			"y": 623.0
+		},
+		{
+			"h": 19.0,
+			"path": "OptionsMenu/Root/Panel/Box/Content/CameraOrbitSpeed/Box/Labels/Caption",
+			"text": "Menu backdrop speed",
+			"type": "Label",
+			"variation": "OptionCaption",
+			"w": 151.0,
+			"x": 622.0,
+			"y": 654.0
+		},
+		{
+			"h": 40.0,
+			"path": "OptionsMenu/Root/Panel/Box/Content/CameraOrbitSpeed/Box/OrbitSpeedSlider",
+			"type": "HSlider",
+			"variation": "OptionSlider",
+			"w": 360.0,
+			"x": 854.0,
+			"y": 628.0
+		},
+		{
+			"h": 26.0,
+			"path": "OptionsMenu/Root/Panel/Box/Content/CameraOrbitSpeed/Box/Value",
+			"text": "0.5×",
+			"type": "Label",
+			"variation": "OptionValue",
+			"w": 64.0,
+			"x": 1234.0,
+			"y": 635.0
+		},
+		{
+			"h": 2.0,
+			"path": "OptionsMenu/Root/Panel/Box/Content/Divider",
+			"type": "HSeparator",
+			"variation": "PanelDivider",
+			"w": 676.0,
+			"x": 622.0,
+			"y": 691.0
+		},
+		{
+			"h": 72.0,
+			"path": "OptionsMenu/Root/Panel/Box/Content/Footer",
+			"type": "MarginContainer",
+			"variation": "OptionsFooter",
+			"w": 676.0,
+			"x": 622.0,
+			"y": 701.0
+		},
+		{
+			"h": 64.0,
+			"path": "OptionsMenu/Root/Panel/Box/Content/Footer/Box",
+			"type": "HBoxContainer",
+			"variation": "",
+			"w": 676.0,
+			"x": 622.0,
+			"y": 709.0
+		},
+		{
+			"h": 64.0,
+			"path": "OptionsMenu/Root/Panel/Box/Content/Footer/Box/BackButton",
+			"text": "BACK",
+			"type": "Button",
+			"variation": "MainMenuButtonKeyed",
+			"w": 260.0,
+			"x": 622.0,
+			"y": 709.0
+		},
+		{
+			"h": 64.0,
+			"path": "OptionsMenu/Root/Panel/Box/Content/Footer/Box/BackButton/Blur",
+			"type": "Panel",
+			"variation": "BackdropBlur",
+			"w": 260.0,
+			"x": 622.0,
+			"y": 709.0
+		},
+		{
+			"h": 25.0,
+			"path": "OptionsMenu/Root/Panel/Box/Content/Footer/Box/BackButton/Keycap",
+			"type": "PanelContainer",
+			"variation": "Keycap",
+			"w": 48.0,
+			"x": 645.0,
+			"y": 728.5
+		},
+		{
+			"h": 19.0,
+			"path": "OptionsMenu/Root/Panel/Box/Content/Footer/Box/BackButton/Keycap/Key",
+			"text": "ESC",
+			"type": "Label",
+			"variation": "KeycapText",
+			"w": 28.0,
+			"x": 655.0,
+			"y": 731.5
+		},
+		{
+			"h": 19.0,
+			"path": "OptionsMenu/Root/Panel/Box/Content/Footer/Box/SaveHint",
+			"text": "Changes are saved automatically",
+			"type": "Label",
+			"variation": "OptionCaption",
+			"w": 224.0,
+			"x": 1074.0,
+			"y": 731.0
+		}
+	],
+	"hover": "",
+	"scene": "res://scenes/main.tscn",
+	"size": [
+		1920,
+		1080
+	],
+	"state": "options"
+}

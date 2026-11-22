@@ -1,0 +1,95 @@
+class_name OptionsMenu
+extends CanvasLayer
+## Mockup frame "Options". Shows a Settings and edits it in place; holds no game state: whoever
+## owns the game gives it the settings, applies and saves them on settings_changed, and closes it on
+## back_requested.
+
+signal settings_changed
+signal back_requested
+
+const ROWS := "Root/Panel/Box/Content/"
+const VOLUME_FORMAT := "%d%%"
+const ORBIT_FORMAT := "%.1f×"
+const FULLSCREEN_TEXT := "FULLSCREEN"
+const WINDOWED_TEXT := "WINDOWED"
+
+## Shown without emitting settings_changed; the controls then edit this object.
+var settings := Settings.new():
+	set(value):
+		settings = value
+		if is_node_ready():
+			_show()
+
+@onready var _volume: OptionSlider = get_node(ROWS + "MasterVolume/Box/VolumeSlider")
+@onready var _volume_value: Label = get_node(ROWS + "MasterVolume/Box/Value")
+@onready var _fullscreen: CheckButton = get_node(ROWS + "DisplayMode/Box/FullscreenToggle")
+@onready var _fullscreen_value: Label = get_node(ROWS + "DisplayMode/Box/Value")
+@onready var _orbit: OptionSlider = get_node(ROWS + "CameraOrbitSpeed/Box/OrbitSpeedSlider")
+@onready var _orbit_value: Label = get_node(ROWS + "CameraOrbitSpeed/Box/Value")
+
+
+func _ready() -> void:
+	_orbit.max_value = Settings.ORBIT_SPEED_MAX
+	_show()
+	_volume.value_changed.connect(_on_volume_changed)
+	_fullscreen.toggled.connect(_on_fullscreen_toggled)
+	_orbit.value_changed.connect(_on_orbit_changed)
+	(get_node(ROWS + "Footer/Box/BackButton") as Button).pressed.connect(back_requested.emit)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if visible and event.is_action_pressed(&"ui_cancel"):
+		get_viewport().set_input_as_handled()
+		back_requested.emit()
+
+
+func open() -> void:
+	show()
+
+
+func close() -> void:
+	hide()
+
+
+## Mockup states for godot.screenshot: "options" (design/options.png) and "options_drag"
+## (options_hover.png, with hover on the Back button). Only the controls change: nothing is applied.
+func _preview_state(state: String) -> void:
+	var preview := Settings.new()
+	preview.volume = 0.85 if state == "options_drag" else 0.7
+	preview.fullscreen = true
+	preview.orbit_speed = 0.5
+	settings = preview
+	_volume.dragging = state == "options_drag"
+
+
+func _show() -> void:
+	_volume.set_value_no_signal(settings.volume * 100.0)
+	_fullscreen.set_pressed_no_signal(settings.fullscreen)
+	_orbit.set_value_no_signal(settings.orbit_speed)
+	_update_labels()
+
+
+func _update_labels() -> void:
+	_volume_value.text = VOLUME_FORMAT % roundi(settings.volume * 100.0)
+	_fullscreen_value.text = FULLSCREEN_TEXT if settings.fullscreen else WINDOWED_TEXT
+	_orbit_value.text = ORBIT_FORMAT % settings.orbit_speed
+
+
+func _on_volume_changed(value: float) -> void:
+	settings.volume = value / 100.0
+	_changed()
+
+
+func _on_fullscreen_toggled(on: bool) -> void:
+	settings.fullscreen = on
+	_changed()
+
+
+func _on_orbit_changed(value: float) -> void:
+	settings.orbit_speed = value
+	_changed()
+
+
+func _changed() -> void:
+	_update_labels()
+	settings_changed.emit()

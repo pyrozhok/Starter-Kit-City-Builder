@@ -16,7 +16,7 @@ alt="Main menu built by generate-ui: live city behind, hover, New Game"/></p>
 
 ## Results
 
-- **generate-ui**: 28/31 layers of the mockup within ±2px, after 1 fix iteration of 3. The run took 16 minutes from the approved plan to the final screenshot. When the mockup contradicted itself, the agent asked instead of guessing.
+- **generate-ui**: 28/31 layers of the mockup within ±2px, after 1 fix iteration of 3. The run took 16 minutes from the approved plan to the final screenshot. When the mockup contradicted itself, the agent asked instead of guessing. On a held-out Options screen with sliders and a toggle: x and width within ±2px for 26/29 layers, 2 iterations, 8.5 minutes.
 - **write-test**: 8 tasks with a hidden known answer, each given to a fresh agent and graded by planting the bug its test must catch. After the rules from the first eval, all 4 new tasks passed with no human edits, in under 65 seconds each. Against a baseline without the skill, the 8 tasks caught 19/20 mutations with it and 18/20 without: on this model the skill adds its project knowledge, not its method.
 - **review-pr**: in 4 runs on 2 PRs, findings checked against the code before reporting went from 1/9 to 8/9, and wrong fixes from 1 to 0. False findings didn't go down: 3 of the 4 runs had one.
 - **write-pytest**: 93 tests for the `godot` MCP server that run without Godot and kill 450 of 477 generated mutants. Writing them found 6 bugs in the server, each fixed together with a test that failed before the fix.
@@ -92,9 +92,11 @@ I wrote the generate-ui and review-pr skills, graded their runs, and wrote both 
 
 Details: [`evals/generate-ui/001-main-menu.md`](evals/generate-ui/001-main-menu.md).
 
+- [002](evals/generate-ui/002-options.md), Options, held out from the skill's tuning: 26/29 layers within ±2px in x and width, 2 of 3 iterations, 8 min 37 s, no code edits. Stacked text rows drift down by Godot's line height (the panel ends 11px lower), so only 3/29 match in all of x, y, w, h.
+
 **Limits**
 
-- One run on one screen.
+- One run per screen, two screens.
 - The mockup was drawn by an agent, so its layers are probably cleaner and better named than in a designer's file. A designer's Figma file would be the real test ([#8](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/8)).
 
 ### write-test: 8 tasks with a known answer

@@ -10,6 +10,8 @@ extends PanelContainer
 			_header.text = value
 ## Smaller padding, gap and left-aligned header (the notifications variant in the mockup).
 @export var compact := false
+## Theme variation of the content slot, for an instance that overrides its gap (Options: 8).
+@export var content_variation := &""
 
 @onready var content: VBoxContainer = $Box/Content
 @onready var _box: VBoxContainer = $Box
@@ -19,6 +21,7 @@ extends PanelContainer
 
 func _ready() -> void:
 	_header.text = title
+	content.theme_type_variation = content_variation
 	if compact:
 		theme_type_variation = &"MenuPanelSmall"
 		_box.theme_type_variation = &"MenuPanelBoxSmall"

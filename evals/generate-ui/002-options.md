@@ -59,7 +59,14 @@ counts the other frame's 29 as not found. Per frame (29 layers, both frames the 
   A diff that checks each layer's position relative to its row would separate the two.
 - **The 3 x/width misses**: the row titles, 2–8 px narrower, because 2% letter spacing at 24 px
   (0.48 px) rounds to 0.
-- **Theme values** all copied from the mockup (colours, sizes, radii, borders, paddings).
+- **Theme values: 66/68 equal the mockup.** Counted over what the run's commits added to
+  `scenes/ui/theme.tres` (`6f2fb1e`, `84c6c92`, `3e689c9`; `d1ef890` doesn't touch it) against
+  `figcraft.py tree`: colours, font sizes, radii, border widths, paddings, gaps, track height,
+  knob centring, one radius per box. The 2 that differ are letter spacing, which Godot's
+  `spacing_glyph` takes in whole pixels: row titles 0 for 2% at 24 px (0.48), keycap 1 for 4% at
+  16 px (0.64, the menu buttons' variation reused). Not counted: knob and toggle SVGs (textures),
+  the hover+pressed font colour (no such state in the mockup), the keycap border width (the file
+  leaves its stroke weight at figcraft's default; the theme has 1).
 - **Found in the mockup**: its 85% volume knob sits where 82.5% would be, so the build's 85% knob is
   9 px further right.
 

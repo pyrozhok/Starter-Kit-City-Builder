@@ -173,8 +173,31 @@ func test_changed_settings_are_applied_and_saved() -> void:
 	options.settings.volume = 0.25
 	options.settings.orbit_speed = 0.5
 	options.settings_changed.emit()
+	options.settings_committed.emit()
 	assert_almost_eq(AudioServer.get_bus_volume_linear(0), 0.25, 0.001)
 	assert_almost_eq(view.orbit_speed, base_speed * 0.5, 0.001)
 	var saved := Settings.load_from(SETTINGS_PATH)
 	assert_almost_eq(saved.volume, 0.25, 0.001)
 	assert_almost_eq(saved.orbit_speed, 0.5, 0.001)
+
+
+func test_slider_ticks_apply_live_and_save_when_the_drag_ends() -> void:
+	_start()
+	var slider := options.get_node(OptionsMenu.ROWS + "MasterVolume/Box/VolumeSlider") as OptionSlider
+	slider.value = 30.0
+	assert_almost_eq(AudioServer.get_bus_volume_linear(0), 0.3, 0.001)
+	assert_false(FileAccess.file_exists(SETTINGS_PATH), "a tick does not write the file")
+	slider.drag_ended.emit(true)
+	assert_almost_eq(Settings.load_from(SETTINGS_PATH).volume, 0.3, 0.001)
+
+
+func test_toggle_and_back_save_settings() -> void:
+	_start()
+	var toggle := options.get_node(OptionsMenu.ROWS + "DisplayMode/Box/FullscreenToggle") as CheckButton
+	toggle.button_pressed = true
+	assert_true(Settings.load_from(SETTINGS_PATH).fullscreen)
+	toggle.set_pressed_no_signal(false)
+	options.settings.fullscreen = false
+	DirAccess.remove_absolute(SETTINGS_PATH)
+	(options.get_node(OptionsMenu.ROWS + "Footer/Box/BackButton") as Button).pressed.emit()
+	assert_true(FileAccess.file_exists(SETTINGS_PATH), "back saves")

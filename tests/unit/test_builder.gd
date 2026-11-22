@@ -74,6 +74,7 @@ func test_demolish_does_not_refund_cash() -> void:
 	assert_eq(builder.cash_display.text, display_before)
 
 func test_preview_is_not_rebuilt_without_toggle() -> void:
+	await get_tree().process_frame  # a press released in the previous test's after_each still reads as just pressed
 	var preview: Node = builder.selector_container.get_child(0)
 	builder.action_structure_toggle()  # nothing pressed, like an idle _process frame
 	assert_eq(builder.selector_container.get_child_count(), 1)

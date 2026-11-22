@@ -34,7 +34,9 @@ Models to copy: `tests/unit/test_data_map.gd` (resources, save/load) and
 
 `action_*` methods read `Input.is_action_just_pressed(...)`. `Input.action_press("<action>")` makes it
 true for the current frame: press, then call the `action_*` method directly in the same frame;
-release every pressed action in `after_each`.
+release every pressed action in `after_each`. A release takes effect only on the next frame, so a
+test that checks an action does nothing without a press starts with
+`await get_tree().process_frame`.
 
 Call `builder.set_process(false)` after the builder enters the tree: READY turns `_process` back
 on, and `_process` raycasts from a camera the test doesn't have. Give the builder exactly what it

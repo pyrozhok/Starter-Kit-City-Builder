@@ -52,13 +52,13 @@ func close() -> void:
 
 
 ## Mockup states for godot.screenshot: "options" (design/options.png) and "options_drag"
-## (options_hover.png, with hover on the Back button). Only the controls change: nothing is applied.
+## (options_hover.png, with hover on the Back button). Values go into the given settings without a
+## signal, so nothing is applied or saved and the controls keep editing the owner's object.
 func _preview_state(state: String) -> void:
-	var preview := Settings.new()
-	preview.volume = 0.85 if state == "options_drag" else 0.7
-	preview.fullscreen = true
-	preview.orbit_speed = 0.5
-	settings = preview
+	settings.volume = 0.85 if state == "options_drag" else 0.7
+	settings.fullscreen = true
+	settings.orbit_speed = 0.5
+	_show()
 	_volume.dragging = state == "options_drag"
 
 

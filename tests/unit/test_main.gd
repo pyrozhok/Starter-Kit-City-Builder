@@ -1,6 +1,7 @@
 extends GutTest
 
 const SAVE_PATH := "user://test_main_map.res"
+const SETTINGS_PATH := "user://test_main_settings.cfg"
 const Main := preload("res://scripts/main.gd")
 
 var main: Node3D
@@ -8,6 +9,7 @@ var builder: Builder
 var view: View
 var menu: MainMenu
 var notifications: Notifications
+var options: OptionsMenu
 
 
 func before_each() -> void:
@@ -17,12 +19,16 @@ func before_each() -> void:
 	view = main.get_node("View")
 	menu = main.get_node("MainMenu")
 	notifications = main.get_node("Overlay/Notifications")
+	options = main.get_node("OptionsMenu")
+	main.settings_path = SETTINGS_PATH  # before _ready: main loads it on start
 
 
 func after_each() -> void:
 	Input.action_release("build")
-	if FileAccess.file_exists(SAVE_PATH):
-		DirAccess.remove_absolute(SAVE_PATH)
+	for path: String in [SAVE_PATH, SETTINGS_PATH]:
+		if FileAccess.file_exists(path):
+			DirAccess.remove_absolute(path)
+	AudioServer.set_bus_volume_linear(0, 1.0)
 
 
 func _start() -> void:
@@ -130,10 +136,45 @@ func test_notifications_stay_in_the_menu() -> void:
 	assert_true(notifications.visible)
 
 
-func test_options_and_credits_say_coming_soon() -> void:
+func test_credits_say_coming_soon() -> void:
 	_start()
-	menu.options_requested.emit()
-	assert_eq(notifications.items()[0].text, Main.OPTIONS_SOON)
 	menu.credits_requested.emit()
 	assert_eq(notifications.items()[0].text, Main.CREDITS_SOON)
 	assert_true(notifications.visible)
+
+
+func test_options_replace_the_menu_and_back_returns() -> void:
+	_start()
+	assert_false(options.visible, "closed on start")
+	menu.options_requested.emit()
+	assert_true(options.visible)
+	assert_false(menu.visible)
+	assert_true(view.auto_orbit, "city keeps orbiting behind the options")
+	options.back_requested.emit()
+	assert_false(options.visible)
+	assert_true(menu.visible)
+
+
+func test_start_applies_saved_settings() -> void:
+	var saved := Settings.new()
+	saved.volume = 0.5
+	saved.orbit_speed = 2.0
+	saved.save(SETTINGS_PATH)
+	var base_speed := view.orbit_speed
+	_start()
+	assert_almost_eq(AudioServer.get_bus_volume_linear(0), 0.5, 0.001)
+	assert_almost_eq(view.orbit_speed, base_speed * 2.0, 0.001)
+	assert_almost_eq(options.settings.volume, 0.5, 0.001, "options show what was loaded")
+
+
+func test_changed_settings_are_applied_and_saved() -> void:
+	var base_speed := view.orbit_speed
+	_start()
+	options.settings.volume = 0.25
+	options.settings.orbit_speed = 0.5
+	options.settings_changed.emit()
+	assert_almost_eq(AudioServer.get_bus_volume_linear(0), 0.25, 0.001)
+	assert_almost_eq(view.orbit_speed, base_speed * 0.5, 0.001)
+	var saved := Settings.load_from(SETTINGS_PATH)
+	assert_almost_eq(saved.volume, 0.25, 0.001)
+	assert_almost_eq(saved.orbit_speed, 0.5, 0.001)

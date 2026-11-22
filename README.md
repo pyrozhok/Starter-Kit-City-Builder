@@ -5,9 +5,9 @@ The skills share a Godot MCP server, so agents can inspect scenes, render UI and
 
 - **Build UI** (`generate-ui`): turn a mockup into a Godot scene, then compare the rendered layout with the design.
 - **Review PRs** (`review-pr`): check findings against the code and engine behavior before reporting them.
-- **Write tests** (`write-test`, `write-pytest`): write gameplay tests and Python tests for the MCP server.
+- **Write tests** (`write-test`, `write-pytest`): write GUT tests for the game's GDScript and Python tests for the MCP server.
 
-An eval grades every run, and each mistake it finds becomes a rule in the skill. Built in one day with Claude Code.
+An eval grades every run, and each mistake it finds becomes a rule in the skill.
 
 <p align="center"><img src="docs/media/main-menu.gif" width="720"
 alt="Main menu built by generate-ui: live city behind, hover, New Game"/></p>
@@ -51,22 +51,22 @@ Figma isn't supported yet. Step 1 of generate-ui needs an adapter that writes th
 
 ### review-pr
 
-[`review-pr`](.claude/skills/review-pr/SKILL.md) runs the plugin's `code-review` with a Godot checklist, and checks every finding against the code and the engine's behavior before it reports it.
+[`review-pr`](.claude/skills/review-pr/SKILL.md) runs the Godot build and test gates, then the plugin's `code-review` with a Godot checklist, and checks every finding against the code and the engine's behavior before it reports it.
 
 ### write-test and write-pytest
 
 [`write-test`](.claude/skills/write-test/SKILL.md) writes GUT tests for the game's GDScript. [`write-pytest`](.claude/skills/write-pytest/SKILL.md) writes pytest tests for `tools/`. Both call the plugin's `tdd`.
-The skills reach Godot only through the `godot` MCP server, so a bug there misleads every agent. write-pytest's first run wrote the suite for the server ([#2](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/2)).
+The skills reach Godot only through the `godot` MCP server, so a bug there misleads every agent.
 
 ```mermaid
 flowchart LR
-  A["real Godot runs<br/>(19 captures)"] --> B["FakeGodot<br/>reads argv like Godot"] --> C["93 tests<br/>no Godot"] --> D["generated mutants<br/>450/477 killed"]
+  A["real Godot runs<br/>(19 captures)"] --> B["FakeGodot<br/>reads argv like Godot"] --> C["tests<br/>no Godot"] --> D["generated mutants"]
   D -- "each survivor: a test, or a<br/>reason checked on the engine" --> C
   C -. "where Godot 4.7 is installed" .-> E["same commands<br/>on real Godot"]
 ```
 
 - Godot is tested as a separate process. A fake executable finds the project through `--path`, writes JUnit or the screenshot where the arguments point, and replays a captured run of Godot 4.7.2. A wrong command line loses its results here, as it would with Godot. Where Godot 4.7 is installed, the same commands also run on the real engine.
-- CI runs the suite on every PR that touches `tools/`, in about 20 seconds, without Godot.
+- CI runs the suite on every PR that touches `tools/`, without Godot.
 
 ### Porting to another engine
 
@@ -74,8 +74,8 @@ The skills run the engine only through the MCP tools: `build`, `run_tests`, `scr
 
 ## Evals
 
-Each eval is a run of a skill on a real task, graded and written up in [`evals/`](evals). Every mistake the grading finds becomes a rule in the skill.
-I wrote the skills, graded the generate-ui and review-pr runs, and wrote both PRs that review-pr reviewed. The write-pytest run was graded by a separate Claude session. write-test's evals are in [`evals/write-test/`](evals/write-test).
+Each eval is a run of a skill on a real task, graded and written up in [`evals/`](evals).
+I wrote the generate-ui and review-pr skills, graded their runs, and wrote both PRs that review-pr reviewed. The write-pytest run was graded by a separate Claude session. write-test's evals are in [`evals/write-test/`](evals/write-test).
 
 ### generate-ui: main menu from a mockup
 
@@ -122,7 +122,7 @@ Findings: reported by the agent; Correct / False: as graded; Wrong fixes: correc
 
 ### write-pytest: tests for the MCP server
 
-Bugs the tests found: `screenshot` returned `ok: true` for a scene with a broken shader or a `push_error`, a path outside the project reached the agent as a bare "Error executing tool", and one byte of Godot's output that isn't UTF-8 broke every tool.
+write-pytest's first run wrote the suite for the server ([#2](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/2)). Bugs the tests found: `screenshot` returned `ok: true` for a scene with a broken shader or a `push_error`, a path outside the project reached the agent as a bare "Error executing tool", and one byte of Godot's output that isn't UTF-8 broke every tool.
 
 Details: [`evals/write-pytest/001-issue2.md`](evals/write-pytest/001-issue2.md).
 
@@ -138,11 +138,13 @@ Details: [`evals/write-pytest/001-issue2.md`](evals/write-pytest/001-issue2.md).
 - The game is a fork of Kenney's Starter Kit City Builder ([below](#original-starter-kit-kenney)).
 - The mockup was made in another session: I gave an agent a reference screenshot, and it drew the layers through the FigCraft MCP.
 - Each task got its own branch and PR: [#1 Agent skills](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/1), [#4 generate-ui + main menu](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/4), [#11 write-pytest + MCP server tests](https://github.com/pyrozhok/Starter-Kit-City-Builder/pull/11). Rules for agents: [`AGENTS.md`](AGENTS.md).
-- Next:
-  - [#3 rotating tips and relative notification times](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/3)
-  - [#5 Options and Credits screens](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/5)
-  - [#6 save slots and Load screen](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/6)
-  - [#8 Figma input for generate-ui](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/8)
+
+## Roadmap
+
+- [#3 rotating tips and relative notification times](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/3)
+- [#5 Options and Credits screens](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/5)
+- [#6 save slots and Load screen](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/6)
+- [#8 Figma input for generate-ui](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/8)
 
 ## Setup
 

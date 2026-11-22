@@ -6,9 +6,10 @@ description: GUT tests for this project's GDScript. Use when adding or fixing a 
 # Write test (GUT)
 
 Follow `mattpocock-skills:tdd` for the loop (if it isn't available, tell the user to install the
-plugin — see `AGENTS.md`): every new test is seen **red** (bug before the fix, or a
-temporarily broken expectation) before it goes green. This skill adds what is specific to GUT and
-this project. Terms follow `GLOSSARY.md`.
+plugin — see `AGENTS.md`): every new test is seen **red** before it goes green: against the bug
+before the fix, or, for behavior already in the code, against a mutant of the code under test
+(reverted after). A broken expectation alone doesn't count. This skill adds what is specific to
+GUT and this project. Terms follow `GLOSSARY.md`.
 
 Run through MCP `godot.run_tests`: `script=` one file, `test_name=` a substring, no args for the suite.
 Models to copy: `tests/unit/test_data_map.gd` (resources, save/load) and
@@ -25,6 +26,9 @@ Models to copy: `tests/unit/test_data_map.gd` (resources, save/load) and
 - Reload a saved file with `ResourceLoader.load(path, "", ResourceLoader.CACHE_MODE_IGNORE)` so the
   test reads the disk, not the cache.
 - Fill typed exported arrays (`Array[Structure]`) with `.assign([...])`.
+- Pick inputs where the behavior and its nearest wrong variant differ, and see the test red with
+  that variant in place (e.g. ≥3 structures for `structure_previous`, red with `index + 1`: with
+  two, wrapping back and forward land on the same index).
 
 ## Testing `builder.gd`
 
@@ -32,16 +36,17 @@ Models to copy: `tests/unit/test_data_map.gd` (resources, save/load) and
 true for the current frame: press, then call the `action_*` method directly in the same frame;
 release every pressed action in `after_each`.
 
-Call `builder.set_process(false)` — `_process` raycasts from a camera the test doesn't have. Give the
-builder exactly what it touches: `gridmap`, `selector`, `selector_container`, `cash_display`,
-`structures` (see `before_each` in `test_builder.gd`).
+Call `builder.set_process(false)` after the builder enters the tree: READY turns `_process` back
+on, and `_process` raycasts from a camera the test doesn't have. Give the builder exactly what it
+touches: `gridmap`, `selector`, `selector_container`, `cash_display`, `structures` (see
+`before_each` in `test_builder.gd`).
 
 The `Audio` autoload runs for real and is silent headless. Reach for `double()` / `stub()` only for a
 collaborator whose side effect the test must observe or block.
 
 ## Done
 
-- The new test was seen red, then green.
+- The new test was seen red on the unfixed code or a mutant, then green.
 - `godot.run_tests` with no args: `ok: true`, `orphans: 0`, `errors` empty (it lists test files GUT
   skipped on parse errors, and "No tests ran" when a filter matched nothing).
 - Report the behaviors covered and the ones left untested (e.g. mouse raycasting in `_process`).

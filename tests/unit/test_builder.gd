@@ -213,3 +213,17 @@ func test_rotate_is_ignored_without_press() -> void:
 	await get_tree().process_frame  # a press released in the previous test's after_each still reads as just pressed this frame
 	builder.action_rotate()  # nothing pressed, like an idle _process frame
 	assert_almost_eq(builder.selector.rotation.y, 0.0, 0.0001)
+
+
+func test_structure_next_from_last_structure_wraps_to_first() -> void:
+	# Three structures: from the last one, index - 1 (wrong direction) would land on 1, not 0
+	builder.structures.append(load("res://structures/pavement.tres"))
+	builder.index = 2
+	builder.update_structure()
+	var preview: Node = builder.selector_container.get_child(0)
+	Input.action_press("structure_next")
+	builder.action_structure_toggle()
+	assert_eq(builder.index, 0)
+	assert_eq(builder.selector_container.get_child_count(), 1)
+	assert_ne(builder.selector_container.get_child(0), preview)
+	await get_tree().process_frame  # let the replaced previews' queue_free() run before GUT counts orphans

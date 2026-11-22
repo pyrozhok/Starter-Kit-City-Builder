@@ -71,6 +71,9 @@ Scenes and resources (`.tscn`, `.tres`, `.import`, `project.godot`)
 
 - Every `ext_resource path=` exists; ids are unique; existing `uid=` values are unchanged.
 - Every new script/resource has its `.uid` file committed.
+- UI values (colours, StyleBoxes, fonts, sizes, margins) live in `scenes/ui/theme.tres` type variations,
+  reached by `theme_type_variation`; a `.tscn` carrying `theme_override_*` or an inline `StyleBox*`/`Color(`
+  is a fail (rule: `generate-ui/mockup.md`, check: its `grep`, run on every changed `.tscn`).
 - Only source files are committed: `*.tmp`, `export_presets.cfg`, `.godot/`, `build/` stay out.
 - `project.godot` changes are intentional: `config/features` matches the engine version in
   `AGENTS.md`, settings hold no machine-local paths, every enabled plugin is wanted.

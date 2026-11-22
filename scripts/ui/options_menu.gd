@@ -1,10 +1,13 @@
 class_name OptionsMenu
 extends CanvasLayer
 ## Mockup frame "Options". Shows a Settings and edits it in place; holds no game state: whoever
-## owns the game gives it the settings, applies and saves them on settings_changed, and closes it on
-## back_requested.
+## owns the game gives it the settings, applies them on settings_changed, saves them on
+## settings_committed, and closes it on back_requested.
 
+## Every edit, slider ticks included.
 signal settings_changed
+## A finished edit: a slider drag ends, a toggle flips, or the menu goes back.
+signal settings_committed
 signal back_requested
 
 const ROWS := "Root/Panel/Box/Content/"
@@ -34,13 +37,15 @@ func _ready() -> void:
 	_volume.value_changed.connect(_on_volume_changed)
 	_fullscreen.toggled.connect(_on_fullscreen_toggled)
 	_orbit.value_changed.connect(_on_orbit_changed)
-	(get_node(ROWS + "Footer/Box/BackButton") as Button).pressed.connect(back_requested.emit)
+	_volume.drag_ended.connect(_on_drag_ended)
+	_orbit.drag_ended.connect(_on_drag_ended)
+	(get_node(ROWS + "Footer/Box/BackButton") as Button).pressed.connect(_back)
 
 
 func _unhandled_input(event: InputEvent) -> void:
 	if visible and event.is_action_pressed(&"ui_cancel"):
 		get_viewport().set_input_as_handled()
-		back_requested.emit()
+		_back()
 
 
 func open() -> void:
@@ -52,13 +57,13 @@ func close() -> void:
 
 
 ## Mockup states for godot.screenshot: "options" (design/options.png) and "options_drag"
-## (options_hover.png, with hover on the Back button). Only the controls change: nothing is applied.
+## (options_hover.png, with hover on the Back button). Values go into the given settings without a
+## signal, so nothing is applied or saved and the controls keep editing the owner's object.
 func _preview_state(state: String) -> void:
-	var preview := Settings.new()
-	preview.volume = 0.85 if state == "options_drag" else 0.7
-	preview.fullscreen = true
-	preview.orbit_speed = 0.5
-	settings = preview
+	settings.volume = 0.85 if state == "options_drag" else 0.7
+	settings.fullscreen = true
+	settings.orbit_speed = 0.5
+	_show()
 	_volume.dragging = state == "options_drag"
 
 
@@ -83,6 +88,7 @@ func _on_volume_changed(value: float) -> void:
 func _on_fullscreen_toggled(on: bool) -> void:
 	settings.fullscreen = on
 	_changed()
+	settings_committed.emit()
 
 
 func _on_orbit_changed(value: float) -> void:
@@ -93,3 +99,12 @@ func _on_orbit_changed(value: float) -> void:
 func _changed() -> void:
 	_update_labels()
 	settings_changed.emit()
+
+
+func _on_drag_ended(_value_changed: bool) -> void:
+	settings_committed.emit()
+
+
+func _back() -> void:
+	settings_committed.emit()
+	back_requested.emit()

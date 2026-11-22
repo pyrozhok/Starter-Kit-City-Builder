@@ -45,3 +45,13 @@ func test_out_of_range_values_are_clamped() -> void:
 	var loaded := Settings.load_from(PATH)
 	assert_eq(loaded.volume, 1.0)
 	assert_eq(loaded.orbit_speed, 0.0)
+
+
+func test_whole_numbers_in_file_are_read_as_floats() -> void:
+	var config := ConfigFile.new()
+	config.set_value(Settings.SECTION, "volume", 0)
+	config.set_value(Settings.SECTION, "orbit_speed", 2)
+	config.save(PATH)
+	var loaded := Settings.load_from(PATH)
+	assert_eq(loaded.volume, 0.0)
+	assert_eq(loaded.orbit_speed, 2.0)

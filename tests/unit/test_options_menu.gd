@@ -94,3 +94,14 @@ func test_cancel_goes_back_only_while_open() -> void:
 	options.open()
 	options._unhandled_input(_cancel())
 	assert_signal_emitted(options, "back_requested")
+
+
+func test_preview_keeps_editing_the_given_settings() -> void:
+	var given := _settings(1.0, false, 1.0)
+	options.settings = given
+	watch_signals(options)
+	options._preview_state("options")
+	assert_signal_not_emitted(options, "settings_changed")
+	assert_eq((_node("MasterVolume/Box/Value") as Label).text, "70%")
+	(_node("MasterVolume/Box/VolumeSlider") as Range).value = 40.0
+	assert_almost_eq(given.volume, 0.4, 0.0001)

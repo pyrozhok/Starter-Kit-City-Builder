@@ -13,7 +13,7 @@ const CREDITS_SOON := "Credits — coming soon"
 @export var hud: CanvasLayer
 @export var notifications: Notifications
 
-## Where settings load from on start and save to on each change (tests point it elsewhere).
+## Where settings load from on start and save to on each finished change (tests point it elsewhere).
 var settings_path := Settings.PATH
 
 var _settings: Settings
@@ -25,7 +25,8 @@ func _ready() -> void:
 	_settings = Settings.load_from(settings_path)
 	_apply_settings()
 	options.settings = _settings
-	options.settings_changed.connect(_on_settings_changed)
+	options.settings_changed.connect(_apply_settings)
+	options.settings_committed.connect(_on_settings_committed)
 	options.back_requested.connect(_close_options)
 	builder.map_saved.connect(_on_map_saved)
 	builder.map_loaded.connect(notifications.push.bind(MAP_LOADED))
@@ -93,8 +94,7 @@ func _close_options() -> void:
 	menu.open()
 
 
-func _on_settings_changed() -> void:
-	_apply_settings()
+func _on_settings_committed() -> void:
 	_settings.save(settings_path)
 
 

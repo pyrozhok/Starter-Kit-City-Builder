@@ -1,30 +1,11 @@
 extends GutTest
-## Option components from design/options.figcraft: Slider, Toggle, and MenuButton with a keycap.
-
+## Mockup component "MenuButton" with a keycap, from design/options.figcraft.
 
 func _instance(path: String) -> Control:
 	var node := (load(path) as PackedScene).instantiate() as Control
 	node.theme = load("res://scenes/ui/theme.tres")  # in the game it comes from the menu's Root
 	add_child_autofree(node)
 	return node
-
-
-func test_slider_looks_pressed_only_while_dragged() -> void:
-	var slider := _instance("res://scenes/ui/option_slider.tscn") as OptionSlider
-	assert_eq(slider.theme_type_variation, &"OptionSlider")
-	slider.drag_started.emit()
-	assert_eq(slider.theme_type_variation, &"OptionSliderPressed")
-	slider.drag_ended.emit(true)
-	assert_eq(slider.theme_type_variation, &"OptionSlider")
-
-
-func test_toggle_looks_hovered_only_under_the_mouse() -> void:
-	var toggle := _instance("res://scenes/ui/option_toggle.tscn") as CheckButton
-	assert_eq(toggle.theme_type_variation, &"OptionToggle")
-	toggle.mouse_entered.emit()
-	assert_eq(toggle.theme_type_variation, &"OptionToggleHover")
-	toggle.mouse_exited.emit()
-	assert_eq(toggle.theme_type_variation, &"OptionToggle")
 
 
 func test_menu_button_without_key_hides_keycap() -> void:

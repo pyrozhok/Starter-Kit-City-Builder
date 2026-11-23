@@ -4,10 +4,10 @@ name: tools
 
 on:
   pull_request:
-    paths: ["tools/**", ".github/workflows/tools.yml"]
+    paths: ["tools/**", "evals/write-test/004/**", ".github/workflows/tools.yml"]
   push:
     branches: [main]
-    paths: ["tools/**", ".github/workflows/tools.yml"]
+    paths: ["tools/**", "evals/write-test/004/**", ".github/workflows/tools.yml"]
 
 permissions:
   contents: read

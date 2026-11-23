@@ -18,7 +18,7 @@ alt="Main menu built by generate-ui: live city behind, hover, New Game"/></p>
 
 - **generate-ui**: 28/31 layers of the mockup within ±2px in x, y, width and height, after 1 fix iteration of 3. The run took 16 minutes from the approved plan to the final screenshot. When the mockup contradicted itself, the agent asked instead of guessing. On a held-out Options screen with sliders and a toggle: 26/29 layers within ±2px in x and width, 3/29 in all four (stacked text rows drift down by Godot's line height), 2 iterations, 8.5 minutes.
 - **write-test**: 8 tasks with a hidden known answer, each given to a fresh agent and graded by planting the bug its test must catch. After the rules from the first eval, all 4 new tasks passed with no human edits, in under 65 seconds each. Against a baseline without the skill, the 8 tasks caught 19/20 mutations with it and 18/20 without: on this model the skill adds its project knowledge, not its method.
-- **review-pr**: in 4 runs on 2 PRs, findings checked against the code before reporting went from 1/9 to 8/9, and wrong fixes from 1 to 0. False findings didn't go down: 3 of the 4 runs had one. On 5 PRs with 8 planted bugs ([005](evals/review-pr/005-planted.md)) it found 7/8 (missed a theme.tres rule) with 0 wrong fixes; on the clean PR: false Blocking 0, false Nits 4.
+- **review-pr**: in 4 runs on 2 PRs, findings checked against the code before reporting went from 1/9 to 8/9, and wrong fixes from 1 to 0. False findings didn't go down: 3 of the 4 runs had one. On 5 PRs with 8 planted bugs ([005](evals/review-pr/005-planted.md)) it found 7/8 (missed a theme.tres rule) with 0 wrong fixes; on the clean PR: false Blocking 0, false Nits 4. After the checklist fix (#37), reruns on PR #33 ([006](evals/review-pr/006-pr33-theme-rule.md), [007](evals/review-pr/007-pr33-run-script.md) via `tools/evals/run.py`) catch it as Blocking.
 - **write-pytest**: 93 tests for the `godot` MCP server that run without Godot and kill 450 of 477 generated mutants. Writing them found 6 bugs in the server, each fixed together with a test that failed before the fix.
 
 Details in [Evals](#evals).
@@ -78,6 +78,14 @@ The skills run the engine only through the MCP tools: `build`, `run_tests`, `scr
 
 Each eval is a run of a skill on a real task, graded and written up in [`evals/`](evals).
 I wrote the generate-ui and review-pr skills, graded their runs, and wrote both PRs that review-pr reviewed. The write-test runs were graded by the session that set the tasks, and I approved each grade. The write-pytest run was graded by a separate Claude session.
+
+To rerun after a skill edit, one command ([`tools/evals/run.py`](tools/evals/run.py)):
+
+- `uv run --script tools/evals/run.py`: grades the stored generate-ui layouts (no Godot, no agent).
+- `uv run --script tools/evals/run.py write-test [-t a,h] [-a skill,base]`: builds the 004 run trees, runs one headless `claude -p` per run, grades each against its mutations (about 35 s and $0.57 for one task and arm). `--grade-only` regrades existing runs.
+- `uv run --script tools/evals/run.py review-pr <PR>`: headless `/review-pr <PR>` in a fresh worktree at the PR head with this checkout's review-pr skill and 006's read-only allow-list (about $1.1 per PR). It prints time and cost and saves the review; grading it against the answer key is still done by hand.
+
+`godot --import` of a fresh tree is retried once when Godot dies on a signal ([#31](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/31)).
 
 ### generate-ui: main menu from a mockup
 

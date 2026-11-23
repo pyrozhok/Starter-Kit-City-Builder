@@ -43,6 +43,17 @@ def sub1(src: str, old: str, new: str) -> str:
     return src.replace(old, new)
 
 
+def godot_import(tree: Path, tries: int = 2) -> None:
+    """`godot --import` on a fresh tree, retried when Godot dies on a signal (#31: SIGABRT on a first import).
+    A signal shows as -N, or as 128+N (134 for SIGABRT) through a shell-wrapper GODOT_BIN."""
+    cmd = [os.environ.get("GODOT_BIN", "godot"), "--headless", "--path", str(tree), "--import"]
+    for _ in range(tries):
+        r = subprocess.run(cmd, capture_output=True)
+        if 0 <= r.returncode <= 128:
+            break
+    if r.returncode:
+        raise subprocess.CalledProcessError(r.returncode, cmd, r.stdout, r.stderr)
+
 def main(arm: str, task: str, out: Path) -> None:
     if out.exists():
         shutil.rmtree(out)
@@ -74,7 +85,7 @@ def main(arm: str, task: str, out: Path) -> None:
     subprocess.run([*git, "init", "-q", "-b", "main"], check=True)
     subprocess.run([*git, "add", "-A"], check=True)
     subprocess.run([*git, "-c", "user.name=eval", "-c", "user.email=eval@localhost", "commit", "-q", "-m", "base"], check=True)
-    subprocess.run(["godot", "--headless", "--path", str(out), "--import"], check=True, capture_output=True)
+    godot_import(out)
 
 
 if __name__ == "__main__":

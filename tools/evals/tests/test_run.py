@@ -46,8 +46,8 @@ def test_default_command_grades_stored_layouts(run, capsys):
         "|---|---|---|",
         "| evals/generate-ui/001/iter1_main_save.layout.json | MainMenu | 28/31 within ±2px |",
         "| evals/generate-ui/001/iter1_main_nosave_hover-NewGame.layout.json | MainMenu | 28/31 within ±2px |",
-        "| evals/generate-ui/002/main_options.layout.json | Options | 3/58 within ±2px |",
-        "| evals/generate-ui/002/main_options_drag_hover-BackButton.layout.json | Options_Hover | 3/58 within ±2px |",
+        "| evals/generate-ui/002/main_options.layout.json | Options | 3/29 within ±2px |",
+        "| evals/generate-ui/002/main_options_drag_hover-BackButton.layout.json | Options_Hover | 3/29 within ±2px |",
     ]
 
 

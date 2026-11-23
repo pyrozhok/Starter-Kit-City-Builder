@@ -81,12 +81,21 @@ def write_test_row(g: dict, stats: dict) -> list:
             stats["time"], stats["turns"], stats["cost"]]
 
 
+def frame_score(diff_out: str) -> str:
+    """figcraft diff's score over the frame's own layers: a map.json for several frames (002) lists
+    the other frames' layers too, which figcraft counts as "layer not found"."""
+    rows = [l for l in diff_out.splitlines() if l.startswith("| ") and "layer not found" not in l][1:]
+    ok = sum(l.rstrip().endswith("✓ |") for l in rows)
+    tol = diff_out.strip().splitlines()[-1].split(" within ")[-1]
+    return f"{ok}/{len(rows)} within {tol}"
+
+
 def cmd_grade(_args) -> int:
     rows = []
     for fig, frame, layout, mapping in LAYOUTS:
         r = subprocess.run([sys.executable, str(FIGCRAFT), "diff", fig, frame, layout, mapping],
                            cwd=REPO, capture_output=True, text=True, check=True)
-        rows.append([layout, frame, r.stdout.strip().splitlines()[-1]])
+        rows.append([layout, frame, frame_score(r.stdout)])
     print(table(["layout", "frame", "figcraft diff"], rows))
     return 0
 

@@ -97,6 +97,33 @@ def test_review_cmd_is_headless_and_read_only(run):
     assert "--permission-mode" not in cmd
 
 
+def _review_pr(run, tmp_path, monkeypatch, *flags):
+    calls = []
+
+    def fake(cmd, *a, **k):
+        calls.append(cmd)
+        if "stdout" in k:
+            k["stdout"].write(json.dumps({"result": "review"}))
+        return subprocess.CompletedProcess(cmd, 0, "", "")
+
+    monkeypatch.setattr(run.subprocess, "run", fake)
+    monkeypatch.setattr(run.shutil, "copytree", lambda *a, **k: None)
+    monkeypatch.setattr(run, "load", lambda path, name: type("S", (), {"godot_import": staticmethod(lambda wt: None)}))
+    run.main(["review-pr", "33", "--commit", "abc1234", "--out", str(tmp_path), *flags])
+    return calls
+
+
+def test_review_pr_removes_worktree_after_saving_review(run, tmp_path, monkeypatch, capsys):
+    calls = _review_pr(run, tmp_path, monkeypatch)
+    assert (tmp_path / "review-33.md").read_text() == "review"
+    assert calls[-1] == ["git", "-C", str(run.REPO), "worktree", "remove", "--force", str(tmp_path / "wt-33")]
+
+
+def test_review_pr_keep_leaves_worktree(run, tmp_path, monkeypatch, capsys):
+    calls = _review_pr(run, tmp_path, monkeypatch, "--keep")
+    assert calls[-1][:3] == ["claude", "-p", "/review-pr 33"]
+
+
 # --- --model ---
 
 def test_review_model_flag(run):

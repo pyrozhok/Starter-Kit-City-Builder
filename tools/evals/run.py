@@ -6,7 +6,7 @@
 
   uv run --script tools/evals/run.py                      # grade stored results (generate-ui layout diffs)
   uv run --script tools/evals/run.py write-test [-t a,h] [-a skill,base] [--grade-only] [--runs DIR]
-  uv run --script tools/evals/run.py review-pr 33 [--commit SHA] [--out DIR]
+  uv run --script tools/evals/run.py review-pr 33 [--commit SHA] [--out DIR] [--keep]
 
 write-test reuses evals/write-test/004 (setup_run.py, drive.sh, grade.py): one fresh headless
 `claude -p` per arm and task, then each grading mutation against the agent's tests.
@@ -148,6 +148,8 @@ def cmd_review_pr(args) -> int:
         (out / f"review-{args.pr}.md").write_text(json.loads(res.read_text()).get("result", ""))
     except ValueError:
         pass
+    if not args.keep:
+        subprocess.run(["git", "-C", str(REPO), "worktree", "remove", "--force", str(wt)], check=False)
     print(table(["PR", "commit", "time", "turns", "cost", "error", "review"],
                 [[args.pr, sha[:7], s["time"], s["turns"], s["cost"], s["error"], out / f"review-{args.pr}.md"]]))
     return 0
@@ -166,6 +168,7 @@ def main(argv: list[str] | None = None) -> int:
     r.add_argument("pr", type=int)
     r.add_argument("--commit", help="PR head to review (default: gh pr view headRefOid)")
     r.add_argument("--out", default="/tmp/review-pr-eval")
+    r.add_argument("--keep", action="store_true", help="keep the worktree after the review")
     r.set_defaults(func=cmd_review_pr)
     for p in (w, r):
         p.add_argument("--model", default=MODEL, help=f"agent model (default {MODEL})")

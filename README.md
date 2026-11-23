@@ -79,6 +79,14 @@ The skills run the engine only through the MCP tools: `build`, `run_tests`, `scr
 Each eval is a run of a skill on a real task, graded and written up in [`evals/`](evals).
 I wrote the generate-ui and review-pr skills, graded their runs, and wrote both PRs that review-pr reviewed. The write-test runs were graded by the session that set the tasks, and I approved each grade. The write-pytest run was graded by a separate Claude session.
 
+To rerun after a skill edit, one command ([`tools/evals/run.py`](tools/evals/run.py)):
+
+- `uv run --script tools/evals/run.py`: grades the stored generate-ui layouts (no Godot, no agent).
+- `uv run --script tools/evals/run.py write-test [-t a,h] [-a skill,base]`: builds the 004 run trees, runs one headless `claude -p` per run, grades each against its mutations (about 35 s and $0.57 for one task and arm). `--grade-only` regrades existing runs.
+- `uv run --script tools/evals/run.py review-pr <PR>`: headless `/review-pr <PR>` in a fresh worktree at the PR head with this checkout's review-pr skill and 006's read-only allow-list (about $1.1 per PR). It prints time and cost and saves the review; grading it against the answer key is still done by hand.
+
+`godot --import` of a fresh tree is retried once when Godot dies on a signal ([#31](https://github.com/pyrozhok/Starter-Kit-City-Builder/issues/31)).
+
 ### generate-ui: main menu from a mockup
 
 | Mockup ([`design/main_menu.png`](design/main_menu.png)) | Result, iteration 1 (`godot.screenshot`) |

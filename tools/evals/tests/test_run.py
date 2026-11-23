@@ -69,7 +69,7 @@ def test_write_test_row(run):
     g = {"run": "skill-b", "new_tests": ["test_x", "test_y"], "passed": 48, "failed": 0, "orphans": 0,
          "mutations": {"b1": ["test_x"], "b2": "SURVIVED", "b3": "NOT APPLIED: 'x' x0"}}
     stats = {"time": "34 s", "turns": 9, "cost": "$0.41", "error": False}
-    assert run.write_test_row(g, stats) == ["skill-b", 2, "48/48", 0, "1/3", "b2, b3", "34 s", 9, "$0.41"]
+    assert run.write_test_row(g, stats) == ["skill-b", 2, "48/48", 0, "1/3", "b2, b3 (not applied)", "34 s", 9, "$0.41"]
 
 
 def test_agent_stats(run, tmp_path):

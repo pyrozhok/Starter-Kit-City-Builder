@@ -75,7 +75,9 @@ def agent_stats(path: Path) -> dict:
 def write_test_row(g: dict, stats: dict) -> list:
     muts = g["mutations"]
     caught = [m for m, v in muts.items() if isinstance(v, list)]
-    missed = sorted(set(muts) - set(caught))
+    # a mutation grade.py could not apply proves nothing about the tests: mark it, don't call it survived
+    missed = [m + (" (not applied)" if str(muts[m]).startswith("NOT APPLIED") else "")
+              for m in sorted(set(muts) - set(caught))]
     return [g["run"], len(g["new_tests"]), f"{g['passed']}/{g['passed'] + g['failed']}" if g.get("passed") is not None else "-",
             g.get("orphans", "-"), f"{len(caught)}/{len(muts)}", ", ".join(missed) or "-",
             stats["time"], stats["turns"], stats["cost"]]

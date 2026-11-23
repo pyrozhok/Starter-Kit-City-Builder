@@ -16,6 +16,13 @@ def test_import_retried_once_when_godot_aborts(setup_run, fake_godot, tmp_path):
     assert log.read_text().splitlines() == [f"--headless --path {tmp_path} --import"] * 2
 
 
+def test_import_retried_when_shell_wrapper_reports_abort(setup_run, fake_godot, tmp_path):
+    """A shell-wrapper GODOT_BIN reports Godot's SIGABRT as 128 + 6 = 134, not -6."""
+    log = fake_godot(128 + signal.SIGABRT, 0)
+    setup_run.godot_import(tmp_path)
+    assert log.read_text().splitlines() == [f"--headless --path {tmp_path} --import"] * 2
+
+
 def test_import_fails_when_godot_aborts_twice(setup_run, fake_godot, tmp_path):
     log = fake_godot(-signal.SIGABRT)
     with pytest.raises(subprocess.CalledProcessError) as e:

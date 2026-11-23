@@ -44,11 +44,12 @@ def sub1(src: str, old: str, new: str) -> str:
 
 
 def godot_import(tree: Path, tries: int = 2) -> None:
-    """`godot --import` on a fresh tree, retried when Godot dies on a signal (#31: SIGABRT on a first import)."""
+    """`godot --import` on a fresh tree, retried when Godot dies on a signal (#31: SIGABRT on a first import).
+    A signal shows as -N, or as 128+N (134 for SIGABRT) through a shell-wrapper GODOT_BIN."""
     cmd = [os.environ.get("GODOT_BIN", "godot"), "--headless", "--path", str(tree), "--import"]
     for _ in range(tries):
         r = subprocess.run(cmd, capture_output=True)
-        if r.returncode >= 0:
+        if 0 <= r.returncode <= 128:
             break
     if r.returncode:
         raise subprocess.CalledProcessError(r.returncode, cmd, r.stdout, r.stderr)

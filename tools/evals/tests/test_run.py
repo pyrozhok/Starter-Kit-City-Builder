@@ -95,3 +95,39 @@ def test_review_cmd_is_headless_and_read_only(run):
     assert tools == run.REVIEW_TOOLS
     assert not any(t in ("Edit", "Write") or "gh pr review" in t or "git push" in t for t in tools)
     assert "--permission-mode" not in cmd
+
+
+# --- --model ---
+
+def test_review_model_flag(run):
+    cmd = run.review_cmd(33, "claude-sonnet-5")
+    assert cmd[cmd.index("--model") + 1] == "claude-sonnet-5"
+    assert run.review_cmd(33)[run.review_cmd(33).index("--model") + 1] == "claude-opus-5-5"
+
+
+def test_write_test_passes_model_to_drive(run, tmp_path, monkeypatch, capsys):
+    calls = []
+    monkeypatch.setattr(run.subprocess, "run", lambda *a, **k: calls.append(k["env"]["MODEL"]))
+
+    class Mod:
+        main = staticmethod(lambda *a: None)
+        grade = staticmethod(lambda n: {"run": n, "new_tests": [], "passed": 1, "failed": 0, "orphans": 0, "mutations": {}})
+
+    monkeypatch.setattr(run, "load", lambda path, name: Mod)
+    run.main(["write-test", "-t", "a", "-a", "skill", "--runs", str(tmp_path), "--model", "claude-sonnet-5"])
+    run.main(["write-test", "-t", "a", "-a", "skill", "--runs", str(tmp_path)])
+    assert calls == ["claude-sonnet-5", "claude-opus-5-5"]
+
+
+def test_drive_sh_reads_model(run, tmp_path):
+    """drive.sh hands $MODEL to claude: a fake claude on PATH records its argv."""
+    import os
+    bin_ = tmp_path / "bin"; bin_.mkdir()
+    (bin_ / "claude").write_text('#!/bin/sh\nprintf "%s\\n" "$@" > "$RUNS/argv"\necho {}\n')
+    (bin_ / "claude").chmod(0o755)
+    (tmp_path / "skill-a").mkdir()
+    subprocess.run(["git", "init", "-q", str(tmp_path / "skill-a")], check=True)
+    env = {**os.environ, "PATH": f"{bin_}:{os.environ['PATH']}", "RUNS": str(tmp_path), "MODEL": "claude-sonnet-5"}
+    subprocess.run(["bash", str(run.WT004 / "drive.sh"), "skill-a"], env=env, check=True, capture_output=True)
+    argv = (tmp_path / "argv").read_text().splitlines()
+    assert argv[argv.index("--model") + 1] == "claude-sonnet-5"

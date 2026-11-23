@@ -100,7 +100,7 @@ def cmd_write_test(args) -> int:
         for n in names:
             arm, task = n.split("-")
             setup.main(arm, task, runs / n)
-        subprocess.run(["bash", str(WT004 / "drive.sh"), *names], check=True, env={**os.environ, "RUNS": str(runs)})
+        subprocess.run(["bash", str(WT004 / "drive.sh"), *names], check=True, env={**os.environ, "RUNS": str(runs), "MODEL": args.model})
     grade = load(WT004 / "grade.py", "grade")
     rows = []
     for n in names:
@@ -111,8 +111,8 @@ def cmd_write_test(args) -> int:
     return 0
 
 
-def review_cmd(pr: int) -> list[str]:
-    return ["claude", "-p", f"/review-pr {pr}", "--model", MODEL, "--mcp-config", ".mcp.json",
+def review_cmd(pr: int, model: str = MODEL) -> list[str]:
+    return ["claude", "-p", f"/review-pr {pr}", "--model", model, "--mcp-config", ".mcp.json",
             "--allowedTools", *REVIEW_TOOLS, "--output-format", "json"]
 
 
@@ -133,7 +133,7 @@ def cmd_review_pr(args) -> int:
     load(WT004 / "setup_run.py", "setup_run").godot_import(wt)
     res = out / f"review-{args.pr}.json"
     with res.open("w") as fh:
-        subprocess.run(review_cmd(args.pr), cwd=wt, stdout=fh, check=False)
+        subprocess.run(review_cmd(args.pr, args.model), cwd=wt, stdout=fh, check=False)
     s = agent_stats(res)
     try:
         (out / f"review-{args.pr}.md").write_text(json.loads(res.read_text()).get("result", ""))
@@ -158,6 +158,8 @@ def main(argv: list[str] | None = None) -> int:
     r.add_argument("--commit", help="PR head to review (default: gh pr view headRefOid)")
     r.add_argument("--out", default="/tmp/review-pr-eval")
     r.set_defaults(func=cmd_review_pr)
+    for p in (w, r):
+        p.add_argument("--model", default=MODEL, help=f"agent model (default {MODEL})")
     args = ap.parse_args(argv)
     return getattr(args, "func", cmd_grade)(args)
 

@@ -153,8 +153,9 @@ def test_drive_sh_reads_model(run, tmp_path):
     (bin_ / "claude").write_text('#!/bin/sh\nprintf "%s\\n" "$@" > "$RUNS/argv"\necho {}\n')
     (bin_ / "claude").chmod(0o755)
     (tmp_path / "skill-a").mkdir()
-    subprocess.run(["git", "init", "-q", str(tmp_path / "skill-a")], check=True)
-    env = {**os.environ, "PATH": f"{bin_}:{os.environ['PATH']}", "RUNS": str(tmp_path), "MODEL": "claude-sonnet-5"}
+    env = {**os.environ, "PATH": f"{bin_}:{os.environ['PATH']}", "RUNS": str(tmp_path), "MODEL": "claude-sonnet-5",
+           "GIT_CONFIG_GLOBAL": "/dev/null", "GIT_CONFIG_NOSYSTEM": "1", "GIT_CEILING_DIRECTORIES": str(tmp_path)}
+    subprocess.run(["git", "init", "-q", str(tmp_path / "skill-a")], env=env, check=True)
     subprocess.run(["bash", str(run.WT004 / "drive.sh"), "skill-a"], env=env, check=True, capture_output=True)
     argv = (tmp_path / "argv").read_text().splitlines()
     assert argv[argv.index("--model") + 1] == "claude-sonnet-5"

@@ -26,15 +26,16 @@ def test_import_fails_when_godot_aborts_twice(setup_run, fake_godot, tmp_path):
 
 def test_import_error_exit_is_not_retried(setup_run, fake_godot, tmp_path):
     log = fake_godot(1, 0)
-    with pytest.raises(subprocess.CalledProcessError):
+    with pytest.raises(subprocess.CalledProcessError) as e:
         setup_run.godot_import(tmp_path)
-    assert len(log.read_text().splitlines()) == 1
+    assert e.value.returncode == 1
+    assert log.read_text().splitlines() == [f"--headless --path {tmp_path} --import"]
 
 
 def test_import_passes_first_time(setup_run, fake_godot, tmp_path):
     log = fake_godot(0)
     setup_run.godot_import(tmp_path)
-    assert len(log.read_text().splitlines()) == 1
+    assert log.read_text().splitlines() == [f"--headless --path {tmp_path} --import"]
 
 
 # --- stored results ---
